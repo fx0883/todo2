@@ -22,13 +22,19 @@
       
       <view class="form-item">
         <text class="label">分类</text>
-        <picker 
+        <view v-if="categories.length === 0" class="empty-category">
+          <text>还没有分类，</text>
+          <text class="link" @click="navigateToCategory">去创建一个</text>
+        </view>
+        <picker v-else 
           :range="categories" 
           range-key="name"
+          :disabled="categories.length === 0"
           @change="handleCategoryChange"
         >
           <view class="picker">
-            {{ selectedCategory ? selectedCategory.name : '请选择分类' }}
+            <text v-if="categories.length === 0">暂无分类</text>
+            <text v-else>{{ selectedCategory ? selectedCategory.name : '请选择分类' }}</text>
           </view>
         </picker>
       </view>
@@ -37,10 +43,11 @@
         <text class="label">优先级</text>
         <picker 
           :range="priorities" 
+          range-key="label"
           @change="handlePriorityChange"
         >
           <view class="picker">
-            {{ taskForm.priority || '请选择优先级' }}
+            {{ priorityLabels[taskForm.priority] || '请选择优先级' }}
           </view>
         </picker>
       </view>
@@ -73,7 +80,10 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useTaskStore } from '@/store/task'
-import { taskApi, categoryApi } from '@/api'
+import { taskApi } from '@/api'
+import { categoryApi } from '@/api'
+
+console.log('导入的 categoryApi:', categoryApi)
 
 const taskStore = useTaskStore()
 const loading = ref(false)
@@ -90,20 +100,41 @@ const taskForm = ref({
 
 // 分类和优先级选项
 const categories = ref([])
-const priorities = ['low', 'medium', 'high']
+const priorities = [
+  { label: '低', value: 1 },
+  { label: '中', value: 2 },
+  { label: '高', value: 3 }
+]
+const priorityLabels = {
+  1: '低优先级',
+  2: '中优先级',
+  3: '高优先级'
+}
 const selectedCategory = ref(null)
 
 // 获取分类列表
 const fetchCategories = async () => {
   try {
+    console.log('开始获取分类列表')
     const res = await categoryApi.getCategories()
-    categories.value = res
+    console.log('获取到的分类列表:', res)
+    categories.value = res.results || []
+    console.log('设置后的分类列表:', categories.value)
   } catch (error) {
+    console.error('获取分类失败:', error)
+    categories.value = []
     uni.showToast({
       title: '获取分类失败',
       icon: 'none'
     })
   }
+}
+
+// 页面跳转
+const navigateToCategory = () => {
+  uni.navigateTo({
+    url: '/pages/category/index'
+  })
 }
 
 // 表单验证
@@ -123,7 +154,7 @@ const handleCategoryChange = (e) => {
 
 const handlePriorityChange = (e) => {
   const index = e.detail.value
-  taskForm.value.priority = priorities[index]
+  taskForm.value.priority = priorities[index].value
 }
 
 const handleDateChange = (e) => {
@@ -194,6 +225,17 @@ onMounted(() => {
       
       .picker {
         color: #666;
+      }
+      
+      .empty-category {
+        padding: 20rpx;
+        background-color: #f5f5f5;
+        border-radius: 12rpx;
+        
+        .link {
+          color: #007AFF;
+          text-decoration: underline;
+        }
       }
     }
     

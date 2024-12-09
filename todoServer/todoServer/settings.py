@@ -57,6 +57,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'simple_history.middleware.HistoryRequestMiddleware',
+    'todoServer.middleware.ErrorLoggingMiddleware',  # 添加错误处理中间件
 ]
 
 ROOT_URLCONF = 'todoServer.urls'
@@ -177,8 +178,50 @@ SESSION_COOKIE_HTTPONLY = True
 CSRF_USE_SESSIONS = False
 CSRF_COOKIE_SECURE = False
 
+# 日志配置
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+        'file': {
+            'level': 'ERROR',
+            'class': 'logging.FileHandler',
+            'filename': 'debug.log',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'django.request': {
+            'handlers': ['console', 'file'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+    },
+}
+
 # REST Framework
 REST_FRAMEWORK = {
+    'EXCEPTION_HANDLER': 'todoServer.utils.custom_exception_handler',
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',

@@ -37,7 +37,7 @@ export const taskApi = {
   getTasks: (params) => request({
     url: '/tasks/tasks/',
     method: 'GET',
-    data: params
+    params
   }),
   
   // 创建任务
@@ -65,7 +65,8 @@ export const taskApi = {
 export const categoryApi = {
   // 获取分类列表
   getCategories: () => request({
-    url: '/tasks/categories/'
+    url: '/tasks/categories/',
+    method: 'GET'
   }),
   
   // 创建分类

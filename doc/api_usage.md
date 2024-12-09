@@ -12,7 +12,7 @@
 ### 1. 用户认证
 #### 1.1 获取 JWT Token
 ```bash
-POST /api/token/
+POST /api/v1/accounts/users/login/
 Content-Type: application/json
 
 {

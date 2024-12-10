@@ -76,6 +76,7 @@ import { ref, computed, onMounted } from 'vue'
 import { onPullDownRefresh } from '@dcloudio/uni-app'
 import { useTask } from '@/composables/useTask'
 import { useTaskStore } from '@/store/modules/task'
+import { useCategoryStore } from '@/store/modules/category'
 import { storeToRefs } from 'pinia'
 
 // 使用 composables
@@ -89,7 +90,9 @@ const {
 
 // 使用 store 中的状态
 const taskStore = useTaskStore()
-const { tasks, categories, loading } = storeToRefs(taskStore)
+const categoryStore = useCategoryStore()
+const { tasks, loading } = storeToRefs(taskStore)
+const { categories } = storeToRefs(categoryStore)
 const selectedCategory = ref(null)
 
 // 统计数据 - 直接从 tasks 计算，不再调用 API

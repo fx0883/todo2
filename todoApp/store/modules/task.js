@@ -2,17 +2,21 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useCache } from '@/composables/useCache'
 import { useErrorLog } from '@/composables/useErrorLog'
-import { categoryApi, taskApi } from '@/api'
+import { taskApi } from '@/api'
+import { useCategoryStore } from './category'
+import { useTagStore } from './tag'
 
 export const useTaskStore = defineStore('task', () => {
   // 使用 composables
   const cache = useCache()
   const { addErrorLog } = useErrorLog()
 
+  // 使用其他 store
+  const categoryStore = useCategoryStore()
+  const tagStore = useTagStore()
+
   // 状态
   const tasks = ref([])
-  const categories = ref([])
-  const tags = ref([])
   const loading = ref(false)
 
   // 计算属性
@@ -139,158 +143,22 @@ export const useTaskStore = defineStore('task', () => {
     }
   }
 
-  // Categories
-  const getCategories = async () => {
-    const cachedCategories = cache.get('categories')
-    if (cachedCategories) {
-      categories.value = cachedCategories
-      return cachedCategories
-    }
-
-    loading.value = true
-    try {
-      const response = await categoryApi.getCategories()
-      categories.value = response.results
-      cache.set('categories', response, 30 * 60 * 1000) // 缓存30分钟
-      return response
-    } catch (error) {
-      addErrorLog(error, { action: 'getCategories' })
-      throw error
-    } finally {
-      loading.value = false
-    }
-  }
-
-  const createCategory = async (categoryData) => {
-    loading.value = true
-    try {
-      const response = await taskApi.createCategory(categoryData)
-      categories.value.push(response)
-      return response
-    } catch (error) {
-      addErrorLog(error, { action: 'createCategory', categoryData })
-      throw error
-    } finally {
-      loading.value = false
-    }
-  }
-
-  const updateCategory = async (categoryId, categoryData) => {
-    loading.value = true
-    try {
-      const response = await taskApi.updateCategory(categoryId, categoryData)
-      const index = categories.value.findIndex(category => category.id === categoryId)
-      if (index !== -1) {
-        categories.value[index] = response
-      }
-      return response
-    } catch (error) {
-      addErrorLog(error, { action: 'updateCategory', categoryId, categoryData })
-      throw error
-    } finally {
-      loading.value = false
-    }
-  }
-
-  const deleteCategory = async (categoryId) => {
-    loading.value = true
-    try {
-      await taskApi.deleteCategory(categoryId)
-      categories.value = categories.value.filter(category => category.id !== categoryId)
-    } catch (error) {
-      addErrorLog(error, { action: 'deleteCategory', categoryId })
-      throw error
-    } finally {
-      loading.value = false
-    }
-  }
-
-  // Tags
-  const getTags = async () => {
-    const cachedTags = cache.get('tags')
-    if (cachedTags) {
-      tags.value = cachedTags
-      return cachedTags
-    }
-
-    loading.value = true
-    try {
-      const response = await taskApi.getTags()
-      tags.value = response
-      cache.set('tags', response, 30 * 60 * 1000) // 缓存30分钟
-      return response
-    } catch (error) {
-      addErrorLog(error, { action: 'getTags' })
-      throw error
-    } finally {
-      loading.value = false
-    }
-  }
-
-  const createTag = async (tagData) => {
-    loading.value = true
-    try {
-      const response = await taskApi.createTag(tagData)
-      tags.value.push(response)
-      return response
-    } catch (error) {
-      addErrorLog(error, { action: 'createTag', tagData })
-      throw error
-    } finally {
-      loading.value = false
-    }
-  }
-
-  const updateTag = async (tagId, tagData) => {
-    loading.value = true
-    try {
-      const response = await taskApi.updateTag(tagId, tagData)
-      const index = tags.value.findIndex(tag => tag.id === tagId)
-      if (index !== -1) {
-        tags.value[index] = response
-      }
-      return response
-    } catch (error) {
-      addErrorLog(error, { action: 'updateTag', tagId, tagData })
-      throw error
-    } finally {
-      loading.value = false
-    }
-  }
-
-  const deleteTag = async (tagId) => {
-    loading.value = true
-    try {
-      await taskApi.deleteTag(tagId)
-      tags.value = tags.value.filter(tag => tag.id !== tagId)
-    } catch (error) {
-      addErrorLog(error, { action: 'deleteTag', tagId })
-      throw error
-    } finally {
-      loading.value = false
-    }
-  }
-
   // Reset store
   const reset = () => {
     tasks.value = []
-    categories.value = []
-    tags.value = []
-    cache.clear()
+    loading.value = false
   }
 
   return {
     // State
     tasks,
-    categories,
-    tags,
     loading,
-
+    
     // Getters
     completedTasks,
     pendingTasks,
     tasksByCategory,
-
+    
     // Actions
     fetchTasks,
     getTaskDetail,
@@ -298,14 +166,6 @@ export const useTaskStore = defineStore('task', () => {
     updateTask,
     deleteTask,
     batchUpdateTasks,
-    getCategories,
-    createCategory,
-    updateCategory,
-    deleteCategory,
-    getTags,
-    createTag,
-    updateTag,
-    deleteTag,
     reset
   }
 })

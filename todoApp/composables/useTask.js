@@ -1,9 +1,13 @@
 import { ref, computed } from 'vue'
 import { useTaskStore } from '@/store/modules/task'
+import { useCategoryStore } from '@/store/modules/category'
+import { useTagStore } from '@/store/modules/tag'
 import { usePreferences } from './usePreferences'
 
 export function useTask() {
   const taskStore = useTaskStore()
+  const categoryStore = useCategoryStore()
+  const tagStore = useTagStore()
   const { preferences } = usePreferences()
   const loading = ref(false)
   const error = ref(null)
@@ -26,8 +30,8 @@ export function useTask() {
     })
   })
 
-  const categories = computed(() => taskStore.categories)
-  const tags = computed(() => taskStore.tags)
+  const categories = computed(() => categoryStore.categories)
+  const tags = computed(() => tagStore.tags)
 
   // 日期格式化
   const formatDate = (date) => {
@@ -149,54 +153,9 @@ export function useTask() {
     try {
       loading.value = true
       clearError()
-      await taskStore.fetchCategories()
+      await categoryStore.fetchCategories()
     } catch (e) {
       error.value = e.message || '获取分类列表失败'
-    } finally {
-      loading.value = false
-    }
-  }
-
-  // 创建分类
-  const createCategory = async (categoryData) => {
-    try {
-      loading.value = true
-      clearError()
-      const category = await taskStore.createCategory(categoryData)
-      return category
-    } catch (e) {
-      error.value = e.message || '创建分类失败'
-      return null
-    } finally {
-      loading.value = false
-    }
-  }
-
-  // 更新分类
-  const updateCategory = async (categoryId, categoryData) => {
-    try {
-      loading.value = true
-      clearError()
-      const category = await taskStore.updateCategory(categoryId, categoryData)
-      return category
-    } catch (e) {
-      error.value = e.message || '更新分类失败'
-      return null
-    } finally {
-      loading.value = false
-    }
-  }
-
-  // 删除分类
-  const deleteCategory = async (categoryId) => {
-    try {
-      loading.value = true
-      clearError()
-      await taskStore.deleteCategory(categoryId)
-      return true
-    } catch (e) {
-      error.value = e.message || '删除分类失败'
-      return false
     } finally {
       loading.value = false
     }
@@ -207,54 +166,9 @@ export function useTask() {
     try {
       loading.value = true
       clearError()
-      await taskStore.fetchTags()
+      await tagStore.fetchTags()
     } catch (e) {
       error.value = e.message || '获取标签列表失败'
-    } finally {
-      loading.value = false
-    }
-  }
-
-  // 创建标签
-  const createTag = async (tagData) => {
-    try {
-      loading.value = true
-      clearError()
-      const tag = await taskStore.createTag(tagData)
-      return tag
-    } catch (e) {
-      error.value = e.message || '创建标签失败'
-      return null
-    } finally {
-      loading.value = false
-    }
-  }
-
-  // 更新标签
-  const updateTag = async (tagId, tagData) => {
-    try {
-      loading.value = true
-      clearError()
-      const tag = await taskStore.updateTag(tagId, tagData)
-      return tag
-    } catch (e) {
-      error.value = e.message || '更新标签失败'
-      return null
-    } finally {
-      loading.value = false
-    }
-  }
-
-  // 删除标签
-  const deleteTag = async (tagId) => {
-    try {
-      loading.value = true
-      clearError()
-      await taskStore.deleteTag(tagId)
-      return true
-    } catch (e) {
-      error.value = e.message || '删除标签失败'
-      return false
     } finally {
       loading.value = false
     }
@@ -264,32 +178,25 @@ export function useTask() {
     // 状态
     loading,
     error,
+    
+    // 计算属性
     tasks,
     categories,
     tags,
-
+    
+    // 工具函数
+    formatDate,
+    getPriorityText,
+    
     // 任务相关方法
     fetchTasks,
     createTask,
     updateTask,
     deleteTask,
     batchUpdateTasks,
-
-    // 分类相关方法
+    
+    // 分类和标签方法
     fetchCategories,
-    createCategory,
-    updateCategory,
-    deleteCategory,
-
-    // 标签相关方法
-    fetchTags,
-    createTag,
-    updateTag,
-    deleteTag,
-
-    // 工具方法
-    clearError,
-    formatDate,
-    getPriorityText
+    fetchTags
   }
 }

@@ -165,11 +165,8 @@ const handleDateChange = (e) => {
 const handleSubmit = async () => {
   if (!isValid.value || loading.value) return
   
-  loading.value = true
   try {
-    const res = await taskApi.createTask(taskForm.value)
-    taskStore.addTask(res)
-    
+    await createTask(taskForm.value)
     uni.showToast({
       title: '创建成功',
       icon: 'success'
@@ -180,12 +177,15 @@ const handleSubmit = async () => {
     }, 1500)
   } catch (error) {
     uni.showToast({
-      title: error.data?.error || '创建失败',
+      title: error.message || '创建失败',
       icon: 'none'
     })
-  } finally {
-    loading.value = false
   }
+}
+
+const createTask = async (task) => {
+  const res = await taskApi.createTask(task)
+  taskStore.addTask(res)
 }
 
 onMounted(() => {

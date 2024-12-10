@@ -448,3 +448,155 @@ Traceback (most recent call last):
 rest_framework.exceptions.NotAuthenticated: 身份认证信息未提供。
 
     
+ERROR 2024-12-10 11:44:30,160 utils 3872 33540 
+API Error Details:
+View: TaskViewSet
+URL: /api/v1/tasks/tasks/11/
+Method: PUT
+User: fx0883
+Error Type: ValidationError
+Error Message: {'title': [ErrorDetail(string='该字段是必填项。', code='required')]}
+Stack Trace:
+Traceback (most recent call last):
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\mixins.py", line 67, in update
+    serializer.is_valid(raise_exception=True)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\serializers.py", line 235, in is_valid
+    raise ValidationError(self.errors)
+rest_framework.exceptions.ValidationError: {'title': [ErrorDetail(string='该字段是必填项。', code='required')]}
+
+    
+ERROR 2024-12-10 11:44:31,153 utils 3872 33540 
+API Error Details:
+View: TaskViewSet
+URL: /api/v1/tasks/tasks/11/
+Method: PUT
+User: fx0883
+Error Type: ValidationError
+Error Message: {'title': [ErrorDetail(string='该字段是必填项。', code='required')]}
+Stack Trace:
+Traceback (most recent call last):
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\mixins.py", line 67, in update
+    serializer.is_valid(raise_exception=True)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\serializers.py", line 235, in is_valid
+    raise ValidationError(self.errors)
+rest_framework.exceptions.ValidationError: {'title': [ErrorDetail(string='该字段是必填项。', code='required')]}
+
+    
+ERROR 2024-12-10 11:44:31,768 utils 3872 33540 
+API Error Details:
+View: TaskViewSet
+URL: /api/v1/tasks/tasks/11/
+Method: PUT
+User: fx0883
+Error Type: ValidationError
+Error Message: {'title': [ErrorDetail(string='该字段是必填项。', code='required')]}
+Stack Trace:
+Traceback (most recent call last):
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\mixins.py", line 67, in update
+    serializer.is_valid(raise_exception=True)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\serializers.py", line 235, in is_valid
+    raise ValidationError(self.errors)
+rest_framework.exceptions.ValidationError: {'title': [ErrorDetail(string='该字段是必填项。', code='required')]}
+
+    
+ERROR 2024-12-10 11:44:33,088 utils 3872 33540 
+API Error Details:
+View: TaskViewSet
+URL: /api/v1/tasks/tasks/11/
+Method: PUT
+User: fx0883
+Error Type: ValidationError
+Error Message: {'title': [ErrorDetail(string='该字段是必填项。', code='required')]}
+Stack Trace:
+Traceback (most recent call last):
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\mixins.py", line 67, in update
+    serializer.is_valid(raise_exception=True)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\serializers.py", line 235, in is_valid
+    raise ValidationError(self.errors)
+rest_framework.exceptions.ValidationError: {'title': [ErrorDetail(string='该字段是必填项。', code='required')]}
+
+    
+ERROR 2024-12-10 11:44:33,604 utils 3872 33540 
+API Error Details:
+View: TaskViewSet
+URL: /api/v1/tasks/tasks/11/
+Method: PUT
+User: fx0883
+Error Type: ValidationError
+Error Message: {'title': [ErrorDetail(string='该字段是必填项。', code='required')]}
+Stack Trace:
+Traceback (most recent call last):
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\mixins.py", line 67, in update
+    serializer.is_valid(raise_exception=True)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\serializers.py", line 235, in is_valid
+    raise ValidationError(self.errors)
+rest_framework.exceptions.ValidationError: {'title': [ErrorDetail(string='该字段是必填项。', code='required')]}
+
+    
+ERROR 2024-12-10 11:44:34,474 utils 3872 33540 
+API Error Details:
+View: TaskViewSet
+URL: /api/v1/tasks/tasks/11/
+Method: PUT
+User: fx0883
+Error Type: ValidationError
+Error Message: {'title': [ErrorDetail(string='该字段是必填项。', code='required')]}
+Stack Trace:
+Traceback (most recent call last):
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\mixins.py", line 67, in update
+    serializer.is_valid(raise_exception=True)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\serializers.py", line 235, in is_valid
+    raise ValidationError(self.errors)
+rest_framework.exceptions.ValidationError: {'title': [ErrorDetail(string='该字段是必填项。', code='required')]}
+
+    
+ERROR 2024-12-10 11:44:35,394 utils 3872 33540 
+API Error Details:
+View: TaskViewSet
+URL: /api/v1/tasks/tasks/11/
+Method: PUT
+User: fx0883
+Error Type: ValidationError
+Error Message: {'title': [ErrorDetail(string='该字段是必填项。', code='required')]}
+Stack Trace:
+Traceback (most recent call last):
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\mixins.py", line 67, in update
+    serializer.is_valid(raise_exception=True)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\serializers.py", line 235, in is_valid
+    raise ValidationError(self.errors)
+rest_framework.exceptions.ValidationError: {'title': [ErrorDetail(string='该字段是必填项。', code='required')]}
+
+    
+ERROR 2024-12-10 11:44:35,916 utils 3872 33540 
+API Error Details:
+View: TaskViewSet
+URL: /api/v1/tasks/tasks/11/
+Method: PUT
+User: fx0883
+Error Type: ValidationError
+Error Message: {'title': [ErrorDetail(string='该字段是必填项。', code='required')]}
+Stack Trace:
+Traceback (most recent call last):
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\mixins.py", line 67, in update
+    serializer.is_valid(raise_exception=True)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\serializers.py", line 235, in is_valid
+    raise ValidationError(self.errors)
+rest_framework.exceptions.ValidationError: {'title': [ErrorDetail(string='该字段是必填项。', code='required')]}
+
+    

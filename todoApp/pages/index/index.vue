@@ -75,7 +75,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { onPullDownRefresh } from '@dcloudio/uni-app'
 import { useTask } from '@/composables/useTask'
-import { useTaskStore } from '@/store/task'
+import { useTaskStore } from '@/store/modules/task'
 import { storeToRefs } from 'pinia'
 
 // 使用 composables

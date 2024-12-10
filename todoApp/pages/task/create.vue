@@ -79,7 +79,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useTaskStore } from '@/store/task'
+import { useTaskStore } from '@/store/modules/task'
 import taskApi from '@/api/task'
 import categoryApi from '@/api/category'
 

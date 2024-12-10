@@ -149,7 +149,7 @@ export function useTask() {
     try {
       loading.value = true
       clearError()
-      await taskStore.getCategories()
+      await taskStore.fetchCategories()
     } catch (e) {
       error.value = e.message || '获取分类列表失败'
     } finally {

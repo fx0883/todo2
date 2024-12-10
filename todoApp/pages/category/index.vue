@@ -101,7 +101,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useTaskStore } from '@/store/task'
+import { useTaskStore } from '@/store/modules/task'
 import { categoryApi } from '@/api'
 
 const taskStore = useTaskStore()

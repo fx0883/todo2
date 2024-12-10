@@ -1,5 +1,5 @@
 <script>
-import { useUserStore } from '@/store/user'
+import { useUserStore } from '@/store/modules/user'
 
 export default {
 	onLaunch: async function() {

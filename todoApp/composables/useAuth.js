@@ -1,5 +1,5 @@
 import { ref, computed } from 'vue'
-import { useUserStore } from '@/store/user'
+import { useUserStore } from '@/store/modules/user'
 import userApi from '@/api/user'
 
 export function useAuth() {

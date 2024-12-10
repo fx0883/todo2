@@ -1,5 +1,9 @@
 // 配置接口地址
-const BASE_URL = 'http://localhost:8000/api/v1'
+const BASE_URL = 'http://127.0.0.1:8000/api/v1'
+
+// 请求队列，用于存储等待 token 刷新的请求
+let refreshing = false
+const waitingQueue = []
 
 // 请求计数器，用于取消重复请求
 const pendingRequests = new Map()
@@ -10,28 +14,19 @@ const generateRequestKey = (config) => {
   return [url, method, JSON.stringify(data)].join('&')
 }
 
-// 取消重复请求
+// 移除请求
 const removePendingRequest = (config) => {
   const requestKey = generateRequestKey(config)
-  if (pendingRequests.has(requestKey)) {
-    const cancel = pendingRequests.get(requestKey)
-    cancel()
-    pendingRequests.delete(requestKey)
-  }
+  pendingRequests.delete(requestKey)
 }
 
-// 添加请求到pending中
+// 添加请求
 const addPendingRequest = (config) => {
   const requestKey = generateRequestKey(config)
-  config.cancelToken = new Promise((_, reject) => {
-    pendingRequests.set(requestKey, () => {
-      pendingRequests.delete(requestKey)
-      reject(new Error('Request canceled'))
-    })
-  })
+  pendingRequests.set(requestKey, config)
 }
 
-// 刷新token
+// 刷新 token
 const refreshToken = async () => {
   try {
     const refreshToken = uni.getStorageSync('refreshToken')
@@ -40,7 +35,7 @@ const refreshToken = async () => {
     }
 
     const response = await uni.request({
-      url: `${BASE_URL}/refresh/`,
+      url: `${BASE_URL}/auth/token/refresh/`,
       method: 'POST',
       data: {
         refresh: refreshToken
@@ -49,14 +44,40 @@ const refreshToken = async () => {
 
     if (response.statusCode === 200) {
       const { access } = response.data
-      uni.setStorageSync('token', access)
+      uni.setStorageSync('accessToken', access)
       return access
     } else {
       throw new Error('Failed to refresh token')
     }
   } catch (error) {
+    // 刷新失败，清除所有 token
+    uni.removeStorageSync('accessToken')
+    uni.removeStorageSync('refreshToken')
+    // 跳转到登录页
+    uni.reLaunch({
+      url: '/pages/login/index'
+    })
     throw error
   }
+}
+
+// 处理请求队列
+const processQueue = (error = null) => {
+  waitingQueue.forEach((promise) => {
+    if (error) {
+      promise.reject(error)
+    } else {
+      promise.resolve()
+    }
+  })
+  waitingQueue.length = 0
+}
+
+// 添加请求到队列
+const addToQueue = (options) => {
+  return new Promise((resolve, reject) => {
+    waitingQueue.push({ resolve, reject, options })
+  })
 }
 
 // 错误处理
@@ -125,16 +146,16 @@ const request = async (options) => {
   // 合并默认配置
   const config = {
     ...options,
-    url: BASE_URL + options.url
+    url: BASE_URL + options.url,
+    header: {
+      'Content-Type': 'application/json',
+      ...options.header
+    }
   }
 
-  // 处理重复请求
-  removePendingRequest(config)
-  addPendingRequest(config)
-
   try {
-    // 添加token
-    const token = uni.getStorageSync('token')
+    // 添加 token
+    const token = uni.getStorageSync('accessToken')
     if (token) {
       config.header = {
         ...config.header,
@@ -143,50 +164,52 @@ const request = async (options) => {
     }
 
     // 发送请求
-    const response = await uni.request(config)
-
-    // 请求完成后，从pending中移除
-    removePendingRequest(config)
-
-    // 处理响应
-    if (response.statusCode >= 200 && response.statusCode < 300) {
-      return response.data
-    }
-
-    // 处理401错误（未授权）
-    if (response.statusCode === 401) {
-      try {
-        // 尝试刷新token
-        await refreshToken()
-        // 重新发送请求
-        return await request(options)
-      } catch (refreshError) {
-        // 刷新token失败，跳转到登录页
-        uni.redirectTo({
-          url: '/pages/login/index'
-        })
-        throw new Error('请重新登录')
-      }
-    }
-
-    // 其他错误
-    throw {
-      statusCode: response.statusCode,
-      data: response.data
-    }
+    return new Promise((resolve, reject) => {
+      uni.request({
+        ...config,
+        success: (res) => {
+          if (res.statusCode >= 200 && res.statusCode < 300) {
+            resolve(res.data)
+          } else if (res.statusCode === 401 && !refreshing) {
+            refreshing = true
+            refreshToken()
+              .then(() => {
+                refreshing = false
+                processQueue()
+                // 重新发送请求
+                return request(options)
+              })
+              .then(resolve)
+              .catch(err => {
+                refreshing = false
+                processQueue(err)
+                // 刷新token失败，清除用户状态并跳转到登录页
+                uni.removeStorageSync('accessToken')
+                uni.removeStorageSync('refreshToken')
+                uni.removeStorageSync('userInfo')
+                uni.reLaunch({
+                  url: '/pages/login/login'
+                })
+                reject(err)
+              })
+          } else {
+            reject({
+              statusCode: res.statusCode,
+              data: res.data
+            })
+          }
+        },
+        fail: (err) => {
+          reject({
+            statusCode: 0,
+            data: { message: '网络请求失败' },
+            error: err
+          })
+        }
+      })
+    })
   } catch (error) {
-    // 请求完成后，从pending中移除
-    removePendingRequest(config)
-
-    // 重试机制
-    if (options.retry !== false) {
-      const shouldRetry = await handleError(error)
-      if (shouldRetry) {
-        return await retry(() => request(options))
-      }
-    }
-
-    throw error
+    return Promise.reject(error)
   }
 }
 

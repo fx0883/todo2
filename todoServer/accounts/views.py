@@ -157,7 +157,7 @@ class UserViewSet(viewsets.ModelViewSet):
         ]
     )
     @method_decorator(csrf_exempt)
-    @action(detail=False, methods=['post'], permission_classes=[permissions.AllowAny])
+    @action(detail=False, methods=['post'], permission_classes=[permissions.AllowAny], authentication_classes=[])
     def register(self, request):
         serializer = RegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -205,7 +205,7 @@ class UserViewSet(viewsets.ModelViewSet):
         ]
     )
     @method_decorator(csrf_exempt)
-    @action(detail=False, methods=['post'], permission_classes=[permissions.AllowAny])
+    @action(detail=False, methods=['post'], permission_classes=[permissions.AllowAny], authentication_classes=[])
     def login(self, request):
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)

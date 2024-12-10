@@ -1146,3 +1146,756 @@ Traceback (most recent call last):
 rest_framework.exceptions.NotAuthenticated: 身份认证信息未提供。
 
     
+ERROR 2024-12-10 14:09:58,399 utils 2856 15568 
+API Error Details:
+View: UserViewSet
+URL: /api/v1/accounts/users/login/
+Method: POST
+User: AnonymousUser
+Error Type: InvalidToken
+Error Message: {'detail': ErrorDetail(string='此令牌对任何类型的令牌无效', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 'token_type': ErrorDetail(string='access', code='token_not_valid'), 'message': ErrorDetail(string='令牌无效或已过期', code='token_not_valid')}]}
+Stack Trace:
+Traceback (most recent call last):
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 414, in initial
+    self.perform_authentication(request)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 324, in perform_authentication
+    request.user
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\request.py", line 227, in user
+    self._authenticate()
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\request.py", line 380, in _authenticate
+    user_auth_tuple = authenticator.authenticate(self)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework_simplejwt\authentication.py", line 49, in authenticate
+    validated_token = self.get_validated_token(raw_token)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework_simplejwt\authentication.py", line 113, in get_validated_token
+    raise InvalidToken(
+rest_framework_simplejwt.exceptions.InvalidToken: {'detail': ErrorDetail(string='此令牌对任何类型的令牌无效', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 'token_type': ErrorDetail(string='access', code='token_not_valid'), 'message': ErrorDetail(string='令牌无效或已过期', code='token_not_valid')}]}
+
+    
+ERROR 2024-12-10 14:10:18,533 utils 2856 15568 
+API Error Details:
+View: UserViewSet
+URL: /api/v1/accounts/users/login/
+Method: POST
+User: AnonymousUser
+Error Type: InvalidToken
+Error Message: {'detail': ErrorDetail(string='此令牌对任何类型的令牌无效', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 'token_type': ErrorDetail(string='access', code='token_not_valid'), 'message': ErrorDetail(string='令牌无效或已过期', code='token_not_valid')}]}
+Stack Trace:
+Traceback (most recent call last):
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 414, in initial
+    self.perform_authentication(request)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 324, in perform_authentication
+    request.user
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\request.py", line 227, in user
+    self._authenticate()
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\request.py", line 380, in _authenticate
+    user_auth_tuple = authenticator.authenticate(self)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework_simplejwt\authentication.py", line 49, in authenticate
+    validated_token = self.get_validated_token(raw_token)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework_simplejwt\authentication.py", line 113, in get_validated_token
+    raise InvalidToken(
+rest_framework_simplejwt.exceptions.InvalidToken: {'detail': ErrorDetail(string='此令牌对任何类型的令牌无效', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 'token_type': ErrorDetail(string='access', code='token_not_valid'), 'message': ErrorDetail(string='令牌无效或已过期', code='token_not_valid')}]}
+
+    
+ERROR 2024-12-10 14:10:19,223 utils 2856 15568 
+API Error Details:
+View: UserViewSet
+URL: /api/v1/accounts/users/login/
+Method: POST
+User: AnonymousUser
+Error Type: InvalidToken
+Error Message: {'detail': ErrorDetail(string='此令牌对任何类型的令牌无效', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 'token_type': ErrorDetail(string='access', code='token_not_valid'), 'message': ErrorDetail(string='令牌无效或已过期', code='token_not_valid')}]}
+Stack Trace:
+Traceback (most recent call last):
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 414, in initial
+    self.perform_authentication(request)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 324, in perform_authentication
+    request.user
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\request.py", line 227, in user
+    self._authenticate()
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\request.py", line 380, in _authenticate
+    user_auth_tuple = authenticator.authenticate(self)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework_simplejwt\authentication.py", line 49, in authenticate
+    validated_token = self.get_validated_token(raw_token)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework_simplejwt\authentication.py", line 113, in get_validated_token
+    raise InvalidToken(
+rest_framework_simplejwt.exceptions.InvalidToken: {'detail': ErrorDetail(string='此令牌对任何类型的令牌无效', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 'token_type': ErrorDetail(string='access', code='token_not_valid'), 'message': ErrorDetail(string='令牌无效或已过期', code='token_not_valid')}]}
+
+    
+ERROR 2024-12-10 14:10:19,590 utils 2856 15568 
+API Error Details:
+View: UserViewSet
+URL: /api/v1/accounts/users/login/
+Method: POST
+User: AnonymousUser
+Error Type: InvalidToken
+Error Message: {'detail': ErrorDetail(string='此令牌对任何类型的令牌无效', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 'token_type': ErrorDetail(string='access', code='token_not_valid'), 'message': ErrorDetail(string='令牌无效或已过期', code='token_not_valid')}]}
+Stack Trace:
+Traceback (most recent call last):
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 414, in initial
+    self.perform_authentication(request)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 324, in perform_authentication
+    request.user
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\request.py", line 227, in user
+    self._authenticate()
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\request.py", line 380, in _authenticate
+    user_auth_tuple = authenticator.authenticate(self)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework_simplejwt\authentication.py", line 49, in authenticate
+    validated_token = self.get_validated_token(raw_token)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework_simplejwt\authentication.py", line 113, in get_validated_token
+    raise InvalidToken(
+rest_framework_simplejwt.exceptions.InvalidToken: {'detail': ErrorDetail(string='此令牌对任何类型的令牌无效', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 'token_type': ErrorDetail(string='access', code='token_not_valid'), 'message': ErrorDetail(string='令牌无效或已过期', code='token_not_valid')}]}
+
+    
+ERROR 2024-12-10 14:10:20,270 utils 2856 15568 
+API Error Details:
+View: UserViewSet
+URL: /api/v1/accounts/users/login/
+Method: POST
+User: AnonymousUser
+Error Type: InvalidToken
+Error Message: {'detail': ErrorDetail(string='此令牌对任何类型的令牌无效', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 'token_type': ErrorDetail(string='access', code='token_not_valid'), 'message': ErrorDetail(string='令牌无效或已过期', code='token_not_valid')}]}
+Stack Trace:
+Traceback (most recent call last):
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 414, in initial
+    self.perform_authentication(request)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 324, in perform_authentication
+    request.user
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\request.py", line 227, in user
+    self._authenticate()
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\request.py", line 380, in _authenticate
+    user_auth_tuple = authenticator.authenticate(self)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework_simplejwt\authentication.py", line 49, in authenticate
+    validated_token = self.get_validated_token(raw_token)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework_simplejwt\authentication.py", line 113, in get_validated_token
+    raise InvalidToken(
+rest_framework_simplejwt.exceptions.InvalidToken: {'detail': ErrorDetail(string='此令牌对任何类型的令牌无效', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 'token_type': ErrorDetail(string='access', code='token_not_valid'), 'message': ErrorDetail(string='令牌无效或已过期', code='token_not_valid')}]}
+
+    
+ERROR 2024-12-10 14:10:20,697 utils 2856 15568 
+API Error Details:
+View: UserViewSet
+URL: /api/v1/accounts/users/login/
+Method: POST
+User: AnonymousUser
+Error Type: InvalidToken
+Error Message: {'detail': ErrorDetail(string='此令牌对任何类型的令牌无效', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 'token_type': ErrorDetail(string='access', code='token_not_valid'), 'message': ErrorDetail(string='令牌无效或已过期', code='token_not_valid')}]}
+Stack Trace:
+Traceback (most recent call last):
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 414, in initial
+    self.perform_authentication(request)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 324, in perform_authentication
+    request.user
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\request.py", line 227, in user
+    self._authenticate()
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\request.py", line 380, in _authenticate
+    user_auth_tuple = authenticator.authenticate(self)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework_simplejwt\authentication.py", line 49, in authenticate
+    validated_token = self.get_validated_token(raw_token)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework_simplejwt\authentication.py", line 113, in get_validated_token
+    raise InvalidToken(
+rest_framework_simplejwt.exceptions.InvalidToken: {'detail': ErrorDetail(string='此令牌对任何类型的令牌无效', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 'token_type': ErrorDetail(string='access', code='token_not_valid'), 'message': ErrorDetail(string='令牌无效或已过期', code='token_not_valid')}]}
+
+    
+ERROR 2024-12-10 14:10:33,876 utils 2856 15568 
+API Error Details:
+View: UserViewSet
+URL: /api/v1/accounts/users/login/
+Method: POST
+User: AnonymousUser
+Error Type: InvalidToken
+Error Message: {'detail': ErrorDetail(string='此令牌对任何类型的令牌无效', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 'token_type': ErrorDetail(string='access', code='token_not_valid'), 'message': ErrorDetail(string='令牌无效或已过期', code='token_not_valid')}]}
+Stack Trace:
+Traceback (most recent call last):
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 414, in initial
+    self.perform_authentication(request)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 324, in perform_authentication
+    request.user
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\request.py", line 227, in user
+    self._authenticate()
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\request.py", line 380, in _authenticate
+    user_auth_tuple = authenticator.authenticate(self)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework_simplejwt\authentication.py", line 49, in authenticate
+    validated_token = self.get_validated_token(raw_token)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework_simplejwt\authentication.py", line 113, in get_validated_token
+    raise InvalidToken(
+rest_framework_simplejwt.exceptions.InvalidToken: {'detail': ErrorDetail(string='此令牌对任何类型的令牌无效', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 'token_type': ErrorDetail(string='access', code='token_not_valid'), 'message': ErrorDetail(string='令牌无效或已过期', code='token_not_valid')}]}
+
+    
+ERROR 2024-12-10 14:10:36,371 utils 2856 15568 
+API Error Details:
+View: UserViewSet
+URL: /api/v1/accounts/users/login/
+Method: POST
+User: AnonymousUser
+Error Type: InvalidToken
+Error Message: {'detail': ErrorDetail(string='此令牌对任何类型的令牌无效', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 'token_type': ErrorDetail(string='access', code='token_not_valid'), 'message': ErrorDetail(string='令牌无效或已过期', code='token_not_valid')}]}
+Stack Trace:
+Traceback (most recent call last):
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 414, in initial
+    self.perform_authentication(request)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 324, in perform_authentication
+    request.user
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\request.py", line 227, in user
+    self._authenticate()
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\request.py", line 380, in _authenticate
+    user_auth_tuple = authenticator.authenticate(self)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework_simplejwt\authentication.py", line 49, in authenticate
+    validated_token = self.get_validated_token(raw_token)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework_simplejwt\authentication.py", line 113, in get_validated_token
+    raise InvalidToken(
+rest_framework_simplejwt.exceptions.InvalidToken: {'detail': ErrorDetail(string='此令牌对任何类型的令牌无效', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 'token_type': ErrorDetail(string='access', code='token_not_valid'), 'message': ErrorDetail(string='令牌无效或已过期', code='token_not_valid')}]}
+
+    
+ERROR 2024-12-10 14:10:36,784 utils 2856 15568 
+API Error Details:
+View: UserViewSet
+URL: /api/v1/accounts/users/login/
+Method: POST
+User: AnonymousUser
+Error Type: InvalidToken
+Error Message: {'detail': ErrorDetail(string='此令牌对任何类型的令牌无效', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 'token_type': ErrorDetail(string='access', code='token_not_valid'), 'message': ErrorDetail(string='令牌无效或已过期', code='token_not_valid')}]}
+Stack Trace:
+Traceback (most recent call last):
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 414, in initial
+    self.perform_authentication(request)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 324, in perform_authentication
+    request.user
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\request.py", line 227, in user
+    self._authenticate()
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\request.py", line 380, in _authenticate
+    user_auth_tuple = authenticator.authenticate(self)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework_simplejwt\authentication.py", line 49, in authenticate
+    validated_token = self.get_validated_token(raw_token)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework_simplejwt\authentication.py", line 113, in get_validated_token
+    raise InvalidToken(
+rest_framework_simplejwt.exceptions.InvalidToken: {'detail': ErrorDetail(string='此令牌对任何类型的令牌无效', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 'token_type': ErrorDetail(string='access', code='token_not_valid'), 'message': ErrorDetail(string='令牌无效或已过期', code='token_not_valid')}]}
+
+    
+ERROR 2024-12-10 14:10:37,040 utils 2856 15568 
+API Error Details:
+View: UserViewSet
+URL: /api/v1/accounts/users/login/
+Method: POST
+User: AnonymousUser
+Error Type: InvalidToken
+Error Message: {'detail': ErrorDetail(string='此令牌对任何类型的令牌无效', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 'token_type': ErrorDetail(string='access', code='token_not_valid'), 'message': ErrorDetail(string='令牌无效或已过期', code='token_not_valid')}]}
+Stack Trace:
+Traceback (most recent call last):
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 414, in initial
+    self.perform_authentication(request)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 324, in perform_authentication
+    request.user
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\request.py", line 227, in user
+    self._authenticate()
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\request.py", line 380, in _authenticate
+    user_auth_tuple = authenticator.authenticate(self)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework_simplejwt\authentication.py", line 49, in authenticate
+    validated_token = self.get_validated_token(raw_token)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework_simplejwt\authentication.py", line 113, in get_validated_token
+    raise InvalidToken(
+rest_framework_simplejwt.exceptions.InvalidToken: {'detail': ErrorDetail(string='此令牌对任何类型的令牌无效', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 'token_type': ErrorDetail(string='access', code='token_not_valid'), 'message': ErrorDetail(string='令牌无效或已过期', code='token_not_valid')}]}
+
+    
+ERROR 2024-12-10 14:10:37,244 utils 2856 15568 
+API Error Details:
+View: UserViewSet
+URL: /api/v1/accounts/users/login/
+Method: POST
+User: AnonymousUser
+Error Type: InvalidToken
+Error Message: {'detail': ErrorDetail(string='此令牌对任何类型的令牌无效', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 'token_type': ErrorDetail(string='access', code='token_not_valid'), 'message': ErrorDetail(string='令牌无效或已过期', code='token_not_valid')}]}
+Stack Trace:
+Traceback (most recent call last):
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 414, in initial
+    self.perform_authentication(request)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 324, in perform_authentication
+    request.user
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\request.py", line 227, in user
+    self._authenticate()
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\request.py", line 380, in _authenticate
+    user_auth_tuple = authenticator.authenticate(self)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework_simplejwt\authentication.py", line 49, in authenticate
+    validated_token = self.get_validated_token(raw_token)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework_simplejwt\authentication.py", line 113, in get_validated_token
+    raise InvalidToken(
+rest_framework_simplejwt.exceptions.InvalidToken: {'detail': ErrorDetail(string='此令牌对任何类型的令牌无效', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 'token_type': ErrorDetail(string='access', code='token_not_valid'), 'message': ErrorDetail(string='令牌无效或已过期', code='token_not_valid')}]}
+
+    
+ERROR 2024-12-10 14:10:37,455 utils 2856 15568 
+API Error Details:
+View: UserViewSet
+URL: /api/v1/accounts/users/login/
+Method: POST
+User: AnonymousUser
+Error Type: InvalidToken
+Error Message: {'detail': ErrorDetail(string='此令牌对任何类型的令牌无效', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 'token_type': ErrorDetail(string='access', code='token_not_valid'), 'message': ErrorDetail(string='令牌无效或已过期', code='token_not_valid')}]}
+Stack Trace:
+Traceback (most recent call last):
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 414, in initial
+    self.perform_authentication(request)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 324, in perform_authentication
+    request.user
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\request.py", line 227, in user
+    self._authenticate()
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\request.py", line 380, in _authenticate
+    user_auth_tuple = authenticator.authenticate(self)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework_simplejwt\authentication.py", line 49, in authenticate
+    validated_token = self.get_validated_token(raw_token)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework_simplejwt\authentication.py", line 113, in get_validated_token
+    raise InvalidToken(
+rest_framework_simplejwt.exceptions.InvalidToken: {'detail': ErrorDetail(string='此令牌对任何类型的令牌无效', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 'token_type': ErrorDetail(string='access', code='token_not_valid'), 'message': ErrorDetail(string='令牌无效或已过期', code='token_not_valid')}]}
+
+    
+ERROR 2024-12-10 14:10:37,663 utils 2856 15568 
+API Error Details:
+View: UserViewSet
+URL: /api/v1/accounts/users/login/
+Method: POST
+User: AnonymousUser
+Error Type: InvalidToken
+Error Message: {'detail': ErrorDetail(string='此令牌对任何类型的令牌无效', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 'token_type': ErrorDetail(string='access', code='token_not_valid'), 'message': ErrorDetail(string='令牌无效或已过期', code='token_not_valid')}]}
+Stack Trace:
+Traceback (most recent call last):
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 414, in initial
+    self.perform_authentication(request)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 324, in perform_authentication
+    request.user
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\request.py", line 227, in user
+    self._authenticate()
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\request.py", line 380, in _authenticate
+    user_auth_tuple = authenticator.authenticate(self)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework_simplejwt\authentication.py", line 49, in authenticate
+    validated_token = self.get_validated_token(raw_token)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework_simplejwt\authentication.py", line 113, in get_validated_token
+    raise InvalidToken(
+rest_framework_simplejwt.exceptions.InvalidToken: {'detail': ErrorDetail(string='此令牌对任何类型的令牌无效', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 'token_type': ErrorDetail(string='access', code='token_not_valid'), 'message': ErrorDetail(string='令牌无效或已过期', code='token_not_valid')}]}
+
+    
+ERROR 2024-12-10 14:10:37,868 utils 2856 15568 
+API Error Details:
+View: UserViewSet
+URL: /api/v1/accounts/users/login/
+Method: POST
+User: AnonymousUser
+Error Type: InvalidToken
+Error Message: {'detail': ErrorDetail(string='此令牌对任何类型的令牌无效', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 'token_type': ErrorDetail(string='access', code='token_not_valid'), 'message': ErrorDetail(string='令牌无效或已过期', code='token_not_valid')}]}
+Stack Trace:
+Traceback (most recent call last):
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 414, in initial
+    self.perform_authentication(request)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 324, in perform_authentication
+    request.user
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\request.py", line 227, in user
+    self._authenticate()
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\request.py", line 380, in _authenticate
+    user_auth_tuple = authenticator.authenticate(self)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework_simplejwt\authentication.py", line 49, in authenticate
+    validated_token = self.get_validated_token(raw_token)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework_simplejwt\authentication.py", line 113, in get_validated_token
+    raise InvalidToken(
+rest_framework_simplejwt.exceptions.InvalidToken: {'detail': ErrorDetail(string='此令牌对任何类型的令牌无效', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 'token_type': ErrorDetail(string='access', code='token_not_valid'), 'message': ErrorDetail(string='令牌无效或已过期', code='token_not_valid')}]}
+
+    
+ERROR 2024-12-10 14:10:38,120 utils 2856 15568 
+API Error Details:
+View: UserViewSet
+URL: /api/v1/accounts/users/login/
+Method: POST
+User: AnonymousUser
+Error Type: InvalidToken
+Error Message: {'detail': ErrorDetail(string='此令牌对任何类型的令牌无效', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 'token_type': ErrorDetail(string='access', code='token_not_valid'), 'message': ErrorDetail(string='令牌无效或已过期', code='token_not_valid')}]}
+Stack Trace:
+Traceback (most recent call last):
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 414, in initial
+    self.perform_authentication(request)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 324, in perform_authentication
+    request.user
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\request.py", line 227, in user
+    self._authenticate()
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\request.py", line 380, in _authenticate
+    user_auth_tuple = authenticator.authenticate(self)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework_simplejwt\authentication.py", line 49, in authenticate
+    validated_token = self.get_validated_token(raw_token)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework_simplejwt\authentication.py", line 113, in get_validated_token
+    raise InvalidToken(
+rest_framework_simplejwt.exceptions.InvalidToken: {'detail': ErrorDetail(string='此令牌对任何类型的令牌无效', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 'token_type': ErrorDetail(string='access', code='token_not_valid'), 'message': ErrorDetail(string='令牌无效或已过期', code='token_not_valid')}]}
+
+    
+ERROR 2024-12-10 14:18:45,585 utils 6168 28208 
+API Error Details:
+View: TokenRefreshView
+URL: /api/token/refresh/
+Method: POST
+User: AnonymousUser
+Error Type: ParseError
+Error Message: JSON parse error - Invalid control character at: line 3 column 245 (char 490)
+Stack Trace:
+Traceback (most recent call last):
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\parsers.py", line 64, in parse
+    return json.load(decoded_stream, parse_constant=parse_constant)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\utils\json.py", line 31, in load
+    return json.load(*args, **kwargs)
+  File "D:\Software\python\Python310\lib\json\__init__.py", line 293, in load
+    return loads(fp.read(),
+  File "D:\Software\python\Python310\lib\json\__init__.py", line 359, in loads
+    return cls(**kw).decode(s)
+  File "D:\Software\python\Python310\lib\json\decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+  File "D:\Software\python\Python310\lib\json\decoder.py", line 353, in raw_decode
+    obj, end = self.scan_once(s, idx)
+json.decoder.JSONDecodeError: Invalid control character at: line 3 column 245 (char 490)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework_simplejwt\views.py", line 41, in post
+    serializer = self.get_serializer(data=request.data)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\request.py", line 216, in data
+    self._load_data_and_files()
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\request.py", line 279, in _load_data_and_files
+    self._data, self._files = self._parse()
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\request.py", line 354, in _parse
+    parsed = parser.parse(stream, media_type, self.parser_context)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\parsers.py", line 66, in parse
+    raise ParseError('JSON parse error - %s' % str(exc))
+rest_framework.exceptions.ParseError: JSON parse error - Invalid control character at: line 3 column 245 (char 490)
+
+    
+ERROR 2024-12-10 14:24:53,539 utils 6168 27216 
+API Error Details:
+View: TaskViewSet
+URL: /api/v1/tasks/tasks/
+Method: GET
+User: AnonymousUser
+Error Type: NotAuthenticated
+Error Message: 身份认证信息未提供。
+Stack Trace:
+Traceback (most recent call last):
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 415, in initial
+    self.check_permissions(request)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 333, in check_permissions
+    self.permission_denied(
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 174, in permission_denied
+    raise exceptions.NotAuthenticated()
+rest_framework.exceptions.NotAuthenticated: 身份认证信息未提供。
+
+    
+ERROR 2024-12-10 14:24:53,541 utils 6168 12876 
+API Error Details:
+View: CategoryViewSet
+URL: /api/v1/tasks/categories/
+Method: GET
+User: AnonymousUser
+Error Type: NotAuthenticated
+Error Message: 身份认证信息未提供。
+Stack Trace:
+Traceback (most recent call last):
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 415, in initial
+    self.check_permissions(request)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 333, in check_permissions
+    self.permission_denied(
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 174, in permission_denied
+    raise exceptions.NotAuthenticated()
+rest_framework.exceptions.NotAuthenticated: 身份认证信息未提供。
+
+    
+ERROR 2024-12-10 14:25:05,153 utils 6168 12876 
+API Error Details:
+View: UserViewSet
+URL: /api/v1/accounts/users/login/
+Method: POST
+User: AnonymousUser
+Error Type: ParseError
+Error Message: JSON parse error - Expecting value: line 1 column 1 (char 0)
+Stack Trace:
+Traceback (most recent call last):
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\parsers.py", line 64, in parse
+    return json.load(decoded_stream, parse_constant=parse_constant)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\utils\json.py", line 31, in load
+    return json.load(*args, **kwargs)
+  File "D:\Software\python\Python310\lib\json\__init__.py", line 293, in load
+    return loads(fp.read(),
+  File "D:\Software\python\Python310\lib\json\__init__.py", line 359, in loads
+    return cls(**kw).decode(s)
+  File "D:\Software\python\Python310\lib\json\decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+  File "D:\Software\python\Python310\lib\json\decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\django\utils\decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "D:\tmp\todo2\todoServer\accounts\views.py", line 210, in login
+    serializer = LoginSerializer(data=request.data)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\request.py", line 216, in data
+    self._load_data_and_files()
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\request.py", line 279, in _load_data_and_files
+    self._data, self._files = self._parse()
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\request.py", line 354, in _parse
+    parsed = parser.parse(stream, media_type, self.parser_context)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\parsers.py", line 66, in parse
+    raise ParseError('JSON parse error - %s' % str(exc))
+rest_framework.exceptions.ParseError: JSON parse error - Expecting value: line 1 column 1 (char 0)
+
+    
+ERROR 2024-12-10 14:25:06,689 utils 6168 12876 
+API Error Details:
+View: TaskViewSet
+URL: /api/v1/tasks/tasks/
+Method: GET
+User: AnonymousUser
+Error Type: NotAuthenticated
+Error Message: 身份认证信息未提供。
+Stack Trace:
+Traceback (most recent call last):
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 415, in initial
+    self.check_permissions(request)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 333, in check_permissions
+    self.permission_denied(
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 174, in permission_denied
+    raise exceptions.NotAuthenticated()
+rest_framework.exceptions.NotAuthenticated: 身份认证信息未提供。
+
+    
+ERROR 2024-12-10 14:25:06,689 utils 6168 27216 
+API Error Details:
+View: CategoryViewSet
+URL: /api/v1/tasks/categories/
+Method: GET
+User: AnonymousUser
+Error Type: NotAuthenticated
+Error Message: 身份认证信息未提供。
+Stack Trace:
+Traceback (most recent call last):
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 415, in initial
+    self.check_permissions(request)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 333, in check_permissions
+    self.permission_denied(
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 174, in permission_denied
+    raise exceptions.NotAuthenticated()
+rest_framework.exceptions.NotAuthenticated: 身份认证信息未提供。
+
+    
+ERROR 2024-12-10 14:25:28,252 utils 6168 12876 
+API Error Details:
+View: UserViewSet
+URL: /api/v1/accounts/users/login/
+Method: POST
+User: AnonymousUser
+Error Type: ParseError
+Error Message: JSON parse error - Expecting value: line 1 column 1 (char 0)
+Stack Trace:
+Traceback (most recent call last):
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\parsers.py", line 64, in parse
+    return json.load(decoded_stream, parse_constant=parse_constant)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\utils\json.py", line 31, in load
+    return json.load(*args, **kwargs)
+  File "D:\Software\python\Python310\lib\json\__init__.py", line 293, in load
+    return loads(fp.read(),
+  File "D:\Software\python\Python310\lib\json\__init__.py", line 359, in loads
+    return cls(**kw).decode(s)
+  File "D:\Software\python\Python310\lib\json\decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+  File "D:\Software\python\Python310\lib\json\decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\django\utils\decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "D:\tmp\todo2\todoServer\accounts\views.py", line 210, in login
+    serializer = LoginSerializer(data=request.data)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\request.py", line 216, in data
+    self._load_data_and_files()
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\request.py", line 279, in _load_data_and_files
+    self._data, self._files = self._parse()
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\request.py", line 354, in _parse
+    parsed = parser.parse(stream, media_type, self.parser_context)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\parsers.py", line 66, in parse
+    raise ParseError('JSON parse error - %s' % str(exc))
+rest_framework.exceptions.ParseError: JSON parse error - Expecting value: line 1 column 1 (char 0)
+
+    
+ERROR 2024-12-10 14:25:29,793 utils 6168 12876 
+API Error Details:
+View: TaskViewSet
+URL: /api/v1/tasks/tasks/
+Method: GET
+User: AnonymousUser
+Error Type: NotAuthenticated
+Error Message: 身份认证信息未提供。
+Stack Trace:
+Traceback (most recent call last):
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 415, in initial
+    self.check_permissions(request)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 333, in check_permissions
+    self.permission_denied(
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 174, in permission_denied
+    raise exceptions.NotAuthenticated()
+rest_framework.exceptions.NotAuthenticated: 身份认证信息未提供。
+
+    
+ERROR 2024-12-10 14:25:29,795 utils 6168 12876 
+API Error Details:
+View: CategoryViewSet
+URL: /api/v1/tasks/categories/
+Method: GET
+User: AnonymousUser
+Error Type: NotAuthenticated
+Error Message: 身份认证信息未提供。
+Stack Trace:
+Traceback (most recent call last):
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 415, in initial
+    self.check_permissions(request)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 333, in check_permissions
+    self.permission_denied(
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 174, in permission_denied
+    raise exceptions.NotAuthenticated()
+rest_framework.exceptions.NotAuthenticated: 身份认证信息未提供。
+
+    
+ERROR 2024-12-10 14:28:48,245 utils 6168 12876 
+API Error Details:
+View: UserViewSet
+URL: /api/v1/accounts/users/login/
+Method: POST
+User: AnonymousUser
+Error Type: ParseError
+Error Message: JSON parse error - Expecting value: line 1 column 1 (char 0)
+Stack Trace:
+Traceback (most recent call last):
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\parsers.py", line 64, in parse
+    return json.load(decoded_stream, parse_constant=parse_constant)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\utils\json.py", line 31, in load
+    return json.load(*args, **kwargs)
+  File "D:\Software\python\Python310\lib\json\__init__.py", line 293, in load
+    return loads(fp.read(),
+  File "D:\Software\python\Python310\lib\json\__init__.py", line 359, in loads
+    return cls(**kw).decode(s)
+  File "D:\Software\python\Python310\lib\json\decoder.py", line 337, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+  File "D:\Software\python\Python310\lib\json\decoder.py", line 355, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\django\utils\decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "D:\tmp\todo2\todoServer\accounts\views.py", line 210, in login
+    serializer = LoginSerializer(data=request.data)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\request.py", line 216, in data
+    self._load_data_and_files()
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\request.py", line 279, in _load_data_and_files
+    self._data, self._files = self._parse()
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\request.py", line 354, in _parse
+    parsed = parser.parse(stream, media_type, self.parser_context)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\parsers.py", line 66, in parse
+    raise ParseError('JSON parse error - %s' % str(exc))
+rest_framework.exceptions.ParseError: JSON parse error - Expecting value: line 1 column 1 (char 0)
+
+    
+ERROR 2024-12-10 14:28:49,876 utils 6168 27216 
+API Error Details:
+View: TaskViewSet
+URL: /api/v1/tasks/tasks/
+Method: GET
+User: AnonymousUser
+Error Type: NotAuthenticated
+Error Message: 身份认证信息未提供。
+Stack Trace:
+Traceback (most recent call last):
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 415, in initial
+    self.check_permissions(request)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 333, in check_permissions
+    self.permission_denied(
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 174, in permission_denied
+    raise exceptions.NotAuthenticated()
+rest_framework.exceptions.NotAuthenticated: 身份认证信息未提供。
+
+    
+ERROR 2024-12-10 14:28:49,876 utils 6168 12876 
+API Error Details:
+View: CategoryViewSet
+URL: /api/v1/tasks/categories/
+Method: GET
+User: AnonymousUser
+Error Type: NotAuthenticated
+Error Message: 身份认证信息未提供。
+Stack Trace:
+Traceback (most recent call last):
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 415, in initial
+    self.check_permissions(request)
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 333, in check_permissions
+    self.permission_denied(
+  File "D:\tmp\todo2\todoServer\.venv\lib\site-packages\rest_framework\views.py", line 174, in permission_denied
+    raise exceptions.NotAuthenticated()
+rest_framework.exceptions.NotAuthenticated: 身份认证信息未提供。
+
+    

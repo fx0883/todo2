@@ -22,10 +22,14 @@ export function useAuth() {
     loading.value = true
     error.value = null
     try {
+      console.log('Login credentials:', credentials)
       const response = await userApi.login(credentials)
-      await userStore.setUserAndToken(response.user, response.token)
+      console.log('Login response:', response)
+      userStore.setToken(response.access, response.refresh)
+      userStore.setUserInfo(response.user)
       return true
     } catch (err) {
+      console.error('Login error:', err)
       error.value = err.message || '登录失败'
       return false
     } finally {

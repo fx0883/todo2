@@ -71,7 +71,11 @@ const handleLogin = async () => {
   if (!isValid.value || loading.value) return
 
   try {
-    await login(form.value.username.trim(), form.value.password)
+	const loginParam = {
+  "username": form.value.username.trim(),
+  "password": form.value.password
+}
+    await login(loginParam)
     uni.showToast({
       title: '登录成功',
       icon: 'success'

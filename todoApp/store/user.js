@@ -13,9 +13,12 @@ export const useUserStore = defineStore('user', () => {
   const isAuthenticated = computed(() => !!token.value)
 
   // Actions
-  const setToken = (newToken) => {
-    token.value = newToken
-    uni.setStorageSync('token', newToken)
+  const setToken = (accessToken, refreshToken) => {
+    token.value = accessToken
+    uni.setStorageSync('accessToken', accessToken)
+    if (refreshToken) {
+      uni.setStorageSync('refreshToken', refreshToken)
+    }
   }
 
   const setUserInfo = (info) => {
@@ -72,7 +75,7 @@ export const useUserStore = defineStore('user', () => {
         throw new Error('No refresh token available')
       }
       const response = await userApi.refreshToken(refreshToken)
-      setToken(response.access)
+      setToken(response.access, response.refresh)
       return response.access
     } catch (err) {
       throw new Error(err.data?.message || 'Token 刷新失败')
@@ -93,13 +96,13 @@ export const useUserStore = defineStore('user', () => {
     token.value = ''
     userInfo.value = null
     error.value = null
-    uni.removeStorageSync('token')
+    uni.removeStorageSync('accessToken')
     uni.removeStorageSync('refreshToken')
     uni.removeStorageSync('userInfo')
   }
 
   const initFromStorage = () => {
-    const storedToken = uni.getStorageSync('token')
+    const storedToken = uni.getStorageSync('accessToken')
     const storedUserInfo = uni.getStorageSync('userInfo')
     if (storedToken) token.value = storedToken
     if (storedUserInfo) userInfo.value = storedUserInfo

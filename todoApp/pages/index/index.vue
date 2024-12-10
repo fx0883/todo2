@@ -1,7 +1,5 @@
 <template>
   <view class="container">
-
-
     <!-- 分类筛选 -->
     <scroll-view 
       class="categories" 
@@ -30,53 +28,40 @@
     </scroll-view>
 
     <!-- 任务列表 -->
-    <scroll-view 
-      class="task-list" 
-      scroll-y 
-      refresher-enabled
-      refresher-threshold="80"
-      refresher-background="#f5f5f5"
-      :refresher-triggered="refreshing"
-      refresher-default-style="black"
-      @refresherrefresh="onRefresh"
-      @refresherpulling="onPulling"
-      @scrolltolower="loadMore"
-    >
-      <view class="task-list-container">
-        <template v-if="filteredTasks.length > 0">
-          <view 
-            v-for="task in filteredTasks" 
-            :key="task.id" 
-            class="task-item"
-            :class="{ completed: task.completed }"
-            @click="navigateToDetail(task.id)"
-          >
-            <checkbox 
-              :checked="task.completed" 
-              @tap.stop="toggleTaskStatus(task)"
-              class="checkbox"
-            />
-            <view class="content">
-              <text class="title" :class="{ 'completed-text': task.completed }">{{ task.title }}</text>
-              <view class="meta">
-                <text class="due-date" v-if="task.due_date">{{ formatDate(task.due_date) }}</text>
-                <text class="priority" :class="'p' + task.priority">{{ getPriorityText(task.priority) }}</text>
-              </view>
+    <view class="task-list">
+      <template v-if="filteredTasks.length > 0">
+        <view 
+          v-for="task in filteredTasks" 
+          :key="task.id" 
+          class="task-item"
+          :class="{ completed: task.completed }"
+          @click="navigateToDetail(task.id)"
+        >
+          <checkbox 
+            :checked="task.completed" 
+            @tap.stop="toggleTaskStatus(task)"
+            class="checkbox"
+          />
+          <view class="content">
+            <text class="title" :class="{ 'completed-text': task.completed }">{{ task.title }}</text>
+            <view class="meta">
+              <text class="due-date" v-if="task.due_date">{{ formatDate(task.due_date) }}</text>
+              <text class="priority" :class="'p' + task.priority">{{ getPriorityText(task.priority) }}</text>
             </view>
           </view>
-        </template>
-        
-        <!-- 加载状态 -->
-        <view v-if="loading && !refreshing" class="loading">
-          <text>加载中...</text>
         </view>
-        
-        <!-- 空状态 -->
-        <view v-if="!loading && filteredTasks.length === 0" class="empty">
-          <text>{{ selectedCategory ? '该分类下暂无任务' : '开始创建你的第一个任务' }}</text>
-        </view>
+      </template>
+      
+      <!-- 加载状态 -->
+      <view v-if="loading" class="loading">
+        <text>加载中...</text>
       </view>
-    </scroll-view>
+      
+      <!-- 空状态 -->
+      <view v-if="!loading && filteredTasks.length === 0" class="empty">
+        <text>{{ selectedCategory ? '该分类下暂无任务' : '开始创建你的第一个任务' }}</text>
+      </view>
+    </view>
 
     <!-- 添加按钮 -->
     <view class="add-btn" @click="navigateToCreate">
@@ -92,7 +77,6 @@ import { taskApi, categoryApi } from '@/api'
 const tasks = ref([])
 const categories = ref([])
 const selectedCategory = ref(null)
-const refreshing = ref(false)
 const loading = ref(false)
 const page = ref(1)
 const hasMore = ref(true)
@@ -111,7 +95,7 @@ const filteredTasks = computed(() => {
   
   // 按分类筛选
   if (selectedCategory.value) {
-    filtered = filtered.filter(task => task.category_id === selectedCategory.value)
+    filtered = filtered.filter(task => task.category === selectedCategory.value)
   }
   
   // 排序规则：未完成 > 优先级 > 截止日期 > 创建时间
@@ -166,6 +150,7 @@ const fetchTasks = async (reset = false) => {
     })
   } finally {
     loading.value = false
+    uni.stopPullDownRefresh()
   }
 }
 
@@ -208,22 +193,6 @@ const toggleTaskStatus = async (task) => {
   }
 }
 
-// 下拉刷新
-const onRefresh = async () => {
-  refreshing.value = true
-  await fetchTasks(true)
-  // 确保重置刷新状态
-  setTimeout(() => {
-    refreshing.value = false
-  }, 300) // 添加小延迟确保动画流畅
-}
-
-// 加载更多
-const loadMore = () => {
-  if (!hasMore.value || loading.value) return
-  fetchTasks()
-}
-
 // 页面跳转
 const navigateToCreate = () => {
   uni.navigateTo({
@@ -263,13 +232,22 @@ const getPriorityText = (priority) => {
   return map[priority] || ''
 }
 
-const onPulling = () => {
-  console.log('下拉刷新中...')
-}
-
+// 页面生命周期
 onMounted(() => {
   fetchTasks()
   fetchCategories()
+})
+
+// 页面下拉刷新
+defineExpose({
+  onPullDownRefresh() {
+    Promise.all([
+      fetchTasks(true),
+      fetchCategories()
+    ]).catch(() => {
+      uni.stopPullDownRefresh()
+    })
+  }
 })
 </script>
 
@@ -278,31 +256,10 @@ onMounted(() => {
   min-height: 100vh;
   background-color: #ffffff;
   
-  .header {
-    display: flex;
-    padding: 40rpx;
-    border-bottom: 1rpx solid #f0f0f0;
-    
-    .stat-item {
-      flex: 1;
-      text-align: center;
-      
-      .count {
-        display: block;
-        font-size: 48rpx;
-        font-weight: 500;
-        color: #262626;
-        margin-bottom: 8rpx;
-      }
-      
-      .label {
-        font-size: 24rpx;
-        color: #8c8c8c;
-      }
-    }
-  }
-  
   .categories {
+    position: sticky;
+    top: 0;
+    z-index: 100;
     padding: 20rpx 0;
     background-color: #ffffff;
     border-bottom: 1rpx solid #f0f0f0;
@@ -334,11 +291,7 @@ onMounted(() => {
   }
   
   .task-list {
-    height: calc(100vh - 220rpx);
-    
-    .task-list-container {
-      padding: 20rpx;
-    }
+    padding: 20rpx;
     
     .task-item {
       display: flex;
@@ -438,6 +391,7 @@ onMounted(() => {
     justify-content: center;
     box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.15);
     transition: transform 0.2s;
+    z-index: 100;
     
     &:active {
       transform: scale(0.95);

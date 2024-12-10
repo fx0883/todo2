@@ -80,8 +80,8 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useTaskStore } from '@/store/task'
-import { taskApi } from '@/api'
-import { categoryApi } from '@/api'
+import taskApi from '@/api/task'
+import categoryApi from '@/api/category'
 
 console.log('导入的 categoryApi:', categoryApi)
 
@@ -116,9 +116,9 @@ const selectedCategory = ref(null)
 const fetchCategories = async () => {
   try {
     console.log('开始获取分类列表')
-    const res = await categoryApi.getCategories()
-    console.log('获取到的分类列表:', res)
-    categories.value = res.results || []
+    const response = await categoryApi.getCategories()
+    console.log('获取到的分类列表:', response)
+    categories.value = response.results || []
     console.log('设置后的分类列表:', categories.value)
   } catch (error) {
     console.error('获取分类失败:', error)

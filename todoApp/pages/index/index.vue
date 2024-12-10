@@ -16,7 +16,7 @@
           全部
         </view>
         <view 
-          v-for="category in categories" 
+          v-for="category in categories || []" 
           :key="category.id"
           class="category-item"
           :class="{ active: selectedCategory === category.id }"
@@ -29,7 +29,13 @@
 
     <!-- 任务列表 -->
     <view class="task-list">
-      <template v-if="filteredTasks.length > 0">
+      <!-- 加载状态 -->
+      <view v-if="loading" class="loading">
+        <text>加载中...</text>
+      </view>
+      
+      <!-- 任务列表内容 -->
+      <template v-else-if="filteredTasks && filteredTasks.length > 0">
         <view 
           v-for="task in filteredTasks" 
           :key="task.id" 
@@ -52,13 +58,8 @@
         </view>
       </template>
       
-      <!-- 加载状态 -->
-      <view v-if="loading" class="loading">
-        <text>加载中...</text>
-      </view>
-      
       <!-- 空状态 -->
-      <view v-if="!loading && filteredTasks.length === 0" class="empty">
+      <view v-else class="empty">
         <text>{{ selectedCategory ? '该分类下暂无任务' : '开始创建你的第一个任务' }}</text>
       </view>
     </view>
@@ -72,25 +73,40 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { taskApi, categoryApi } from '@/api'
+import { onPullDownRefresh } from '@dcloudio/uni-app'
+import { useTask } from '@/composables/useTask'
+import { useTaskStore } from '@/store/task'
+import { storeToRefs } from 'pinia'
 
-const tasks = ref([])
-const categories = ref([])
+// 使用 composables
+const { 
+  fetchTasks, 
+  fetchCategories, 
+  toggleTaskStatus,
+  formatDate,
+  getPriorityText
+} = useTask()
+
+// 使用 store 中的状态
+const taskStore = useTaskStore()
+const { tasks, categories, loading } = storeToRefs(taskStore)
 const selectedCategory = ref(null)
-const loading = ref(false)
-const page = ref(1)
-const hasMore = ref(true)
 
-// 统计数据
-const completedCount = computed(() => 
-  tasks.value.filter(task => task.completed).length
-)
-const pendingCount = computed(() => 
-  tasks.value.filter(task => !task.completed).length
-)
+// 统计数据 - 直接从 tasks 计算，不再调用 API
+const completedCount = computed(() => {
+  if (!Array.isArray(tasks.value)) return 0
+  return tasks.value.filter(task => task.status === 'completed').length || 0
+})
+
+const pendingCount = computed(() => {
+  if (!Array.isArray(tasks.value)) return 0
+  return tasks.value.filter(task => task.status === 'pending').length || 0
+})
 
 // 过滤和排序任务
 const filteredTasks = computed(() => {
+  if (!Array.isArray(tasks.value)) return []
+  
   let filtered = [...tasks.value]
   
   // 按分类筛选
@@ -98,100 +114,14 @@ const filteredTasks = computed(() => {
     filtered = filtered.filter(task => task.category === selectedCategory.value)
   }
   
-  // 排序规则：未完成 > 优先级 > 截止日期 > 创建时间
+  // 排序：未完成的任务优先，然后按创建时间倒序
   return filtered.sort((a, b) => {
-    if (a.completed !== b.completed) {
-      return a.completed ? 1 : -1
+    if (a.status !== b.status) {
+      return a.status === 'completed' ? 1 : -1
     }
-    if (a.priority !== b.priority) {
-      return b.priority - a.priority
-    }
-    if (a.due_date && b.due_date) {
-      return new Date(a.due_date) - new Date(b.due_date)
-    }
-    if (a.due_date) return -1
-    if (b.due_date) return 1
-    return new Date(b.created_at) - new Date(a.created_at)
+    return new Date(b.createdAt) - new Date(a.createdAt)
   })
 })
-
-// 获取任务列表
-const fetchTasks = async (reset = false) => {
-  if (loading.value && !reset) return
-  loading.value = true
-  
-  try {
-    if (reset) {
-      page.value = 1
-      hasMore.value = true
-    }
-    
-    if (!hasMore.value) return
-    
-    const res = await taskApi.getTasks({ page: page.value })
-    // 处理任务的完成状态
-    const processedTasks = res.results.map(task => ({
-      ...task,
-      completed: task.status === 'completed'
-    }))
-    
-    if (reset) {
-      tasks.value = processedTasks
-    } else {
-      tasks.value = [...tasks.value, ...processedTasks]
-    }
-    
-    hasMore.value = !!res.next
-    page.value++
-  } catch (error) {
-    uni.showToast({
-      title: '获取任务失败',
-      icon: 'none'
-    })
-  } finally {
-    loading.value = false
-    uni.stopPullDownRefresh()
-  }
-}
-
-// 获取分类列表
-const fetchCategories = async () => {
-  try {
-    const res = await categoryApi.getCategories()
-    categories.value = res.results
-  } catch (error) {
-    uni.showToast({
-      title: '获取分类失败',
-      icon: 'none'
-    })
-  }
-}
-
-// 切换任务状态
-const toggleTaskStatus = async (task) => {
-  try {
-    const newStatus = !task.completed
-    // 乐观更新UI
-    task.completed = newStatus
-
-    // 发送请求到后端，包含所有必要字段
-    await taskApi.updateTask(task.id, {
-      title: task.title,
-      description: task.description,
-      category_id: task.category_id,
-      priority: task.priority,
-      due_date: task.due_date,
-      status: newStatus ? 'completed' : 'pending'
-    })
-  } catch (error) {
-    // 如果失败，回滚UI状态
-    task.completed = !task.completed
-    uni.showToast({
-      title: '更新失败',
-      icon: 'none'
-    })
-  }
-}
 
 // 页面跳转
 const navigateToCreate = () => {
@@ -206,47 +136,37 @@ const navigateToDetail = (taskId) => {
   })
 }
 
-// 格式化日期
-const formatDate = (date) => {
-  if (!date) return ''
-  const today = new Date().toLocaleDateString()
-  const tomorrow = new Date(Date.now() + 86400000).toLocaleDateString()
-  const taskDate = new Date(date).toLocaleDateString()
-  
-  if (taskDate === today) {
-    return '今天'
-  }
-  if (taskDate === tomorrow) {
-    return '明天'
-  }
-  return taskDate
-}
-
-// 获取优先级文本
-const getPriorityText = (priority) => {
-  const map = {
-    1: '低',
-    2: '中',
-    3: '高'
-  }
-  return map[priority] || ''
-}
-
 // 页面生命周期
-onMounted(() => {
-  fetchTasks()
-  fetchCategories()
+onMounted(async () => {
+  try {
+    await Promise.all([
+      fetchTasks(),
+      fetchCategories()
+    ])
+  } catch (error) {
+    console.error('Failed to load initial data:', error)
+    uni.showToast({
+      title: '加载失败',
+      icon: 'none'
+    })
+  }
 })
 
-// 页面下拉刷新
-defineExpose({
-  onPullDownRefresh() {
-    Promise.all([
-      fetchTasks(true),
+// 下拉刷新
+onPullDownRefresh(async () => {
+  try {
+    await Promise.all([
+      fetchTasks(),
       fetchCategories()
-    ]).catch(() => {
-      uni.stopPullDownRefresh()
+    ])
+  } catch (error) {
+    console.error('Failed to refresh data:', error)
+    uni.showToast({
+      title: '刷新失败',
+      icon: 'none'
     })
+  } finally {
+    uni.stopPullDownRefresh()
   }
 })
 </script>

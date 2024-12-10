@@ -6,13 +6,15 @@
     
     <view class="form-container">
       <view class="form-item">
-        <text class="label">用户名</text>
+        <text class="label">邮箱</text>
         <input 
           class="input" 
           type="text" 
-          v-model="form.username" 
-          placeholder="请输入用户名"
+          v-model="form.email" 
+          placeholder="请输入注册邮箱"
+          @input="validateEmail"
         />
+        <text v-if="errors.email" class="error-text">{{ errors.email }}</text>
       </view>
       
       <view class="form-item">
@@ -23,7 +25,9 @@
           v-model="form.password" 
           placeholder="请输入新密码"
           password
+          @input="validatePassword"
         />
+        <text v-if="errors.password" class="error-text">{{ errors.password }}</text>
       </view>
       
       <view class="form-item">
@@ -34,7 +38,9 @@
           v-model="form.confirmPassword" 
           placeholder="请再次输入新密码"
           password
+          @input="validateConfirmPassword"
         />
+        <text v-if="errors.confirmPassword" class="error-text">{{ errors.confirmPassword }}</text>
       </view>
       
       <button 
@@ -47,7 +53,7 @@
       </button>
       
       <view class="actions">
-        <text @click="navigateToLogin">返回登录</text>
+        <text @click="navigateToLogin" class="link-text">返回登录</text>
       </view>
     </view>
   </view>
@@ -55,33 +61,80 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { userApi } from '@/api'
+import { useAuth } from '@/composables'
+
+const { resetPassword } = useAuth()
 
 const loading = ref(false)
-
-// 表单数据
 const form = ref({
-  username: '',
+  email: '',
+  password: '',
+  confirmPassword: ''
+})
+
+const errors = ref({
+  email: '',
   password: '',
   confirmPassword: ''
 })
 
 // 表单验证
+const validateEmail = () => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!form.value.email) {
+    errors.value.email = '请输入邮箱'
+  } else if (!emailRegex.test(form.value.email)) {
+    errors.value.email = '请输入有效的邮箱地址'
+  } else {
+    errors.value.email = ''
+  }
+}
+
+const validatePassword = () => {
+  if (!form.value.password) {
+    errors.value.password = '请输入新密码'
+  } else if (form.value.password.length < 6) {
+    errors.value.password = '密码长度至少为6位'
+  } else {
+    errors.value.password = ''
+  }
+  validateConfirmPassword()
+}
+
+const validateConfirmPassword = () => {
+  if (!form.value.confirmPassword) {
+    errors.value.confirmPassword = '请确认新密码'
+  } else if (form.value.confirmPassword !== form.value.password) {
+    errors.value.confirmPassword = '两次输入的密码不一致'
+  } else {
+    errors.value.confirmPassword = ''
+  }
+}
+
 const isValid = computed(() => {
-  return form.value.username && 
+  return form.value.email && 
          form.value.password && 
          form.value.confirmPassword && 
-         form.value.password === form.value.confirmPassword
+         form.value.password === form.value.confirmPassword &&
+         !errors.value.email &&
+         !errors.value.password &&
+         !errors.value.confirmPassword
 })
 
 // 重置密码
 const handleResetPassword = async () => {
   if (!isValid.value || loading.value) return
   
+  validateEmail()
+  validatePassword()
+  validateConfirmPassword()
+  
+  if (!isValid.value) return
+  
   loading.value = true
   try {
-    await userApi.resetPassword({
-      username: form.value.username,
+    await resetPassword({
+      email: form.value.email,
       password: form.value.password
     })
     
@@ -90,13 +143,12 @@ const handleResetPassword = async () => {
       icon: 'success'
     })
     
-    // 跳转到登录页
     setTimeout(() => {
       navigateToLogin()
     }, 1500)
   } catch (error) {
     uni.showToast({
-      title: error.data?.error || '密码重置失败',
+      title: error.message || '密码重置失败',
       icon: 'none'
     })
   } finally {
@@ -115,64 +167,84 @@ const navigateToLogin = () => {
 <style lang="scss">
 .forgot-password-container {
   min-height: 100vh;
-  padding: 60rpx 40rpx;
-  background-color: #fff;
+  padding: 40rpx;
+  background-color: #f5f5f5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   
   .logo {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 80rpx;
+    margin: 60rpx 0;
+    width: 200rpx;
+    height: 200rpx;
     
     image {
-      width: 200rpx;
-      height: 200rpx;
+      width: 100%;
+      height: 100%;
     }
   }
   
   .form-container {
+    width: 100%;
+    max-width: 600rpx;
+    padding: 40rpx;
+    background-color: #fff;
+    border-radius: 20rpx;
+    box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+    
     .form-item {
-      margin-bottom: 40rpx;
+      margin-bottom: 30rpx;
       
       .label {
         display: block;
-        margin-bottom: 16rpx;
+        margin-bottom: 10rpx;
         font-size: 28rpx;
         color: #333;
       }
       
       .input {
         width: 100%;
-        height: 88rpx;
-        padding: 0 30rpx;
-        background-color: #f5f5f5;
-        border-radius: 44rpx;
+        height: 80rpx;
+        padding: 0 20rpx;
+        border: 2rpx solid #ddd;
+        border-radius: 8rpx;
         font-size: 28rpx;
+        
+        &:focus {
+          border-color: #007AFF;
+        }
+      }
+      
+      .error-text {
+        display: block;
+        margin-top: 10rpx;
+        font-size: 24rpx;
+        color: #ff4d4f;
       }
     }
     
     .submit-btn {
       width: 100%;
       height: 88rpx;
-      line-height: 88rpx;
-      margin-top: 60rpx;
+      margin-top: 40rpx;
       background-color: #007AFF;
       color: #fff;
-      border-radius: 44rpx;
+      border-radius: 8rpx;
       font-size: 32rpx;
       
-      &[disabled] {
-        opacity: 0.6;
+      &:disabled {
+        background-color: #ccc;
       }
     }
     
     .actions {
-      display: flex;
-      justify-content: center;
-      margin-top: 40rpx;
+      margin-top: 30rpx;
+      text-align: center;
       
-      text {
+      .link-text {
         font-size: 28rpx;
         color: #007AFF;
+        text-decoration: underline;
       }
     }
   }

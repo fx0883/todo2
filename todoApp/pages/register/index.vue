@@ -12,6 +12,19 @@
           type="text" 
           v-model="form.username" 
           placeholder="请输入用户名"
+          @keypress.enter="handleRegister"
+        />
+        <text class="hint" v-if="form.username">用户名长度需要在3-20个字符之间</text>
+      </view>
+      
+      <view class="form-item">
+        <text class="label">邮箱</text>
+        <input 
+          class="input" 
+          type="email" 
+          v-model="form.email" 
+          placeholder="请输入邮箱"
+          @keypress.enter="handleRegister"
         />
       </view>
       
@@ -23,7 +36,9 @@
           v-model="form.password" 
           placeholder="请输入密码"
           password
+          @keypress.enter="handleRegister"
         />
+        <text class="hint" v-if="form.password">密码长度需要在6-20个字符之间</text>
       </view>
       
       <view class="form-item">
@@ -34,7 +49,13 @@
           v-model="form.confirmPassword" 
           placeholder="请再次输入密码"
           password
+          @keypress.enter="handleRegister"
         />
+        <text class="error" v-if="passwordMismatch">两次输入的密码不一致</text>
+      </view>
+
+      <view class="error-message" v-if="error">
+        {{ error }}
       </view>
       
       <button 
@@ -55,33 +76,55 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { userApi } from '@/api'
+import { useAuth } from '@/composables'
 
-const loading = ref(false)
+const { loading, error, register } = useAuth()
 
 // 表单数据
 const form = ref({
   username: '',
+  email: '',
   password: '',
   confirmPassword: ''
 })
 
 // 表单验证
-const isValid = computed(() => {
-  return form.value.username && 
-         form.value.password && 
-         form.value.confirmPassword && 
-         form.value.password === form.value.confirmPassword
+const isUsernameValid = computed(() => {
+  const username = form.value.username.trim()
+  return username.length >= 3 && username.length <= 20
 })
 
-// 注册
+const isEmailValid = computed(() => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  return emailRegex.test(form.value.email.trim())
+})
+
+const isPasswordValid = computed(() => {
+  const password = form.value.password
+  return password.length >= 6 && password.length <= 20
+})
+
+const passwordMismatch = computed(() => {
+  return form.value.password && 
+         form.value.confirmPassword && 
+         form.value.password !== form.value.confirmPassword
+})
+
+const isValid = computed(() => {
+  return isUsernameValid.value && 
+         isEmailValid.value && 
+         isPasswordValid.value && 
+         !passwordMismatch.value
+})
+
+// 注册处理
 const handleRegister = async () => {
   if (!isValid.value || loading.value) return
-  
-  loading.value = true
+
   try {
-    await userApi.register({
-      username: form.value.username,
+    await register({
+      username: form.value.username.trim(),
+      email: form.value.email.trim(),
       password: form.value.password,
       confirm_password: form.value.confirmPassword
     })
@@ -95,73 +138,107 @@ const handleRegister = async () => {
     setTimeout(() => {
       navigateToLogin()
     }, 1500)
-  } catch (error) {
-    uni.showToast({
-      title: error.data?.error || '注册失败',
-      icon: 'none'
-    })
-  } finally {
-    loading.value = false
+  } catch (err) {
+    // 错误已经在 useAuth 中处理
+    console.error('Registration failed:', err)
   }
 }
 
 // 页面跳转
 const navigateToLogin = () => {
-  uni.navigateTo({
-    url: '/pages/login/index'
-  })
+  uni.navigateBack()
 }
 </script>
 
 <style lang="scss">
 .register-container {
   min-height: 100vh;
-  padding: 60rpx 40rpx;
-  background-color: #fff;
+  padding: 40rpx;
+  background-color: #f8f8f8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   
   .logo {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 80rpx;
+    margin: 60rpx 0;
+    width: 200rpx;
+    height: 200rpx;
     
     image {
-      width: 200rpx;
-      height: 200rpx;
+      width: 100%;
+      height: 100%;
     }
   }
   
   .form-container {
+    width: 100%;
+    max-width: 600rpx;
+    padding: 40rpx;
+    background-color: #fff;
+    border-radius: 20rpx;
+    box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+    
     .form-item {
-      margin-bottom: 40rpx;
+      margin-bottom: 30rpx;
       
       .label {
         display: block;
-        margin-bottom: 16rpx;
+        margin-bottom: 10rpx;
         font-size: 28rpx;
         color: #333;
       }
       
       .input {
         width: 100%;
-        height: 88rpx;
-        padding: 0 30rpx;
-        background-color: #f5f5f5;
-        border-radius: 44rpx;
+        height: 80rpx;
+        padding: 0 20rpx;
+        border: 2rpx solid #ddd;
+        border-radius: 8rpx;
         font-size: 28rpx;
+        
+        &:focus {
+          border-color: #007AFF;
+        }
       }
+
+      .hint {
+        display: block;
+        margin-top: 6rpx;
+        font-size: 24rpx;
+        color: #999;
+      }
+
+      .error {
+        display: block;
+        margin-top: 6rpx;
+        font-size: 24rpx;
+        color: #ff4d4f;
+      }
+    }
+
+    .error-message {
+      color: #ff4d4f;
+      font-size: 24rpx;
+      margin-bottom: 20rpx;
+      text-align: center;
     }
     
     .submit-btn {
       width: 100%;
-      height: 88rpx;
-      line-height: 88rpx;
-      margin-top: 60rpx;
+      height: 80rpx;
+      line-height: 80rpx;
       background-color: #007AFF;
       color: #fff;
-      border-radius: 44rpx;
       font-size: 32rpx;
+      border-radius: 8rpx;
+      margin: 40rpx 0;
+      
+      &:active {
+        opacity: 0.8;
+      }
       
       &[disabled] {
+        background-color: #ccc;
         opacity: 0.6;
       }
     }
@@ -169,11 +246,15 @@ const navigateToLogin = () => {
     .actions {
       display: flex;
       justify-content: center;
-      margin-top: 40rpx;
+      font-size: 26rpx;
+      color: #007AFF;
       
       text {
-        font-size: 28rpx;
-        color: #007AFF;
+        padding: 10rpx;
+        
+        &:active {
+          opacity: 0.6;
+        }
       }
     }
   }

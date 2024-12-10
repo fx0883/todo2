@@ -12,6 +12,7 @@
           type="text" 
           v-model="form.username" 
           placeholder="请输入用户名"
+          @keypress.enter="handleLogin"
         />
       </view>
       
@@ -23,7 +24,12 @@
           v-model="form.password" 
           placeholder="请输入密码"
           password
+          @keypress.enter="handleLogin"
         />
+      </view>
+
+      <view class="error-message" v-if="error">
+        {{ error }}
       </view>
       
       <button 
@@ -45,11 +51,9 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { useUserStore } from '@/store/user'
-import { userApi } from '@/api'
+import { useAuth } from '@/composables'
 
-const userStore = useUserStore()
-const loading = ref(false)
+const { loading, error, login } = useAuth()
 
 // 表单数据
 const form = ref({
@@ -59,22 +63,15 @@ const form = ref({
 
 // 表单验证
 const isValid = computed(() => {
-  return form.value.username && form.value.password
+  return form.value.username.trim() && form.value.password.trim()
 })
 
-// 登录
+// 登录处理
 const handleLogin = async () => {
   if (!isValid.value || loading.value) return
-  
-  loading.value = true
+
   try {
-    const res = await userApi.login(form.value)
-    
-    // 保存token和refresh token
-    userStore.setToken(res.access)
-    uni.setStorageSync('refreshToken', res.refresh)
-    userStore.setUserInfo(res.user)
-    
+    await login(form.value.username.trim(), form.value.password)
     uni.showToast({
       title: '登录成功',
       icon: 'success'
@@ -86,13 +83,9 @@ const handleLogin = async () => {
         url: '/pages/index/index'
       })
     }, 1500)
-  } catch (error) {
-    uni.showToast({
-      title: error.data?.error || '登录失败',
-      icon: 'none'
-    })
-  } finally {
-    loading.value = false
+  } catch (err) {
+    // 错误已经在 useAuth 中处理
+    console.error('Login failed:', err)
   }
 }
 
@@ -113,52 +106,78 @@ const navigateToForgotPassword = () => {
 <style lang="scss">
 .login-container {
   min-height: 100vh;
-  padding: 60rpx 40rpx;
-  background-color: #fff;
+  padding: 40rpx;
+  background-color: #f8f8f8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   
   .logo {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 80rpx;
+    margin: 80rpx 0;
+    width: 200rpx;
+    height: 200rpx;
     
     image {
-      width: 200rpx;
-      height: 200rpx;
+      width: 100%;
+      height: 100%;
     }
   }
   
   .form-container {
+    width: 100%;
+    max-width: 600rpx;
+    padding: 40rpx;
+    background-color: #fff;
+    border-radius: 20rpx;
+    box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
+    
     .form-item {
-      margin-bottom: 40rpx;
+      margin-bottom: 30rpx;
       
       .label {
         display: block;
-        margin-bottom: 16rpx;
+        margin-bottom: 10rpx;
         font-size: 28rpx;
         color: #333;
       }
       
       .input {
         width: 100%;
-        height: 88rpx;
-        padding: 0 30rpx;
-        background-color: #f5f5f5;
-        border-radius: 44rpx;
+        height: 80rpx;
+        padding: 0 20rpx;
+        border: 2rpx solid #ddd;
+        border-radius: 8rpx;
         font-size: 28rpx;
+        
+        &:focus {
+          border-color: #007AFF;
+        }
       }
+    }
+
+    .error-message {
+      color: #ff4d4f;
+      font-size: 24rpx;
+      margin-bottom: 20rpx;
+      text-align: center;
     }
     
     .submit-btn {
       width: 100%;
-      height: 88rpx;
-      line-height: 88rpx;
-      margin-top: 60rpx;
+      height: 80rpx;
+      line-height: 80rpx;
       background-color: #007AFF;
       color: #fff;
-      border-radius: 44rpx;
       font-size: 32rpx;
+      border-radius: 8rpx;
+      margin: 40rpx 0;
+      
+      &:active {
+        opacity: 0.8;
+      }
       
       &[disabled] {
+        background-color: #ccc;
         opacity: 0.6;
       }
     }
@@ -166,11 +185,15 @@ const navigateToForgotPassword = () => {
     .actions {
       display: flex;
       justify-content: space-between;
-      margin-top: 40rpx;
+      font-size: 26rpx;
+      color: #007AFF;
       
       text {
-        font-size: 28rpx;
-        color: #007AFF;
+        padding: 10rpx;
+        
+        &:active {
+          opacity: 0.6;
+        }
       }
     }
   }

@@ -29,6 +29,43 @@ export function useTask() {
   const categories = computed(() => taskStore.categories)
   const tags = computed(() => taskStore.tags)
 
+  // 日期格式化
+  const formatDate = (date) => {
+    if (!date) return ''
+    const taskDate = new Date(date)
+    const today = new Date()
+    const tomorrow = new Date(today)
+    tomorrow.setDate(tomorrow.getDate() + 1)
+
+    // 重置时间部分以便比较日期
+    today.setHours(0, 0, 0, 0)
+    tomorrow.setHours(0, 0, 0, 0)
+    taskDate.setHours(0, 0, 0, 0)
+
+    if (taskDate.getTime() === today.getTime()) {
+      return '今天'
+    }
+    if (taskDate.getTime() === tomorrow.getTime()) {
+      return '明天'
+    }
+
+    return taskDate.toLocaleDateString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    })
+  }
+
+  // 获取优先级文本
+  const getPriorityText = (priority) => {
+    const priorityMap = {
+      1: '低',
+      2: '中',
+      3: '高'
+    }
+    return priorityMap[priority] || '无'
+  }
+
   // 清除错误
   const clearError = () => {
     error.value = null
@@ -112,7 +149,7 @@ export function useTask() {
     try {
       loading.value = true
       clearError()
-      await taskStore.fetchCategories()
+      await taskStore.getCategories()
     } catch (e) {
       error.value = e.message || '获取分类列表失败'
     } finally {
@@ -251,6 +288,8 @@ export function useTask() {
     deleteTag,
 
     // 工具方法
-    clearError
+    clearError,
+    formatDate,
+    getPriorityText
   }
 }

@@ -40,16 +40,16 @@
           v-for="task in filteredTasks" 
           :key="task.id" 
           class="task-item"
-          :class="{ completed: task.completed }"
+          :class="{ completed: task.status === 'completed' }"
           @click="navigateToDetail(task.id)"
         >
           <checkbox 
-            :checked="task.completed" 
+            :checked="task.status === 'completed'" 
             @tap.stop="toggleTaskStatus(task)"
             class="checkbox"
           />
           <view class="content">
-            <text class="title" :class="{ 'completed-text': task.completed }">{{ task.title }}</text>
+            <text class="title" :class="{ 'completed-text': task.status === 'completed' }">{{ task.title }}</text>
             <view class="meta">
               <text class="due-date" v-if="task.due_date">{{ formatDate(task.due_date) }}</text>
               <text class="priority" :class="'p' + task.priority">{{ getPriorityText(task.priority) }}</text>

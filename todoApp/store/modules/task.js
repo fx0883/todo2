@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { useCache } from '@/composables/useCache'
 import { useErrorLog } from '@/composables/useErrorLog'
-import { taskApi } from '@/api'
+import { categoryApi, taskApi } from '@/api'
 
 export const useTaskStore = defineStore('task', () => {
   // 使用 composables
@@ -43,7 +43,7 @@ export const useTaskStore = defineStore('task', () => {
     loading.value = true
     try {
       const response = await taskApi.getTasks(filters)
-      tasks.value = response
+      tasks.value = response.results
       cache.set(cacheKey, response, 5 * 60 * 1000) // 缓存5分钟
       return response
     } catch (error) {
@@ -149,8 +149,8 @@ export const useTaskStore = defineStore('task', () => {
 
     loading.value = true
     try {
-      const response = await taskApi.getCategories()
-      categories.value = response
+      const response = await categoryApi.getCategories()
+      categories.value = response.results
       cache.set('categories', response, 30 * 60 * 1000) // 缓存30分钟
       return response
     } catch (error) {

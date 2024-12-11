@@ -66,15 +66,17 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useUserStore } from '@/store/modules/user'
-import { userApi } from '@/api'
+import { useTask } from '@/composables/useTask'
+
+
+// 使用 composables
+const { 
+	fetchTaskStats
+} = useTask()
 
 const userStore = useUserStore()
 const userInfo = ref(null)
-const stats = ref({
-  total: 0,
-  completed: 0,
-  pending: 0
-})
+const stats = ref({ total: 0, completed: 0, pending: 0 })
 
 // 获取用户信息
 const fetchUserInfo = () => {
@@ -83,11 +85,9 @@ const fetchUserInfo = () => {
 
 // 获取任务统计
 const fetchStats = async () => {
-  try {
-    const res = await userApi.getTaskStats()
-    stats.value = res
-  } catch (error) {
-    console.error('获取统计信息失败:', error)
+  const result = await fetchTaskStats()
+  if (result) {
+    stats.value = result
   }
 }
 

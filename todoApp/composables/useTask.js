@@ -141,6 +141,21 @@ export function useTask() {
     }
   }
 
+  // 获取任务统计信息
+  const fetchTaskStats = async () => {
+    try {
+      loading.value = true
+      clearError()
+      const stats = await taskStore.getTaskStats()
+      return stats
+    } catch (e) {
+      error.value = e.message || '获取任务统计信息失败'
+      return null
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     // 状态
     loading,
@@ -158,6 +173,7 @@ export function useTask() {
     createTask,
     updateTask,
     deleteTask,
-    batchUpdateTasks
+    batchUpdateTasks,
+    fetchTaskStats
   }
 }

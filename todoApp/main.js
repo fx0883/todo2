@@ -33,6 +33,9 @@ export function createApp() {
     console.warn('Global error caught:', error)
   })
   
+  
+  
+  
   return {
     app,
     Pinia

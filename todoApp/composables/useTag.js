@@ -60,6 +60,19 @@ export function useTag() {
     }
   }
 
+  // 获取标签列表
+  const fetchTags = async () => {
+    try {
+      loading.value = true
+      error.value = null
+      await tagStore.fetchTags()
+    } catch (e) {
+      error.value = e.message || '获取标签列表失败'
+    } finally {
+      loading.value = false
+    }
+  }
+
   // 更新标签
   const updateTag = async (tagId, tagData) => {
     loading.value = true
@@ -116,6 +129,7 @@ export function useTag() {
     initTagData,
     createTag,
     createTagsIfNotExist,
+    fetchTags,
     updateTag,
     deleteTag,
     getTagById,

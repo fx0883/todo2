@@ -1,13 +1,9 @@
 import { ref, computed } from 'vue'
 import { useTaskStore } from '@/store/modules/task'
-import { useCategoryStore } from '@/store/modules/category'
-import { useTagStore } from '@/store/modules/tag'
 import { usePreferences } from './usePreferences'
 
 export function useTask() {
   const taskStore = useTaskStore()
-  const categoryStore = useCategoryStore()
-  const tagStore = useTagStore()
   const { preferences } = usePreferences()
   const loading = ref(false)
   const error = ref(null)
@@ -29,9 +25,6 @@ export function useTask() {
       }
     })
   })
-
-  const categories = computed(() => categoryStore.categories)
-  const tags = computed(() => tagStore.tags)
 
   // 日期格式化
   const formatDate = (date) => {
@@ -148,32 +141,6 @@ export function useTask() {
     }
   }
 
-  // 获取分类列表
-  const fetchCategories = async () => {
-    try {
-      loading.value = true
-      clearError()
-      await categoryStore.fetchCategories()
-    } catch (e) {
-      error.value = e.message || '获取分类列表失败'
-    } finally {
-      loading.value = false
-    }
-  }
-
-  // 获取标签列表
-  const fetchTags = async () => {
-    try {
-      loading.value = true
-      clearError()
-      await tagStore.fetchTags()
-    } catch (e) {
-      error.value = e.message || '获取标签列表失败'
-    } finally {
-      loading.value = false
-    }
-  }
-
   return {
     // 状态
     loading,
@@ -181,8 +148,6 @@ export function useTask() {
     
     // 计算属性
     tasks,
-    categories,
-    tags,
     
     // 工具函数
     formatDate,
@@ -193,10 +158,6 @@ export function useTask() {
     createTask,
     updateTask,
     deleteTask,
-    batchUpdateTasks,
-    
-    // 分类和标签方法
-    fetchCategories,
-    fetchTags
+    batchUpdateTasks
   }
 }

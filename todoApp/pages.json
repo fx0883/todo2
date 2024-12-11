@@ -1,11 +1,13 @@
 {
   "pages": [
     {
-      "path": "pages/login/index",
+      "path": "pages/index/index",
       "style": {
-        "navigationBarTitleText": "登录"
+        "navigationBarTitleText": "任务清单",
+        "enablePullDownRefresh": false
       }
     },
+
     {
       "path": "pages/register/index",
       "style": {
@@ -19,13 +21,6 @@
       }
     },
     {
-      "path": "pages/index/index",
-      "style": {
-        "navigationBarTitleText": "任务清单",
-        "enablePullDownRefresh": false
-      }
-    },
-    {
       "path": "pages/calendar/index",
       "style": {
         "navigationBarTitleText": "日历"
@@ -35,38 +30,50 @@
       "path": "pages/statistics/index",
       "style": {
         "navigationBarTitleText": "统计"
-      }
+      },
+      "requiresAuth": true
     },
     {
       "path": "pages/profile/index",
       "style": {
         "navigationBarTitleText": "我的"
-      }
+      },
+      "requiresAuth": true
     },
     {
       "path": "pages/task/create",
       "style": {
         "navigationBarTitleText": "创建任务"
-      }
+      },
+      "requiresAuth": true
     },
     {
       "path": "pages/task/detail",
       "style": {
         "navigationBarTitleText": "任务详情"
-      }
+      },
+      "requiresAuth": true
     },
     {
       "path": "pages/category/index",
       "style": {
         "navigationBarTitleText": "分类管理"
-      }
+      },
+      "requiresAuth": true
     },
     {
       "path": "pages/tag/index",
       "style": {
         "navigationBarTitleText": "标签管理"
-      }
-    }
+      },
+      "requiresAuth": true
+    },
+	{
+	  "path": "pages/login/index",
+	  "style": {
+	    "navigationBarTitleText": "登录"
+	  }
+	}
   ],
   "tabBar": {
     "color": "#999999",

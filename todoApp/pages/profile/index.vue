@@ -65,7 +65,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useUserStore } from '@/store/user'
+import { useUserStore } from '@/store/modules/user'
 import { userApi } from '@/api'
 
 const userStore = useUserStore()
@@ -99,40 +99,34 @@ const navigateTo = (url) => {
 // 修改密码
 const handleChangePassword = () => {
   uni.navigateTo({
-    url: '/pages/change-password/change-password'
+    url: '/pages/change-password/index'
   })
 }
 
 // 意见反馈
 const handleFeedback = () => {
   uni.navigateTo({
-    url: '/pages/feedback/feedback'
+    url: '/pages/feedback/index'
   })
 }
 
 // 关于
 const handleAbout = () => {
-  uni.showModal({
-    title: '关于 Todo App',
-    content: '版本 1.0.0\n一个简单而强大的待办事项管理应用',
-    showCancel: false
+  uni.navigateTo({
+    url: '/pages/about/index'
   })
 }
 
 // 退出登录
-const handleLogout = () => {
-  uni.showModal({
-    title: '确认退出',
-    content: '确定要退出登录吗？',
-    success: (res) => {
-      if (res.confirm) {
-        userStore.logout()
-        uni.reLaunch({
-          url: '/pages/login/login'
-        })
-      }
-    }
-  })
+const handleLogout = async () => {
+  try {
+    await userStore.logout()
+    uni.reLaunch({
+      url: '/pages/login/index'
+    })
+  } catch (error) {
+    console.error('退出登录失败:', error)
+  }
 }
 
 onMounted(() => {

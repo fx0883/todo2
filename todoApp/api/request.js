@@ -53,10 +53,6 @@ const refreshToken = async () => {
     // 刷新失败，清除所有 token
     uni.removeStorageSync('accessToken')
     uni.removeStorageSync('refreshToken')
-    // 跳转到登录页
-    uni.reLaunch({
-      url: '/pages/login/index'
-    })
     throw error
   }
 }
@@ -187,9 +183,7 @@ const request = async (options) => {
                 uni.removeStorageSync('accessToken')
                 uni.removeStorageSync('refreshToken')
                 uni.removeStorageSync('userInfo')
-                uni.reLaunch({
-                  url: '/pages/login/login'
-                })
+
                 reject(err)
               })
           } else {

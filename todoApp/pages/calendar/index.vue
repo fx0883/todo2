@@ -64,7 +64,7 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { useTaskStore } from '@/store/task'
+import { useTaskStore } from '@/store/modules/task'
 import { formatDate } from '@/utils/date'
 
 const taskStore = useTaskStore()

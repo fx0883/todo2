@@ -26,8 +26,42 @@ export function useTask() {
     })
   })
 
-  const categories = computed(() => taskStore.categories)
-  const tags = computed(() => taskStore.tags)
+  // 日期格式化
+  const formatDate = (date) => {
+    if (!date) return ''
+    const taskDate = new Date(date)
+    const today = new Date()
+    const tomorrow = new Date(today)
+    tomorrow.setDate(tomorrow.getDate() + 1)
+
+    // 重置时间部分以便比较日期
+    today.setHours(0, 0, 0, 0)
+    tomorrow.setHours(0, 0, 0, 0)
+    taskDate.setHours(0, 0, 0, 0)
+
+    if (taskDate.getTime() === today.getTime()) {
+      return '今天'
+    }
+    if (taskDate.getTime() === tomorrow.getTime()) {
+      return '明天'
+    }
+
+    return taskDate.toLocaleDateString('zh-CN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    })
+  }
+
+  // 获取优先级文本
+  const getPriorityText = (priority) => {
+    const priorityMap = {
+      1: '低',
+      2: '中',
+      3: '高'
+    }
+    return priorityMap[priority] || '无'
+  }
 
   // 清除错误
   const clearError = () => {
@@ -107,117 +141,16 @@ export function useTask() {
     }
   }
 
-  // 获取分类列表
-  const fetchCategories = async () => {
+  // 获取任务统计信息
+  const fetchTaskStats = async () => {
     try {
       loading.value = true
       clearError()
-      await taskStore.fetchCategories()
+      const stats = await taskStore.getTaskStats()
+      return stats
     } catch (e) {
-      error.value = e.message || '获取分类列表失败'
-    } finally {
-      loading.value = false
-    }
-  }
-
-  // 创建分类
-  const createCategory = async (categoryData) => {
-    try {
-      loading.value = true
-      clearError()
-      const category = await taskStore.createCategory(categoryData)
-      return category
-    } catch (e) {
-      error.value = e.message || '创建分类失败'
+      error.value = e.message || '获取任务统计信息失败'
       return null
-    } finally {
-      loading.value = false
-    }
-  }
-
-  // 更新分类
-  const updateCategory = async (categoryId, categoryData) => {
-    try {
-      loading.value = true
-      clearError()
-      const category = await taskStore.updateCategory(categoryId, categoryData)
-      return category
-    } catch (e) {
-      error.value = e.message || '更新分类失败'
-      return null
-    } finally {
-      loading.value = false
-    }
-  }
-
-  // 删除分类
-  const deleteCategory = async (categoryId) => {
-    try {
-      loading.value = true
-      clearError()
-      await taskStore.deleteCategory(categoryId)
-      return true
-    } catch (e) {
-      error.value = e.message || '删除分类失败'
-      return false
-    } finally {
-      loading.value = false
-    }
-  }
-
-  // 获取标签列表
-  const fetchTags = async () => {
-    try {
-      loading.value = true
-      clearError()
-      await taskStore.fetchTags()
-    } catch (e) {
-      error.value = e.message || '获取标签列表失败'
-    } finally {
-      loading.value = false
-    }
-  }
-
-  // 创建标签
-  const createTag = async (tagData) => {
-    try {
-      loading.value = true
-      clearError()
-      const tag = await taskStore.createTag(tagData)
-      return tag
-    } catch (e) {
-      error.value = e.message || '创建标签失败'
-      return null
-    } finally {
-      loading.value = false
-    }
-  }
-
-  // 更新标签
-  const updateTag = async (tagId, tagData) => {
-    try {
-      loading.value = true
-      clearError()
-      const tag = await taskStore.updateTag(tagId, tagData)
-      return tag
-    } catch (e) {
-      error.value = e.message || '更新标签失败'
-      return null
-    } finally {
-      loading.value = false
-    }
-  }
-
-  // 删除标签
-  const deleteTag = async (tagId) => {
-    try {
-      loading.value = true
-      clearError()
-      await taskStore.deleteTag(tagId)
-      return true
-    } catch (e) {
-      error.value = e.message || '删除标签失败'
-      return false
     } finally {
       loading.value = false
     }
@@ -227,30 +160,20 @@ export function useTask() {
     // 状态
     loading,
     error,
+    
+    // 计算属性
     tasks,
-    categories,
-    tags,
-
+    
+    // 工具函数
+    formatDate,
+    getPriorityText,
+    
     // 任务相关方法
     fetchTasks,
     createTask,
     updateTask,
     deleteTask,
     batchUpdateTasks,
-
-    // 分类相关方法
-    fetchCategories,
-    createCategory,
-    updateCategory,
-    deleteCategory,
-
-    // 标签相关方法
-    fetchTags,
-    createTag,
-    updateTag,
-    deleteTag,
-
-    // 工具方法
-    clearError
+    fetchTaskStats
   }
 }

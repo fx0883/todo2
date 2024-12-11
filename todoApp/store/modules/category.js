@@ -38,7 +38,7 @@ export const useCategoryStore = defineStore('category', () => {
     
     try {
       const response = await categoryApi.getCategories()
-      categories.value = response
+      categories.value = response.results
       cache.value.lastUpdate = Date.now()
       saveToStorage() // 保存到本地存储
       return response

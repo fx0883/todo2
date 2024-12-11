@@ -95,7 +95,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useTaskStore } from '@/store/task'
+import { useTaskStore } from '@/store/modules/task'
 import { taskApi } from '@/api'
 import { formatDate } from '@/utils/date'
 

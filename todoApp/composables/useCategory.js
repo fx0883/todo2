@@ -64,6 +64,19 @@ export function useCategory() {
     }
   }
 
+  // 获取分类列表
+  const fetchCategories = async () => {
+    try {
+      loading.value = true
+      error.value = null
+      await categoryStore.fetchCategories()
+    } catch (e) {
+      error.value = e.message || '获取分类列表失败'
+    } finally {
+      loading.value = false
+    }
+  }
+
   // 删除分类
   const deleteCategory = async (categoryId) => {
     loading.value = true
@@ -110,6 +123,7 @@ export function useCategory() {
     createCategory,
     updateCategory,
     deleteCategory,
-    updateCategoriesOrder
+    updateCategoriesOrder,
+    fetchCategories
   }
 }

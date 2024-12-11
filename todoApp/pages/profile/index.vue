@@ -65,29 +65,24 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useUserStore } from '@/store/user'
-import { userApi } from '@/api'
+import { storeToRefs } from 'pinia'
+import { useUserStore } from '@/store/modules/user'
+import { useTask } from '@/composables/useTask'
+
+// 使用 composables
+const { 
+	fetchTaskStats
+} = useTask()
 
 const userStore = useUserStore()
-const userInfo = ref(null)
-const stats = ref({
-  total: 0,
-  completed: 0,
-  pending: 0
-})
-
-// 获取用户信息
-const fetchUserInfo = () => {
-  userInfo.value = userStore.userInfo
-}
+const { userInfo } = storeToRefs(userStore)
+const stats = ref({ total: 0, completed: 0, pending: 0 })
 
 // 获取任务统计
 const fetchStats = async () => {
-  try {
-    const res = await userApi.getTaskStats()
-    stats.value = res
-  } catch (error) {
-    console.error('获取统计信息失败:', error)
+  const result = await fetchTaskStats()
+  if (result) {
+    stats.value = result
   }
 }
 
@@ -99,44 +94,37 @@ const navigateTo = (url) => {
 // 修改密码
 const handleChangePassword = () => {
   uni.navigateTo({
-    url: '/pages/change-password/change-password'
+    url: '/pages/change-password/index'
   })
 }
 
 // 意见反馈
 const handleFeedback = () => {
   uni.navigateTo({
-    url: '/pages/feedback/feedback'
+    url: '/pages/feedback/index'
   })
 }
 
 // 关于
 const handleAbout = () => {
-  uni.showModal({
-    title: '关于 Todo App',
-    content: '版本 1.0.0\n一个简单而强大的待办事项管理应用',
-    showCancel: false
+  uni.navigateTo({
+    url: '/pages/about/index'
   })
 }
 
 // 退出登录
-const handleLogout = () => {
-  uni.showModal({
-    title: '确认退出',
-    content: '确定要退出登录吗？',
-    success: (res) => {
-      if (res.confirm) {
-        userStore.logout()
-        uni.reLaunch({
-          url: '/pages/login/login'
-        })
-      }
-    }
-  })
+const handleLogout = async () => {
+  try {
+    await userStore.logout()
+    uni.reLaunch({
+      url: '/pages/login/index'
+    })
+  } catch (error) {
+    console.error('退出登录失败:', error)
+  }
 }
 
 onMounted(() => {
-  fetchUserInfo()
   fetchStats()
 })
 </script>

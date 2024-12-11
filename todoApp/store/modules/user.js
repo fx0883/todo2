@@ -4,17 +4,15 @@ import { userApi } from '@/api'
 
 export const useUserStore = defineStore('user', () => {
   // 状态
-  const token = ref('')
   const userInfo = ref(null)
   const loading = ref(false)
   const error = ref(null)
 
   // Getters
-  const isAuthenticated = computed(() => !!token.value)
+  const isAuthenticated = computed(() => !!uni.getStorageSync('accessToken'))
 
   // Actions
   const setToken = (accessToken, refreshToken) => {
-    token.value = accessToken
     uni.setStorageSync('accessToken', accessToken)
     if (refreshToken) {
       uni.setStorageSync('refreshToken', refreshToken)
@@ -93,7 +91,6 @@ export const useUserStore = defineStore('user', () => {
   }
 
   const logout = () => {
-    token.value = ''
     userInfo.value = null
     error.value = null
     uni.removeStorageSync('accessToken')
@@ -104,13 +101,11 @@ export const useUserStore = defineStore('user', () => {
   const initFromStorage = () => {
     const storedToken = uni.getStorageSync('accessToken')
     const storedUserInfo = uni.getStorageSync('userInfo')
-    if (storedToken) token.value = storedToken
     if (storedUserInfo) userInfo.value = storedUserInfo
   }
 
   return {
     // 状态
-    token,
     userInfo,
     loading,
     error,

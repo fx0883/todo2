@@ -185,7 +185,7 @@ const handleSubmit = async () => {
 
 const createTask = async (task) => {
   const res = await taskApi.createTask(task)
-  taskStore.addTask(res)
+  taskStore.createTask(res)
 }
 
 onMounted(() => {

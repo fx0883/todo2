@@ -16,10 +16,21 @@ export const useTaskStore = defineStore('task', () => {
   const tagStore = useTagStore()
 
   // 状态
-  const tasks = ref([])
+  const rawTasks = ref([])
   const loading = ref(false)
 
+  // 公共排序方法
+  const sortTasks = (taskList) => {
+    return taskList.sort((a, b) => {
+      if (a.status !== b.status) {
+        return a.status === 'completed' ? 1 : -1
+      }
+      return new Date(b.createdAt) - new Date(a.createdAt)
+    })
+  }
+
   // 计算属性
+  const tasks = computed(() => sortTasks(rawTasks.value))
   const completedTasks = computed(() => tasks.value.filter(task => task.completed))
   const pendingTasks = computed(() => tasks.value.filter(task => !task.completed))
   const tasksByCategory = computed(() => {
@@ -40,16 +51,16 @@ export const useTaskStore = defineStore('task', () => {
     const cachedTasks = cache.get(cacheKey)
     
     if (cachedTasks) {
-      tasks.value = cachedTasks
+      rawTasks.value = cachedTasks
       return cachedTasks
     }
 
     loading.value = true
     try {
       const response = await taskApi.getTasks(filters)
-      tasks.value = response.results
-      cache.set(cacheKey, response, 5 * 60 * 1000) // 缓存5分钟
-      return response
+      rawTasks.value = response.results
+      cache.set(cacheKey, rawTasks.value, 5 * 60 * 1000) // 缓存5分钟
+      return rawTasks.value
     } catch (error) {
       addErrorLog(error, { action: 'fetchTasks', filters })
       throw error
@@ -75,7 +86,7 @@ export const useTaskStore = defineStore('task', () => {
     loading.value = true
     try {
       const response = await taskApi.createTask(taskData)
-      tasks.value.push(response)
+      rawTasks.value.push(response)
       // 清除相关缓存
       cache.remove('tasks:{}')
       return response
@@ -91,9 +102,9 @@ export const useTaskStore = defineStore('task', () => {
     loading.value = true
     try {
       const response = await taskApi.updateTask(taskId, taskData)
-      const index = tasks.value.findIndex(t => t.id === taskId)
+      const index = rawTasks.value.findIndex(t => t.id === taskId)
       if (index !== -1) {
-        tasks.value[index] = response
+        rawTasks.value[index] = response
       }
       // 清除相关缓存
       cache.remove('tasks:{}')
@@ -110,7 +121,7 @@ export const useTaskStore = defineStore('task', () => {
     loading.value = true
     try {
       await taskApi.deleteTask(taskId)
-      tasks.value = tasks.value.filter(t => t.id !== taskId)
+      rawTasks.value = rawTasks.value.filter(t => t.id !== taskId)
       // 清除相关缓存
       cache.remove('tasks:{}')
     } catch (error) {
@@ -127,9 +138,9 @@ export const useTaskStore = defineStore('task', () => {
       const response = await taskApi.batchUpdateTasks(taskIds, updateData)
       // 更新本地状态
       response.forEach(updatedTask => {
-        const index = tasks.value.findIndex(t => t.id === updatedTask.id)
+        const index = rawTasks.value.findIndex(t => t.id === updatedTask.id)
         if (index !== -1) {
-          tasks.value[index] = updatedTask
+          rawTasks.value[index] = updatedTask
         }
       })
       // 清除相关缓存
@@ -145,7 +156,7 @@ export const useTaskStore = defineStore('task', () => {
 
   // Reset store
   const reset = () => {
-    tasks.value = []
+    rawTasks.value = []
     loading.value = false
   }
 

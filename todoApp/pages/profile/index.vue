@@ -65,9 +65,9 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useUserStore } from '@/store/modules/user'
 import { useTask } from '@/composables/useTask'
-
 
 // 使用 composables
 const { 
@@ -75,13 +75,8 @@ const {
 } = useTask()
 
 const userStore = useUserStore()
-const userInfo = ref(null)
+const { userInfo } = storeToRefs(userStore)
 const stats = ref({ total: 0, completed: 0, pending: 0 })
-
-// 获取用户信息
-const fetchUserInfo = () => {
-  userInfo.value = userStore.userInfo
-}
 
 // 获取任务统计
 const fetchStats = async () => {
@@ -130,7 +125,6 @@ const handleLogout = async () => {
 }
 
 onMounted(() => {
-  fetchUserInfo()
   fetchStats()
 })
 </script>

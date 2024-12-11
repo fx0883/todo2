@@ -3227,3 +3227,387 @@ Traceback (most recent call last):
 rest_framework.exceptions.NotAuthenticated: 身份认证信息未提供。
 
     
+ERROR 2024-12-11 22:41:52,375 utils 25596 10140 
+API Error Details:
+View: TaskViewSet
+URL: /api/v1/tasks/tasks/
+Method: GET
+User: AnonymousUser
+Error Type: NotAuthenticated
+Error Message: 身份认证信息未提供。
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 415, in initial
+    self.check_permissions(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 333, in check_permissions
+    self.permission_denied(
+    ~~~~~~~~~~~~~~~~~~~~~~^
+        request,
+        ^^^^^^^^
+        message=getattr(permission, 'message', None),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        code=getattr(permission, 'code', None)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 174, in permission_denied
+    raise exceptions.NotAuthenticated()
+rest_framework.exceptions.NotAuthenticated: 身份认证信息未提供。
+
+    
+ERROR 2024-12-11 22:41:52,377 utils 25596 16408 
+API Error Details:
+View: CategoryViewSet
+URL: /api/v1/tasks/categories/
+Method: GET
+User: AnonymousUser
+Error Type: NotAuthenticated
+Error Message: 身份认证信息未提供。
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 415, in initial
+    self.check_permissions(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 333, in check_permissions
+    self.permission_denied(
+    ~~~~~~~~~~~~~~~~~~~~~~^
+        request,
+        ^^^^^^^^
+        message=getattr(permission, 'message', None),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        code=getattr(permission, 'code', None)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 174, in permission_denied
+    raise exceptions.NotAuthenticated()
+rest_framework.exceptions.NotAuthenticated: 身份认证信息未提供。
+
+    
+ERROR 2024-12-11 22:42:55,443 utils 25596 17728 
+API Error Details:
+View: TaskViewSet
+URL: /api/v1/tasks/tasks/
+Method: GET
+User: AnonymousUser
+Error Type: NotAuthenticated
+Error Message: 身份认证信息未提供。
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 415, in initial
+    self.check_permissions(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 333, in check_permissions
+    self.permission_denied(
+    ~~~~~~~~~~~~~~~~~~~~~~^
+        request,
+        ^^^^^^^^
+        message=getattr(permission, 'message', None),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        code=getattr(permission, 'code', None)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 174, in permission_denied
+    raise exceptions.NotAuthenticated()
+rest_framework.exceptions.NotAuthenticated: 身份认证信息未提供。
+
+    
+ERROR 2024-12-11 22:42:55,446 utils 25596 12296 
+API Error Details:
+View: CategoryViewSet
+URL: /api/v1/tasks/categories/
+Method: GET
+User: AnonymousUser
+Error Type: NotAuthenticated
+Error Message: 身份认证信息未提供。
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 415, in initial
+    self.check_permissions(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 333, in check_permissions
+    self.permission_denied(
+    ~~~~~~~~~~~~~~~~~~~~~~^
+        request,
+        ^^^^^^^^
+        message=getattr(permission, 'message', None),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        code=getattr(permission, 'code', None)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 174, in permission_denied
+    raise exceptions.NotAuthenticated()
+rest_framework.exceptions.NotAuthenticated: 身份认证信息未提供。
+
+    
+ERROR 2024-12-11 22:43:36,496 utils 25596 1076 
+API Error Details:
+View: TaskViewSet
+URL: /api/v1/tasks/tasks/
+Method: GET
+User: AnonymousUser
+Error Type: NotAuthenticated
+Error Message: 身份认证信息未提供。
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 415, in initial
+    self.check_permissions(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 333, in check_permissions
+    self.permission_denied(
+    ~~~~~~~~~~~~~~~~~~~~~~^
+        request,
+        ^^^^^^^^
+        message=getattr(permission, 'message', None),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        code=getattr(permission, 'code', None)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 174, in permission_denied
+    raise exceptions.NotAuthenticated()
+rest_framework.exceptions.NotAuthenticated: 身份认证信息未提供。
+
+    
+ERROR 2024-12-11 22:43:36,512 utils 25596 17804 
+API Error Details:
+View: CategoryViewSet
+URL: /api/v1/tasks/categories/
+Method: GET
+User: AnonymousUser
+Error Type: NotAuthenticated
+Error Message: 身份认证信息未提供。
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 415, in initial
+    self.check_permissions(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 333, in check_permissions
+    self.permission_denied(
+    ~~~~~~~~~~~~~~~~~~~~~~^
+        request,
+        ^^^^^^^^
+        message=getattr(permission, 'message', None),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        code=getattr(permission, 'code', None)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 174, in permission_denied
+    raise exceptions.NotAuthenticated()
+rest_framework.exceptions.NotAuthenticated: 身份认证信息未提供。
+
+    
+ERROR 2024-12-11 22:59:58,020 utils 25596 10060 
+API Error Details:
+View: TaskViewSet
+URL: /api/v1/tasks/tasks/
+Method: GET
+User: AnonymousUser
+Error Type: NotAuthenticated
+Error Message: 身份认证信息未提供。
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 415, in initial
+    self.check_permissions(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 333, in check_permissions
+    self.permission_denied(
+    ~~~~~~~~~~~~~~~~~~~~~~^
+        request,
+        ^^^^^^^^
+        message=getattr(permission, 'message', None),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        code=getattr(permission, 'code', None)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 174, in permission_denied
+    raise exceptions.NotAuthenticated()
+rest_framework.exceptions.NotAuthenticated: 身份认证信息未提供。
+
+    
+ERROR 2024-12-11 22:59:58,022 utils 25596 16616 
+API Error Details:
+View: CategoryViewSet
+URL: /api/v1/tasks/categories/
+Method: GET
+User: AnonymousUser
+Error Type: NotAuthenticated
+Error Message: 身份认证信息未提供。
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 415, in initial
+    self.check_permissions(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 333, in check_permissions
+    self.permission_denied(
+    ~~~~~~~~~~~~~~~~~~~~~~^
+        request,
+        ^^^^^^^^
+        message=getattr(permission, 'message', None),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        code=getattr(permission, 'code', None)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 174, in permission_denied
+    raise exceptions.NotAuthenticated()
+rest_framework.exceptions.NotAuthenticated: 身份认证信息未提供。
+
+    
+ERROR 2024-12-11 23:01:21,756 utils 25596 16616 
+API Error Details:
+View: TaskViewSet
+URL: /api/v1/tasks/tasks/
+Method: GET
+User: AnonymousUser
+Error Type: NotAuthenticated
+Error Message: 身份认证信息未提供。
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 415, in initial
+    self.check_permissions(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 333, in check_permissions
+    self.permission_denied(
+    ~~~~~~~~~~~~~~~~~~~~~~^
+        request,
+        ^^^^^^^^
+        message=getattr(permission, 'message', None),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        code=getattr(permission, 'code', None)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 174, in permission_denied
+    raise exceptions.NotAuthenticated()
+rest_framework.exceptions.NotAuthenticated: 身份认证信息未提供。
+
+    
+ERROR 2024-12-11 23:01:21,756 utils 25596 10060 
+API Error Details:
+View: CategoryViewSet
+URL: /api/v1/tasks/categories/
+Method: GET
+User: AnonymousUser
+Error Type: NotAuthenticated
+Error Message: 身份认证信息未提供。
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 415, in initial
+    self.check_permissions(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 333, in check_permissions
+    self.permission_denied(
+    ~~~~~~~~~~~~~~~~~~~~~~^
+        request,
+        ^^^^^^^^
+        message=getattr(permission, 'message', None),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        code=getattr(permission, 'code', None)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 174, in permission_denied
+    raise exceptions.NotAuthenticated()
+rest_framework.exceptions.NotAuthenticated: 身份认证信息未提供。
+
+    
+ERROR 2024-12-11 23:02:22,739 utils 25596 10060 
+API Error Details:
+View: TaskViewSet
+URL: /api/v1/tasks/tasks/
+Method: GET
+User: AnonymousUser
+Error Type: NotAuthenticated
+Error Message: 身份认证信息未提供。
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 415, in initial
+    self.check_permissions(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 333, in check_permissions
+    self.permission_denied(
+    ~~~~~~~~~~~~~~~~~~~~~~^
+        request,
+        ^^^^^^^^
+        message=getattr(permission, 'message', None),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        code=getattr(permission, 'code', None)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 174, in permission_denied
+    raise exceptions.NotAuthenticated()
+rest_framework.exceptions.NotAuthenticated: 身份认证信息未提供。
+
+    
+ERROR 2024-12-11 23:02:22,740 utils 25596 16616 
+API Error Details:
+View: CategoryViewSet
+URL: /api/v1/tasks/categories/
+Method: GET
+User: AnonymousUser
+Error Type: NotAuthenticated
+Error Message: 身份认证信息未提供。
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 415, in initial
+    self.check_permissions(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 333, in check_permissions
+    self.permission_denied(
+    ~~~~~~~~~~~~~~~~~~~~~~^
+        request,
+        ^^^^^^^^
+        message=getattr(permission, 'message', None),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        code=getattr(permission, 'code', None)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 174, in permission_denied
+    raise exceptions.NotAuthenticated()
+rest_framework.exceptions.NotAuthenticated: 身份认证信息未提供。
+
+    

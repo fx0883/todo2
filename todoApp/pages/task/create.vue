@@ -82,11 +82,18 @@ import { ref, computed, onMounted } from 'vue'
 import { useTaskStore } from '@/store/modules/task'
 import taskApi from '@/api/task'
 import categoryApi from '@/api/category'
+import { useTask } from '@/composables'
 
 console.log('导入的 categoryApi:', categoryApi)
 
 const taskStore = useTaskStore()
 const loading = ref(false)
+
+const { 
+  fetchTasks, 
+  createTask
+
+} = useTask()
 
 // 表单数据
 const taskForm = ref({
@@ -166,7 +173,7 @@ const handleSubmit = async () => {
   if (!isValid.value || loading.value) return
   
   try {
-    await createTask(taskForm.value)
+    await addTask(taskForm.value)
     uni.showToast({
       title: '创建成功',
       icon: 'success'
@@ -183,9 +190,10 @@ const handleSubmit = async () => {
   }
 }
 
-const createTask = async (task) => {
-  const res = await taskApi.createTask(task)
-  taskStore.createTask(res)
+const addTask = async (task) => {
+  // const res = await taskApi.createTask(task)
+  // taskStore.createTask(res)
+	await createTask(task)
 }
 
 onMounted(() => {

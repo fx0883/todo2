@@ -50,5 +50,10 @@ urlpatterns = [
     path('api/v1/social/', include('social_django.urls', namespace='social')),
     
     # API documentation
-    path('api/docs-old/', include_docs_urls(title='Todo API')),
+    # path('api/docs-old/', include_docs_urls(title='Todo API')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+# from django.contrib.auth.hashers import make_password
+#
+# new_password = make_password('Fengxuan_0027337')
+# print(new_password)

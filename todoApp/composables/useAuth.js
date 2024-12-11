@@ -1,12 +1,13 @@
 import { ref, computed } from 'vue'
-import { useUserStore } from '@/store/modules/user'
+import { useCategoryStore,  useTaskStore, useUserStore } from '@/store'
 import userApi from '@/api/user'
 
 export function useAuth() {
   const userStore = useUserStore()
   const loading = ref(false)
   const error = ref(null)
-
+  const categoryStore = useCategoryStore()
+  const taskStore = useTaskStore()
   // 计算属性
   const isAuthenticated = computed(() => userStore.isAuthenticated)
   const user = computed(() => userStore.user)
@@ -27,6 +28,7 @@ export function useAuth() {
       console.log('Login response:', response)
       userStore.setToken(response.access, response.refresh)
       userStore.setUserInfo(response.user)
+	  await refreshUserData()
       return true
     } catch (err) {
       console.error('Login error:', err)
@@ -34,6 +36,19 @@ export function useAuth() {
       return false
     } finally {
       loading.value = false
+    }
+  }
+  
+  
+  // 刷新用户相关数据
+  const refreshUserData = async () => {
+    try {
+      await Promise.all([
+        categoryStore.fetchCategories(),
+		taskStore.fetchTasks()
+      ])
+    } catch (error) {
+      console.error('Failed to refresh user data:', error)
     }
   }
 

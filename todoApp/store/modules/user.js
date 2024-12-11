@@ -9,7 +9,10 @@ export const useUserStore = defineStore('user', () => {
   const error = ref(null)
 
   // Getters
-  const isAuthenticated = computed(() => !!uni.getStorageSync('accessToken'))
+  const isAuthenticated = computed(() => {
+    const hasToken = !!uni.getStorageSync('accessToken')
+    return hasToken
+  })
 
   // Actions
   const setToken = (accessToken, refreshToken) => {

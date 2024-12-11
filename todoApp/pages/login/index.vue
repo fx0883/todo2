@@ -81,9 +81,6 @@ const handleLogin = async () => {
       icon: 'success'
     })
     
-    // 刷新用户相关数据
-    await refreshUserData()
-    
     // 跳转到主页
     setTimeout(() => {
       uni.switchTab({
@@ -96,18 +93,7 @@ const handleLogin = async () => {
   }
 }
 
-// 刷新用户相关数据
-const refreshUserData = async () => {
-  try {
-    await Promise.all([
-      fetchUserInfo(),
-      fetchTasks(),
-      fetchCategories()
-    ])
-  } catch (error) {
-    console.error('Failed to refresh user data:', error)
-  }
-}
+
 
 // 页面跳转
 const navigateToRegister = () => {

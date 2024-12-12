@@ -1,6 +1,6 @@
 // 配置接口地址
-const BASE_URL = 'http://127.0.0.1:8000/api/v1'
-
+// const BASE_URL = 'http://127.0.0.1:8000/api/v1'
+const BASE_URL = 'http://192.168.31.143:8000/api/v1'
 // 请求队列，用于存储等待 token 刷新的请求
 let refreshing = false
 const waitingQueue = []

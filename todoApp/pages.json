@@ -4,7 +4,8 @@
       "path": "pages/index/index",
       "style": {
         "navigationBarTitleText": "任务清单",
-        "enablePullDownRefresh": false
+        "enablePullDownRefresh": false,
+		"disableScroll": true
       }
     },
 

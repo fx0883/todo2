@@ -6447,3 +6447,419 @@ Traceback (most recent call last):
 rest_framework.exceptions.NotAuthenticated: 身份认证信息未提供。
 
     
+ERROR 2024-12-12 19:54:24,490 utils 5564 8560 
+API Error Details:
+View: CategoryViewSet
+URL: /api/v1/tasks/categories/
+Method: GET
+User: AnonymousUser
+Error Type: InvalidToken
+Error Message: {'detail': ErrorDetail(string='此令牌对任何类型的令牌无效', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 'token_type': ErrorDetail(string='access', code='token_not_valid'), 'message': ErrorDetail(string='令牌无效或已过期', code='token_not_valid')}]}
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 414, in initial
+    self.perform_authentication(request)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 324, in perform_authentication
+    request.user
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\request.py", line 227, in user
+    self._authenticate()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\request.py", line 380, in _authenticate
+    user_auth_tuple = authenticator.authenticate(self)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework_simplejwt\authentication.py", line 49, in authenticate
+    validated_token = self.get_validated_token(raw_token)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework_simplejwt\authentication.py", line 113, in get_validated_token
+    raise InvalidToken(
+    ...<4 lines>...
+    )
+rest_framework_simplejwt.exceptions.InvalidToken: {'detail': ErrorDetail(string='此令牌对任何类型的令牌无效', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 'token_type': ErrorDetail(string='access', code='token_not_valid'), 'message': ErrorDetail(string='令牌无效或已过期', code='token_not_valid')}]}
+
+    
+ERROR 2024-12-12 20:35:04,923 utils 5800 14732 
+API Error Details:
+View: TaskViewSet
+URL: /api/v1/tasks/tasks/
+Method: GET
+User: AnonymousUser
+Error Type: NotAuthenticated
+Error Message: 身份认证信息未提供。
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 415, in initial
+    self.check_permissions(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 333, in check_permissions
+    self.permission_denied(
+    ~~~~~~~~~~~~~~~~~~~~~~^
+        request,
+        ^^^^^^^^
+        message=getattr(permission, 'message', None),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        code=getattr(permission, 'code', None)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 174, in permission_denied
+    raise exceptions.NotAuthenticated()
+rest_framework.exceptions.NotAuthenticated: 身份认证信息未提供。
+
+    
+ERROR 2024-12-12 20:35:04,927 utils 5800 19604 
+API Error Details:
+View: CategoryViewSet
+URL: /api/v1/tasks/categories/
+Method: GET
+User: AnonymousUser
+Error Type: NotAuthenticated
+Error Message: 身份认证信息未提供。
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 415, in initial
+    self.check_permissions(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 333, in check_permissions
+    self.permission_denied(
+    ~~~~~~~~~~~~~~~~~~~~~~^
+        request,
+        ^^^^^^^^
+        message=getattr(permission, 'message', None),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        code=getattr(permission, 'code', None)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 174, in permission_denied
+    raise exceptions.NotAuthenticated()
+rest_framework.exceptions.NotAuthenticated: 身份认证信息未提供。
+
+    
+ERROR 2024-12-12 20:35:04,937 utils 5800 15528 
+API Error Details:
+View: TaskViewSet
+URL: /api/v1/tasks/tasks/
+Method: GET
+User: AnonymousUser
+Error Type: NotAuthenticated
+Error Message: 身份认证信息未提供。
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 415, in initial
+    self.check_permissions(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 333, in check_permissions
+    self.permission_denied(
+    ~~~~~~~~~~~~~~~~~~~~~~^
+        request,
+        ^^^^^^^^
+        message=getattr(permission, 'message', None),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        code=getattr(permission, 'code', None)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 174, in permission_denied
+    raise exceptions.NotAuthenticated()
+rest_framework.exceptions.NotAuthenticated: 身份认证信息未提供。
+
+    
+ERROR 2024-12-12 20:35:56,504 utils 5800 18332 
+API Error Details:
+View: TaskViewSet
+URL: /api/v1/tasks/tasks/
+Method: GET
+User: AnonymousUser
+Error Type: NotAuthenticated
+Error Message: 身份认证信息未提供。
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 415, in initial
+    self.check_permissions(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 333, in check_permissions
+    self.permission_denied(
+    ~~~~~~~~~~~~~~~~~~~~~~^
+        request,
+        ^^^^^^^^
+        message=getattr(permission, 'message', None),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        code=getattr(permission, 'code', None)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 174, in permission_denied
+    raise exceptions.NotAuthenticated()
+rest_framework.exceptions.NotAuthenticated: 身份认证信息未提供。
+
+    
+ERROR 2024-12-12 20:35:56,508 utils 5800 14372 
+API Error Details:
+View: CategoryViewSet
+URL: /api/v1/tasks/categories/
+Method: GET
+User: AnonymousUser
+Error Type: NotAuthenticated
+Error Message: 身份认证信息未提供。
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 415, in initial
+    self.check_permissions(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 333, in check_permissions
+    self.permission_denied(
+    ~~~~~~~~~~~~~~~~~~~~~~^
+        request,
+        ^^^^^^^^
+        message=getattr(permission, 'message', None),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        code=getattr(permission, 'code', None)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 174, in permission_denied
+    raise exceptions.NotAuthenticated()
+rest_framework.exceptions.NotAuthenticated: 身份认证信息未提供。
+
+    
+ERROR 2024-12-12 20:35:56,520 utils 5800 5112 
+API Error Details:
+View: TaskViewSet
+URL: /api/v1/tasks/tasks/
+Method: GET
+User: AnonymousUser
+Error Type: NotAuthenticated
+Error Message: 身份认证信息未提供。
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 415, in initial
+    self.check_permissions(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 333, in check_permissions
+    self.permission_denied(
+    ~~~~~~~~~~~~~~~~~~~~~~^
+        request,
+        ^^^^^^^^
+        message=getattr(permission, 'message', None),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        code=getattr(permission, 'code', None)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 174, in permission_denied
+    raise exceptions.NotAuthenticated()
+rest_framework.exceptions.NotAuthenticated: 身份认证信息未提供。
+
+    
+ERROR 2024-12-12 21:11:39,074 utils 5800 5536 
+API Error Details:
+View: TaskViewSet
+URL: /api/v1/tasks/tasks/
+Method: GET
+User: AnonymousUser
+Error Type: InvalidToken
+Error Message: {'detail': ErrorDetail(string='此令牌对任何类型的令牌无效', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 'token_type': ErrorDetail(string='access', code='token_not_valid'), 'message': ErrorDetail(string='令牌无效或已过期', code='token_not_valid')}]}
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 414, in initial
+    self.perform_authentication(request)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 324, in perform_authentication
+    request.user
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\request.py", line 227, in user
+    self._authenticate()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\request.py", line 380, in _authenticate
+    user_auth_tuple = authenticator.authenticate(self)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework_simplejwt\authentication.py", line 49, in authenticate
+    validated_token = self.get_validated_token(raw_token)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework_simplejwt\authentication.py", line 113, in get_validated_token
+    raise InvalidToken(
+    ...<4 lines>...
+    )
+rest_framework_simplejwt.exceptions.InvalidToken: {'detail': ErrorDetail(string='此令牌对任何类型的令牌无效', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 'token_type': ErrorDetail(string='access', code='token_not_valid'), 'message': ErrorDetail(string='令牌无效或已过期', code='token_not_valid')}]}
+
+    
+ERROR 2024-12-12 21:11:39,074 utils 5800 22548 
+API Error Details:
+View: CategoryViewSet
+URL: /api/v1/tasks/categories/
+Method: GET
+User: AnonymousUser
+Error Type: InvalidToken
+Error Message: {'detail': ErrorDetail(string='此令牌对任何类型的令牌无效', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 'token_type': ErrorDetail(string='access', code='token_not_valid'), 'message': ErrorDetail(string='令牌无效或已过期', code='token_not_valid')}]}
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 414, in initial
+    self.perform_authentication(request)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 324, in perform_authentication
+    request.user
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\request.py", line 227, in user
+    self._authenticate()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\request.py", line 380, in _authenticate
+    user_auth_tuple = authenticator.authenticate(self)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework_simplejwt\authentication.py", line 49, in authenticate
+    validated_token = self.get_validated_token(raw_token)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework_simplejwt\authentication.py", line 113, in get_validated_token
+    raise InvalidToken(
+    ...<4 lines>...
+    )
+rest_framework_simplejwt.exceptions.InvalidToken: {'detail': ErrorDetail(string='此令牌对任何类型的令牌无效', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 'token_type': ErrorDetail(string='access', code='token_not_valid'), 'message': ErrorDetail(string='令牌无效或已过期', code='token_not_valid')}]}
+
+    
+ERROR 2024-12-12 21:11:39,079 utils 5800 22548 
+API Error Details:
+View: TaskViewSet
+URL: /api/v1/tasks/tasks/
+Method: GET
+User: AnonymousUser
+Error Type: InvalidToken
+Error Message: {'detail': ErrorDetail(string='此令牌对任何类型的令牌无效', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 'token_type': ErrorDetail(string='access', code='token_not_valid'), 'message': ErrorDetail(string='令牌无效或已过期', code='token_not_valid')}]}
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 414, in initial
+    self.perform_authentication(request)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 324, in perform_authentication
+    request.user
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\request.py", line 227, in user
+    self._authenticate()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\request.py", line 380, in _authenticate
+    user_auth_tuple = authenticator.authenticate(self)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework_simplejwt\authentication.py", line 49, in authenticate
+    validated_token = self.get_validated_token(raw_token)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework_simplejwt\authentication.py", line 113, in get_validated_token
+    raise InvalidToken(
+    ...<4 lines>...
+    )
+rest_framework_simplejwt.exceptions.InvalidToken: {'detail': ErrorDetail(string='此令牌对任何类型的令牌无效', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 'token_type': ErrorDetail(string='access', code='token_not_valid'), 'message': ErrorDetail(string='令牌无效或已过期', code='token_not_valid')}]}
+
+    
+ERROR 2024-12-12 22:10:09,208 utils 5800 23196 
+API Error Details:
+View: TaskViewSet
+URL: /api/v1/tasks/tasks/
+Method: GET
+User: AnonymousUser
+Error Type: InvalidToken
+Error Message: {'detail': ErrorDetail(string='此令牌对任何类型的令牌无效', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 'token_type': ErrorDetail(string='access', code='token_not_valid'), 'message': ErrorDetail(string='令牌无效或已过期', code='token_not_valid')}]}
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 414, in initial
+    self.perform_authentication(request)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 324, in perform_authentication
+    request.user
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\request.py", line 227, in user
+    self._authenticate()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\request.py", line 380, in _authenticate
+    user_auth_tuple = authenticator.authenticate(self)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework_simplejwt\authentication.py", line 49, in authenticate
+    validated_token = self.get_validated_token(raw_token)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework_simplejwt\authentication.py", line 113, in get_validated_token
+    raise InvalidToken(
+    ...<4 lines>...
+    )
+rest_framework_simplejwt.exceptions.InvalidToken: {'detail': ErrorDetail(string='此令牌对任何类型的令牌无效', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 'token_type': ErrorDetail(string='access', code='token_not_valid'), 'message': ErrorDetail(string='令牌无效或已过期', code='token_not_valid')}]}
+
+    
+ERROR 2024-12-12 22:10:09,209 utils 5800 19708 
+API Error Details:
+View: CategoryViewSet
+URL: /api/v1/tasks/categories/
+Method: GET
+User: AnonymousUser
+Error Type: InvalidToken
+Error Message: {'detail': ErrorDetail(string='此令牌对任何类型的令牌无效', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 'token_type': ErrorDetail(string='access', code='token_not_valid'), 'message': ErrorDetail(string='令牌无效或已过期', code='token_not_valid')}]}
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 414, in initial
+    self.perform_authentication(request)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 324, in perform_authentication
+    request.user
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\request.py", line 227, in user
+    self._authenticate()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\request.py", line 380, in _authenticate
+    user_auth_tuple = authenticator.authenticate(self)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework_simplejwt\authentication.py", line 49, in authenticate
+    validated_token = self.get_validated_token(raw_token)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework_simplejwt\authentication.py", line 113, in get_validated_token
+    raise InvalidToken(
+    ...<4 lines>...
+    )
+rest_framework_simplejwt.exceptions.InvalidToken: {'detail': ErrorDetail(string='此令牌对任何类型的令牌无效', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 'token_type': ErrorDetail(string='access', code='token_not_valid'), 'message': ErrorDetail(string='令牌无效或已过期', code='token_not_valid')}]}
+
+    
+ERROR 2024-12-12 22:10:09,224 utils 5800 23196 
+API Error Details:
+View: TaskViewSet
+URL: /api/v1/tasks/tasks/
+Method: GET
+User: AnonymousUser
+Error Type: InvalidToken
+Error Message: {'detail': ErrorDetail(string='此令牌对任何类型的令牌无效', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 'token_type': ErrorDetail(string='access', code='token_not_valid'), 'message': ErrorDetail(string='令牌无效或已过期', code='token_not_valid')}]}
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 414, in initial
+    self.perform_authentication(request)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 324, in perform_authentication
+    request.user
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\request.py", line 227, in user
+    self._authenticate()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\request.py", line 380, in _authenticate
+    user_auth_tuple = authenticator.authenticate(self)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework_simplejwt\authentication.py", line 49, in authenticate
+    validated_token = self.get_validated_token(raw_token)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework_simplejwt\authentication.py", line 113, in get_validated_token
+    raise InvalidToken(
+    ...<4 lines>...
+    )
+rest_framework_simplejwt.exceptions.InvalidToken: {'detail': ErrorDetail(string='此令牌对任何类型的令牌无效', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 'token_type': ErrorDetail(string='access', code='token_not_valid'), 'message': ErrorDetail(string='令牌无效或已过期', code='token_not_valid')}]}
+
+    

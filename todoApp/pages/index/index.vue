@@ -213,16 +213,18 @@ onMounted(async () => {
   background-color: #ffffff;
   
   .categories {
-    position: sticky;
-    top: 0;
-    z-index: 1;
+    position: fixed;
+    z-index:999;
     background-color: #ffffff;
     padding: 20rpx 0;
     border-bottom: 1rpx solid #f0f0f0;
     
     .category-list {
       display: flex;
+	  z-index: 999;
+	  height: 80rpx;
       padding: 0 20rpx;
+	  top: calc(var(--window-top));
       
       .category-item {
         padding: 12rpx 32rpx;
@@ -247,6 +249,8 @@ onMounted(async () => {
   }
   
   .task-list-container {
+	  position: fixed;
+	     margin-top: 80rpx;
     flex: 1;
     height: calc(100vh - 100rpx);
   }

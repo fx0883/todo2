@@ -149,6 +149,8 @@ const request = async (options) => {
     }
   }
 
+  
+
   try {
     // 添加 token
     const token = uni.getStorageSync('accessToken')
@@ -158,7 +160,8 @@ const request = async (options) => {
         'Authorization': `Bearer ${token}`
       }
     }
-
+	console.log(config.url);
+	console.dir(config, {depth: null});
     // 发送请求
     return new Promise((resolve, reject) => {
       uni.request({
@@ -194,6 +197,7 @@ const request = async (options) => {
           }
         },
         fail: (err) => {
+			console.log(err)
           reject({
             statusCode: 0,
             data: { message: '网络请求失败' },

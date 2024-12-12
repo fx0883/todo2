@@ -45,7 +45,7 @@
         >
           <checkbox 
             :checked="task.status === 'completed'" 
-            @tap.stop="toggleTaskStatus(task)"
+            @tap.stop="toggleTaskStatus(task.id)"
             class="checkbox"
           />
           <view class="content">

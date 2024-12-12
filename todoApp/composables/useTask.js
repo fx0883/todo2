@@ -156,6 +156,42 @@ export function useTask() {
     }
   }
 
+  // 修改 toggleTaskStatus 方法
+  const toggleTaskStatus = async (taskId) => {
+    try {
+      loading.value = true
+      clearError()
+      
+      // 先获取当前任务信息
+      const currentTask = tasks.value.find(t => t.id === taskId)
+      if (!currentTask) {
+        throw new Error('任务不存在')
+      }
+      
+      // 准备更新数据，包含必填字段
+      const updateData = {
+        title: currentTask.title, // 保留原标题
+        status: currentTask.status === 'completed' ? 'pending' : 'completed'
+      }
+      
+      const updatedTask = await updateTask(taskId, updateData)
+      
+      if (updatedTask) {
+        uni.showToast({
+          title: updatedTask.status === 'completed' ? '已完成' : '已取消完成',
+          icon: 'success'
+        })
+      }
+      
+      return updatedTask
+    } catch (e) {
+      error.value = e.message || '更新任务状态失败'
+      throw e
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     // 状态
     loading,
@@ -174,6 +210,9 @@ export function useTask() {
     updateTask,
     deleteTask,
     batchUpdateTasks,
-    fetchTaskStats
+    fetchTaskStats,
+    
+    // 添加到返回对象中
+    toggleTaskStatus,
   }
 }

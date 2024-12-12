@@ -36,6 +36,7 @@ export function useAuth() {
 			userStore.setToken(response.access, response.refresh)
 			userStore.setUserInfo(response.user)
 			await refreshUserData()
+			await refreshData()
 			return true
 		} catch (err) {
 			console.error('Login error:', err)
@@ -45,10 +46,9 @@ export function useAuth() {
 			loading.value = false
 		}
 	}
-
-
+	
 	// 刷新用户相关数据
-	const refreshUserData = async () => {
+	const refreshData = async () => {
 		try {
 			await Promise.all([
 				categoryStore.fetchCategories(),
@@ -56,6 +56,20 @@ export function useAuth() {
 			])
 		} catch (error) {
 			console.error('Failed to refresh user data:', error)
+		}
+	}
+
+	// 刷新用户相关数据
+	const refreshUserData = async () => {
+		loading.value = true
+		error.value = null
+		try {
+			await userStore.fetchUserInfo()
+		} catch (e) {
+			error.value = e.message || '获取用户信息失败'
+			throw e
+		} finally {
+			loading.value = false
 		}
 	}
 
@@ -149,6 +163,7 @@ export function useAuth() {
 		requestReset,
 		confirmReset,
 		clearError,
-		checkTokenExpiration
+		checkTokenExpiration,
+		refreshUserData
 	}
 }

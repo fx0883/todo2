@@ -64,25 +64,54 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onActivated  } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useUserStore } from '@/store/modules/user'
 import { useTask } from '@/composables/useTask'
+import { useAuth } from '@/composables/useAuth'
 
 // 使用 composables
-const { 
-	fetchTaskStats
-} = useTask()
+const { fetchTaskStats } = useTask()
+const { refreshUserData, loading: authLoading } = useAuth()
 
+// 状态管理
 const userStore = useUserStore()
 const { userInfo } = storeToRefs(userStore)
 const stats = ref({ total: 0, completed: 0, pending: 0 })
+const loading = ref(false)
+const error = ref(null)
+
+// 刷新页面数据
+const refreshPageData = async () => {
+  loading.value = true
+  error.value = null
+  
+  try {
+    // 并行请求数据
+    await Promise.all([
+      refreshUserData(),  // 刷新用户数据
+      fetchStats()        // 刷新统计数据
+    ])
+  } catch (e) {
+    error.value = e.message || '获取数据失败'
+    uni.showToast({
+      title: error.value,
+      icon: 'none'
+    })
+  } finally {
+    loading.value = false
+  }
+}
 
 // 获取任务统计
 const fetchStats = async () => {
-  const result = await fetchTaskStats()
-  if (result) {
-    stats.value = result
+  try {
+    const result = await fetchTaskStats()
+    if (result) {
+      stats.value = result
+    }
+  } catch (e) {
+    console.error('获取统计失败:', e)
   }
 }
 
@@ -124,8 +153,14 @@ const handleLogout = async () => {
   }
 }
 
+// 生命周期钩子
 onMounted(() => {
-  fetchStats()
+  // refreshPageData()
+})
+
+// 页面显示时刷新数据
+onActivated (() => {
+  refreshPageData()
 })
 </script>
 

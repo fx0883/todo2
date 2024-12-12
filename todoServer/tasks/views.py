@@ -6,6 +6,15 @@ from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiExample, OpenApiResponse
 from .models import Category, Tag, Task, TaskComment
 from .serializers import CategorySerializer, TagSerializer, TaskSerializer, TaskCommentSerializer
+from rest_framework.pagination import PageNumberPagination
+
+# 添加分页器类
+class TaskPagination(PageNumberPagination):
+    """任务列表分页器"""
+    page_size = 10  # 每页默认数量
+    page_size_query_param = 'page_size'  # 允许客户端通过此参数指定每页数量
+    max_page_size = 100  # 每页最大数量
+    page_query_param = 'page'  # 页码参数名称
 
 @extend_schema_view(
     list=extend_schema(
@@ -153,24 +162,47 @@ class TagViewSet(viewsets.ModelViewSet):
     list=extend_schema(
         summary="获取任务列表",
         tags=['任务管理'],
+        parameters=[
+            {
+                'name': 'page',
+                'in': 'query',
+                'description': '页码',
+                'required': False,
+                'type': 'integer',
+                'default': 1
+            },
+            {
+                'name': 'page_size',
+                'in': 'query',
+                'description': '每页数量',
+                'required': False,
+                'type': 'integer',
+                'default': 10
+            }
+        ],
         responses={
             200: OpenApiResponse(
                 description="成功获取任务列表",
                 examples=[
                     OpenApiExample(
                         'Task List Example',
-                        value=[{
-                            'id': 1,
-                            'title': '完成项目报告',
-                            'description': '准备第四季度项目总结报告',
-                            'due_date': '2024-12-31T23:59:59Z',
-                            'priority': 2,
-                            'status': 'pending',
-                            'category': 1,
-                            'tags': [1, 2],
-                            'is_important': True,
-                            'order': 1
-                        }]
+                        value={
+                            'count': 100,  # 总数量
+                            'next': 'http://localhost:8000/api/v1/tasks/tasks/?page=2',  # 下一页链接
+                            'previous': None,  # 上一页链接
+                            'results': [{  # 当前页数据
+                                'id': 1,
+                                'title': '完成项目报告',
+                                'description': '准备第四季度项目总结报告',
+                                'due_date': '2024-12-31T23:59:59Z',
+                                'priority': 2,
+                                'status': 'pending',
+                                'category': 1,
+                                'tags': [1, 2],
+                                'is_important': True,
+                                'order': 1
+                            }]
+                        }
                     )
                 ]
             )
@@ -204,6 +236,7 @@ class TaskViewSet(viewsets.ModelViewSet):
     search_fields = ['title', 'description']
     ordering_fields = ['created_at', 'updated_at', 'due_date', 'priority']
     ordering = ['-created_at']
+    pagination_class = TaskPagination  # 添加分页器
 
     def get_queryset(self):
         queryset = Task.objects.filter(user=self.request.user)

@@ -7,6 +7,8 @@ export const useUserStore = defineStore('user', () => {
   const userInfo = ref(null)
   const loading = ref(false)
   const error = ref(null)
+  
+  userInfo.value = uni.getStorageSync('userInfo')
 
   // Getters
   const isAuthenticated = computed(() => {

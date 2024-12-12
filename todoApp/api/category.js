@@ -27,13 +27,7 @@ export default {
     method: 'DELETE'
   }),
 
-  // 获取分类详情
-  getCategoryDetail: (id) => request({
-    url: `/tasks/categories/${id}/`,
-    method: 'GET'
-  }),
-
-  // 批量操作分类
+  // 批量更新分类
   batchUpdateCategories: (data) => request({
     url: '/tasks/categories/batch/',
     method: 'POST',

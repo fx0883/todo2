@@ -20,7 +20,7 @@ from .models import User, UserProfile, UserDevice, VerificationCode, UserFeedbac
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'is_active')
+        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'is_active', 'avatar')
         read_only_fields = ('id', 'is_active')
 
 @extend_schema_serializer(

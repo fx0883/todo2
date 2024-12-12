@@ -1,30 +1,34 @@
 <template>
   <view class="category-container">
-    <view class="category-list">
+    <!-- 加载状态 -->
+    <uni-load-more v-if="loading" status="loading" />
+    
+    <!-- 分类列表 -->
+    <view class="category-list" v-else>
       <view 
         v-for="category in categories" 
-        :key="category.id" 
+        :key="category.id"
         class="category-item"
       >
         <view class="category-info">
           <view 
-            class="category-color" 
+            class="category-color"
             :style="{ backgroundColor: category.color }"
-          ></view>
+          />
           <text class="category-name">{{ category.name }}</text>
-          <text class="task-count">({{ category.taskCount || 0 }})</text>
+          <text class="task-count">({{ category.taskCount }})</text>
         </view>
         
         <view class="category-actions">
           <button 
-            class="action-btn edit" 
+            class="edit-btn"
             @click="handleEdit(category)"
           >
             编辑
           </button>
           <button 
-            class="action-btn delete" 
-            @click="handleDelete(category)"
+            class="delete-btn"
+            @click="handleDelete(category.id)"
           >
             删除
           </button>
@@ -32,192 +36,141 @@
       </view>
     </view>
     
+    <!-- 添加按钮 -->
     <view class="add-category">
       <button 
-        class="add-btn" 
-        @click="showAddModal = true"
+        class="add-btn"
+        @click="handleAdd"
       >
-        新建分类
+        添加分类
       </button>
     </view>
     
-    <!-- 新建/编辑分类弹窗 -->
-    <uni-popup ref="popup" type="center">
-      <view class="modal-content">
-        <text class="modal-title">{{ editingCategory ? '编辑分类' : '新建分类' }}</text>
-        
-        <view class="form-item">
-          <text class="label">名称</text>
-          <input 
-            class="input" 
-            type="text" 
-            v-model="categoryForm.name" 
-            placeholder="请输入分类名称"
-          />
-        </view>
-        
-        <view class="form-item">
-          <text class="label">颜色</text>
-          <view class="color-picker">
-            <view 
-              v-for="color in colors" 
-              :key="color"
-              class="color-item"
-              :class="{ active: categoryForm.color === color }"
-              :style="{ backgroundColor: color }"
-              @click="categoryForm.color = color"
-            ></view>
-          </view>
-        </view>
-        
-        <view class="form-item">
-          <text class="label">图标</text>
-          <input 
-            class="input" 
-            type="text" 
-            v-model="categoryForm.icon" 
-            placeholder="请输入图标名称"
-          />
-        </view>
-        
-        <view class="modal-actions">
-          <button 
-            class="cancel-btn" 
-            @click="closeModal"
-          >
-            取消
-          </button>
-          <button 
-            class="confirm-btn" 
-            @click="handleSubmit"
-          >
-            确定
-          </button>
-        </view>
-      </view>
+    <!-- 编辑弹窗 -->
+    <uni-popup ref="popup" type="dialog">
+      <uni-popup-dialog
+        :title="editingCategory ? '编辑分类' : '新建分类'"
+        :before-close="true"
+        @confirm="handleSave"
+        @close="handleCancel"
+      >
+        <uni-forms :model="formData">
+          <uni-forms-item label="名称" required>
+            <uni-easyinput
+              v-model="formData.name"
+              placeholder="请输入分类名称"
+            />
+          </uni-forms-item>
+          <uni-forms-item label="颜色">
+            <uni-easyinput
+              v-model="formData.color"
+              placeholder="请选择颜色"
+            />
+          </uni-forms-item>
+        </uni-forms>
+      </uni-popup-dialog>
     </uni-popup>
   </view>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useTaskStore } from '@/store/modules/task'
-import { categoryApi } from '@/api'
+import { useCategory } from '@/composables/useCategory'
 
-const taskStore = useTaskStore()
+// 使用 composables
+const {
+  loading,
+  error,
+  categories,
+  createCategory,
+  updateCategory,
+  deleteCategory,
+  fetchCategories
+} = useCategory()
+
+// 状态
 const popup = ref(null)
-const showAddModal = ref(false)
 const editingCategory = ref(null)
-const categories = ref([])
-
-// 预设颜色
-const colors = [
-  '#f5222d', '#fa8c16', '#fadb14', '#52c41a',
-  '#13c2c2', '#1890ff', '#722ed1', '#eb2f96'
-]
-
-// 表单数据
-const categoryForm = ref({
+const formData = ref({
   name: '',
-  color: colors[0],
-  icon: ''
+  color: '#000000'
 })
 
-// 获取分类列表
-const fetchCategories = async () => {
+// 初始化数据
+const initData = async () => {
   try {
-    const res = await categoryApi.getCategories()
-    categories.value = res
-    taskStore.setCategories(res)
-  } catch (error) {
+    await fetchCategories()
+  } catch (e) {
     uni.showToast({
-      title: '获取分类失败',
+      title: e.message || '获取分类失败',
       icon: 'none'
     })
   }
+}
+
+// 添加分类
+const handleAdd = () => {
+  editingCategory.value = null
+  formData.value = {
+    name: '',
+    color: '#000000'
+  }
+  popup.value.open()
 }
 
 // 编辑分类
 const handleEdit = (category) => {
   editingCategory.value = category
-  categoryForm.value = { ...category }
-  showAddModal.value = true
+  formData.value = {
+    name: category.name,
+    color: category.color
+  }
+  popup.value.open()
+}
+
+// 保存分类
+const handleSave = async () => {
+  try {
+    if (editingCategory.value) {
+      await updateCategory(editingCategory.value.id, formData.value)
+    } else {
+      await createCategory(formData.value)
+    }
+    popup.value.close()
+    await initData()
+  } catch (e) {
+    uni.showToast({
+      title: e.message || '保存失败',
+      icon: 'none'
+    })
+  }
 }
 
 // 删除分类
-const handleDelete = (category) => {
-  uni.showModal({
-    title: '确认删除',
-    content: '确定要删除这个分类吗？相关任务的分类将被清空',
-    success: async (res) => {
-      if (res.confirm) {
-        try {
-          await categoryApi.deleteCategory(category.id)
-          await fetchCategories()
-          
-          uni.showToast({
-            title: '删除成功',
-            icon: 'success'
-          })
-        } catch (error) {
-          uni.showToast({
-            title: '删除失败',
-            icon: 'none'
-          })
-        }
-      }
-    }
-  })
-}
-
-// 提交表单
-const handleSubmit = async () => {
-  if (!categoryForm.value.name) {
-    uni.showToast({
-      title: '请输入分类名称',
-      icon: 'none'
-    })
-    return
-  }
-  
+const handleDelete = async (categoryId) => {
   try {
-    if (editingCategory.value) {
-      await categoryApi.updateCategory(
-        editingCategory.value.id,
-        categoryForm.value
-      )
-    } else {
-      await categoryApi.createCategory(categoryForm.value)
-    }
-    
-    await fetchCategories()
-    closeModal()
-    
-    uni.showToast({
-      title: `${editingCategory.value ? '编辑' : '创建'}成功`,
-      icon: 'success'
+    await uni.showModal({
+      title: '确认删除',
+      content: '确定要删除这个分类吗？'
     })
-  } catch (error) {
+    
+    await deleteCategory(categoryId)
+    await initData()
+  } catch (e) {
     uni.showToast({
-      title: error.data?.error || `${editingCategory.value ? '编辑' : '创建'}失败`,
+      title: e.message || '删除失败',
       icon: 'none'
     })
   }
 }
 
-// 关闭弹窗
-const closeModal = () => {
-  showAddModal.value = false
-  editingCategory.value = null
-  categoryForm.value = {
-    name: '',
-    color: colors[0],
-    icon: ''
-  }
+// 取消编辑
+const handleCancel = () => {
+  popup.value.close()
 }
 
 onMounted(() => {
-  fetchCategories()
+  initData()
 })
 </script>
 
@@ -228,21 +181,14 @@ onMounted(() => {
   padding: 30rpx;
   
   .category-list {
-    background-color: #fff;
-    border-radius: 12rpx;
-    padding: 20rpx;
-    margin-bottom: 40rpx;
-    
     .category-item {
       display: flex;
-      align-items: center;
       justify-content: space-between;
+      align-items: center;
+      background-color: #fff;
       padding: 30rpx;
-      border-bottom: 2rpx solid #f5f5f5;
-      
-      &:last-child {
-        border-bottom: none;
-      }
+      margin-bottom: 20rpx;
+      border-radius: 12rpx;
       
       .category-info {
         display: flex;
@@ -256,12 +202,12 @@ onMounted(() => {
         }
         
         .category-name {
-          font-size: 30rpx;
+          font-size: 32rpx;
           color: #333;
         }
         
         .task-count {
-          font-size: 26rpx;
+          font-size: 28rpx;
           color: #999;
         }
       }
@@ -270,23 +216,20 @@ onMounted(() => {
         display: flex;
         gap: 20rpx;
         
-        .action-btn {
+        button {
           min-width: 120rpx;
           height: 60rpx;
           line-height: 60rpx;
-          font-size: 26rpx;
-          border-radius: 30rpx;
+          font-size: 28rpx;
           
-          &.edit {
-            background-color: #fff;
-            color: #007AFF;
-            border: 2rpx solid #007AFF;
+          &.edit-btn {
+            background-color: #1890ff;
+            color: #fff;
           }
           
-          &.delete {
-            background-color: #fff;
-            color: #ff4d4f;
-            border: 2rpx solid #ff4d4f;
+          &.delete-btn {
+            background-color: #ff4d4f;
+            color: #fff;
           }
         }
       }
@@ -294,6 +237,12 @@ onMounted(() => {
   }
   
   .add-category {
+    position: fixed;
+    bottom: 120rpx;
+    left: 0;
+    right: 0;
+    padding: 0 30rpx;
+    
     .add-btn {
       width: 100%;
       height: 90rpx;
@@ -302,82 +251,6 @@ onMounted(() => {
       color: #fff;
       border-radius: 45rpx;
       font-size: 32rpx;
-    }
-  }
-  
-  .modal-content {
-    width: 600rpx;
-    background-color: #fff;
-    border-radius: 20rpx;
-    padding: 40rpx;
-    
-    .modal-title {
-      font-size: 36rpx;
-      font-weight: bold;
-      color: #333;
-      text-align: center;
-      margin-bottom: 40rpx;
-    }
-    
-    .form-item {
-      margin-bottom: 30rpx;
-      
-      .label {
-        display: block;
-        font-size: 28rpx;
-        color: #333;
-        margin-bottom: 10rpx;
-      }
-      
-      .input {
-        width: 100%;
-        height: 80rpx;
-        padding: 0 20rpx;
-        background-color: #f5f5f5;
-        border-radius: 12rpx;
-        font-size: 28rpx;
-      }
-      
-      .color-picker {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 20rpx;
-        
-        .color-item {
-          width: 60rpx;
-          height: 60rpx;
-          border-radius: 50%;
-          border: 4rpx solid transparent;
-          
-          &.active {
-            border-color: #333;
-          }
-        }
-      }
-    }
-    
-    .modal-actions {
-      display: flex;
-      gap: 20rpx;
-      margin-top: 40rpx;
-      
-      button {
-        flex: 1;
-        height: 80rpx;
-        line-height: 80rpx;
-        border-radius: 40rpx;
-        font-size: 30rpx;
-      }
-      
-      .cancel-btn {
-        background-color: #f5f5f5;
-        color: #666;
-      }
-      
-      .confirm-btn {
-        background-color: #007AFF;
-        color: #fff;
-      }
     }
   }
 }

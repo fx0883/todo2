@@ -1,50 +1,42 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { useCache } from '@/composables/useCache'
+import { useErrorLog } from '@/composables/useErrorLog'
 import { categoryApi } from '@/api'
 
 export const useCategoryStore = defineStore('category', () => {
+  // 使用 composables
+  const cache = useCache()
+  const { addErrorLog } = useErrorLog()
+
   // 状态
   const categories = ref([])
   const loading = ref(false)
-  const error = ref(null)
-  const cache = ref({
-    lastUpdate: null,
-    expiresIn: 30 * 60 * 1000 // 30分钟缓存，分类变动较少
-  })
 
-  // Getters
+  // 计算属性
   const sortedCategories = computed(() => {
     return [...categories.value].sort((a, b) => a.order - b.order)
   })
 
-  const getCategoryById = computed(() => {
-    return (id) => categories.value.find(c => c.id === id)
-  })
-
-  const needsRefresh = computed(() => {
-    if (!cache.value.lastUpdate) return true
-    return Date.now() - cache.value.lastUpdate > cache.value.expiresIn
-  })
-
   // Actions
-  const fetchCategories = async (force = false) => {
-    // 如果有缓存且未过期，直接返回
-    if (!force && !needsRefresh.value && categories.value.length > 0) {
-      return categories.value
+  const fetchCategories = async () => {
+    const cacheKey = 'categories'
+    const cachedCategories = cache.get(cacheKey)
+    
+    if (cachedCategories) {
+      categories.value = cachedCategories
+      return cachedCategories
     }
 
     loading.value = true
-    error.value = null
-    
     try {
       const response = await categoryApi.getCategories()
       categories.value = response.results
-      cache.value.lastUpdate = Date.now()
-      saveToStorage() // 保存到本地存储
+      cache.set(cacheKey, response, 5 * 60 * 1000) // 缓存5分钟
       return response
-    } catch (err) {
-      error.value = err.message
-      throw err
+    } catch (error) {
+      addErrorLog(error, { action: 'fetchCategories' })
+      throw error
     } finally {
       loading.value = false
     }
@@ -52,16 +44,15 @@ export const useCategoryStore = defineStore('category', () => {
 
   const createCategory = async (categoryData) => {
     loading.value = true
-    error.value = null
-    
     try {
       const response = await categoryApi.createCategory(categoryData)
       categories.value.push(response)
-      saveToStorage()
+      // 清除缓存
+      cache.remove('categories')
       return response
-    } catch (err) {
-      error.value = err.message
-      throw err
+    } catch (error) {
+      addErrorLog(error, { action: 'createCategory', categoryData })
+      throw error
     } finally {
       loading.value = false
     }
@@ -69,19 +60,18 @@ export const useCategoryStore = defineStore('category', () => {
 
   const updateCategory = async (categoryId, categoryData) => {
     loading.value = true
-    error.value = null
-    
     try {
       const response = await categoryApi.updateCategory(categoryId, categoryData)
       const index = categories.value.findIndex(c => c.id === categoryId)
       if (index !== -1) {
         categories.value[index] = response
       }
-      saveToStorage()
+      // 清除缓存
+      cache.remove('categories')
       return response
-    } catch (err) {
-      error.value = err.message
-      throw err
+    } catch (error) {
+      addErrorLog(error, { action: 'updateCategory', categoryId, categoryData })
+      throw error
     } finally {
       loading.value = false
     }
@@ -89,15 +79,14 @@ export const useCategoryStore = defineStore('category', () => {
 
   const deleteCategory = async (categoryId) => {
     loading.value = true
-    error.value = null
-    
     try {
       await categoryApi.deleteCategory(categoryId)
       categories.value = categories.value.filter(c => c.id !== categoryId)
-      saveToStorage()
-    } catch (err) {
-      error.value = err.message
-      throw err
+      // 清除缓存
+      cache.remove('categories')
+    } catch (error) {
+      addErrorLog(error, { action: 'deleteCategory', categoryId })
+      throw error
     } finally {
       loading.value = false
     }
@@ -106,62 +95,41 @@ export const useCategoryStore = defineStore('category', () => {
   // 更新分类顺序
   const updateCategoriesOrder = async (newOrder) => {
     loading.value = true
-    error.value = null
-    
     try {
-      const updatePromises = newOrder.map((categoryId, index) => {
-        return updateCategory(categoryId, { order: index })
-      })
-      await Promise.all(updatePromises)
-      await fetchCategories(true) // 重新获取最新数据
-    } catch (err) {
-      error.value = err.message
-      throw err
+      const response = await categoryApi.batchUpdateCategories(newOrder)
+      categories.value = response
+      // 清除缓存
+      cache.remove('categories')
+      return response
+    } catch (error) {
+      addErrorLog(error, { action: 'updateCategoriesOrder', newOrder })
+      throw error
     } finally {
       loading.value = false
     }
   }
 
-  // 数据持久化
-  const saveToStorage = () => {
-    uni.setStorageSync('categories', {
-      data: categories.value,
-      timestamp: Date.now()
-    })
-  }
-
-  const loadFromStorage = () => {
-    const stored = uni.getStorageSync('categories')
-    if (stored && stored.timestamp) {
-      const age = Date.now() - stored.timestamp
-      if (age < cache.value.expiresIn) {
-        categories.value = stored.data
-        cache.value.lastUpdate = stored.timestamp
-      }
-    }
-  }
-
-  // 初始化
-  const init = () => {
-    loadFromStorage()
-    fetchCategories()
+  // Reset store
+  const reset = () => {
+    categories.value = []
+    loading.value = false
+    cache.remove('categories')
   }
 
   return {
-    // 状态
+    // State
     categories,
     loading,
-    error,
+    
     // Getters
     sortedCategories,
-    getCategoryById,
+    
     // Actions
     fetchCategories,
     createCategory,
     updateCategory,
     deleteCategory,
     updateCategoriesOrder,
-    // 初始化
-    init
+    reset
   }
 })

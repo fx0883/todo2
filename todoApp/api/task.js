@@ -2,11 +2,22 @@ import request from './request'
 
 export default {
   // 获取任务列表
-  getTasks: (params) => request({
-    url: '/tasks/tasks/',
-    method: 'GET',
-    params
-  }),
+  fetchTasks: async (params = {}) => {
+    try {
+      const response = await request({
+        url: '/tasks/tasks/',
+        method: 'GET',
+        params: {
+          page: params.page || 1,
+          page_size: params.pageSize || 10,
+          ...params
+        }
+      })
+      return response
+    } catch (error) {
+      throw error
+    }
+  },
 
   // 获取任务详情
   getTaskDetail: (taskId) => request({

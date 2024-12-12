@@ -69,16 +69,32 @@ export function useTask() {
   }
 
   // 获取任务列表
-  const fetchTasks = async (filters = {}) => {
+  const fetchTasks = async (params = {}, append = false) => {
     try {
       loading.value = true
-      clearError()
-      await taskStore.fetchTasks(filters)
-    } catch (e) {
-      error.value = e.message || '获取任务列表失败'
+      error.value = null
+      return await taskStore.fetchTasks(params, append)
+    } catch (err) {
+      error.value = err
+      throw err
     } finally {
       loading.value = false
     }
+  }
+
+  // 加载更多
+  const loadMore = async () => {
+    if (!taskStore.hasMore || loading.value) return
+    
+    await fetchTasks({
+      page: taskStore.currentPage + 1
+    }, true)
+  }
+
+  // 刷新列表
+  const refreshList = async () => {
+    taskStore.resetPagination()
+    await fetchTasks()
   }
 
   // 创建任务
@@ -214,5 +230,9 @@ export function useTask() {
     
     // 添加到返回对象中
     toggleTaskStatus,
+    loadMore,
+    refreshList,
+    hasMore: computed(() => taskStore.hasMore),
+    currentPage: computed(() => taskStore.currentPage),
   }
 }

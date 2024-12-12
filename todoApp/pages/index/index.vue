@@ -27,8 +27,15 @@
       </view>
     </scroll-view>
 
-    <!-- 任务列表 -->
-    <view class="task-list">
+    <!-- 任务列表区域 -->
+    <scroll-view 
+      class="task-list-container"
+      scroll-y 
+      refresher-enabled
+      :refresher-triggered="refreshing"
+      @refresherrefresh="onRefresh"
+      @scrolltolower="onLoadMore"
+    >
       <!-- 加载状态 -->
       <view v-if="loading" class="loading">
         <text>加载中...</text>
@@ -36,33 +43,45 @@
       
       <!-- 任务列表内容 -->
       <template v-else-if="filteredTasks && filteredTasks.length > 0">
-        <view 
-          v-for="task in filteredTasks" 
-          :key="task.id" 
-          class="task-item"
-          :class="{ completed: task.status === 'completed' }"
-          @click="navigateToDetail(task.id)"
-        >
-          <checkbox 
-            :checked="task.status === 'completed'" 
-            @tap.stop="toggleTaskStatus(task.id)"
-            class="checkbox"
-          />
-          <view class="content">
-            <text class="title" :class="{ 'completed-text': task.status === 'completed' }">{{ task.title }}</text>
-            <view class="meta">
-              <text class="due-date" v-if="task.due_date">{{ formatDate(task.due_date) }}</text>
-              <text class="priority" :class="'p' + task.priority">{{ getPriorityText(task.priority) }}</text>
+        <view class="task-list">
+          <view 
+            v-for="task in filteredTasks" 
+            :key="task.id" 
+            class="task-item"
+            :class="{ completed: task.status === 'completed' }"
+            @click="navigateToDetail(task.id)"
+          >
+            <checkbox 
+              :checked="task.status === 'completed'" 
+              @tap.stop="toggleTaskStatus(task.id)"
+              class="checkbox"
+            />
+            <view class="content">
+              <text class="title" :class="{ 'completed-text': task.status === 'completed' }">{{ task.title }}</text>
+              <view class="meta">
+                <text class="due-date" v-if="task.due_date">{{ formatDate(task.due_date) }}</text>
+                <text class="priority" :class="'p' + task.priority">{{ getPriorityText(task.priority) }}</text>
+              </view>
             </view>
           </view>
         </view>
       </template>
       
+      <!-- 加载更多状态 -->
+      <view class="loading-more" v-if="loading">
+        <uni-load-more status="loading" />
+      </view>
+      
+      <!-- 无更多数据 -->
+      <view v-if="!hasMore && filteredTasks.length > 0" class="no-more">
+        <uni-load-more status="noMore" />
+      </view>
+
       <!-- 空状态 -->
-      <view v-else class="empty">
+      <view v-else-if="!filteredTasks.length" class="empty">
         <text>{{ selectedCategory ? '该分类下暂无任务' : '开始创建你的第一个任务' }}</text>
       </view>
-    </view>
+    </scroll-view>
 
     <!-- 添加按钮 -->
     <view class="add-btn" @click="navigateToCreate">
@@ -85,7 +104,10 @@ const {
   fetchTasks, 
   toggleTaskStatus,
   formatDate,
-  getPriorityText
+  getPriorityText,
+  hasMore,
+  loadMore,
+  refreshList
 } = useTask()
 
 const { fetchCategories } = useCategory()
@@ -96,6 +118,9 @@ const categoryStore = useCategoryStore()
 const { tasks, loading } = storeToRefs(taskStore)
 const { categories } = storeToRefs(categoryStore)
 const selectedCategory = ref(null)
+
+// 添加 refreshing ref
+const refreshing = ref(false)
 
 // 统计数据 - 直接从 tasks 计算，不再调用 API
 const completedCount = computed(() => {
@@ -145,7 +170,7 @@ const navigateToDetail = (taskId) => {
 onMounted(async () => {
   try {
     await Promise.all([
-      fetchTasks(),
+      refreshList(),
       fetchCategories()
     ])
   } catch (error) {
@@ -158,21 +183,27 @@ onMounted(async () => {
 })
 
 // 下拉刷新
-onPullDownRefresh(async () => {
+const onRefresh = async () => {
+  refreshing.value = true
   try {
     await Promise.all([
-      fetchTasks(),
+      refreshList(),
       fetchCategories()
     ])
-  } catch (error) {
-    console.error('Failed to refresh data:', error)
-    uni.showToast({
-      title: '刷新失败',
-      icon: 'none'
-    })
   } finally {
-    uni.stopPullDownRefresh()
+    refreshing.value = false
   }
+}
+
+// 上拉加载更多
+const onLoadMore = async () => {
+  if (!hasMore.value || loading.value) return
+  await loadMore()
+}
+
+// 初始加载
+onMounted(async () => {
+  await refreshList()
 })
 </script>
 
@@ -184,9 +215,9 @@ onPullDownRefresh(async () => {
   .categories {
     position: sticky;
     top: 0;
-    z-index: 100;
-    padding: 20rpx 0;
+    z-index: 1;
     background-color: #ffffff;
+    padding: 20rpx 0;
     border-bottom: 1rpx solid #f0f0f0;
     
     .category-list {
@@ -213,6 +244,11 @@ onPullDownRefresh(async () => {
         }
       }
     }
+  }
+  
+  .task-list-container {
+    flex: 1;
+    height: calc(100vh - 100rpx);
   }
   
   .task-list {
@@ -327,6 +363,12 @@ onPullDownRefresh(async () => {
       font-size: 48rpx;
       font-weight: 300;
     }
+  }
+  
+  .loading-more,
+  .no-more {
+    padding: 20rpx 0;
+    text-align: center;
   }
 }
 </style>

@@ -15,19 +15,19 @@
     
     <view class="stats-cards">
       <view class="stats-card">
-        <text class="number">{{ taskStats.total || 0 }}</text>
+        <text class="number">{{ stats.total || 0 }}</text>
         <text class="label">总任务数</text>
       </view>
       <view class="stats-card">
-        <text class="number">{{ taskStats.completed || 0 }}</text>
+        <text class="number">{{ stats.completed || 0 }}</text>
         <text class="label">已完成</text>
       </view>
       <view class="stats-card">
-        <text class="number">{{ taskStats.pending || 0 }}</text>
+        <text class="number">{{ stats.pending || 0 }}</text>
         <text class="label">待完成</text>
       </view>
       <view class="stats-card">
-        <text class="number">{{ taskStats.completion_rate || 0 }}%</text>
+        <text class="number">{{ stats.completion_rate || 0 }}%</text>
         <text class="label">完成率</text>
       </view>
     </view>
@@ -76,11 +76,13 @@ import { ref, onMounted, onActivated  } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useUserStore } from '@/store/modules/user'
 import { useProfile } from '@/composables/useProfile'
+import { useTaskStatsStore } from '@/store/modules/taskStats.js'
 
 // 状态管理
 const userStore = useUserStore()
 const { userInfo } = storeToRefs(userStore)
-const { uploading, uploadAvatar, taskStats, taskStatsLoading, fetchStats } = useProfile()
+const { uploading, uploadAvatar, taskStatsLoading, fetchStats } = useProfile()
+const { stats } = useTaskStatsStore()
 
 // 选择并上传图片
 const chooseImage = async () => {
@@ -155,7 +157,7 @@ const handleLogout = async () => {
 // 页面显示时刷新数据
 onActivated (async () => {
   await fetchStats()
-  console.log(taskStats.total)
+  console.log(stats)
 })
 </script>
 

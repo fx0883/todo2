@@ -1,10 +1,10 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { reactive, ref } from 'vue'
 import { userApi } from '@/api'
 
 export const useTaskStatsStore = defineStore('taskStats', () => {
   // 状态
-  const stats = ref({
+  let stats = reactive({
     total: 0,
     completed: 0,
     pending: 0,
@@ -19,9 +19,12 @@ export const useTaskStatsStore = defineStore('taskStats', () => {
     error.value = null
     try {
       const response = await userApi.getTaskStats()
-      stats.value = response
+	  stats.total = response.total;
+	  stats.completed = response.completed;
+	  stats.pending = response.pending;
+	  stats.completion_rate = response.completion_rate;
 	  
-	  console.dir(stats.value)
+	  console.dir(stats)
     } catch (err) {
       error.value = err.message
       throw err

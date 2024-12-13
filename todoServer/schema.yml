@@ -1,0 +1,4791 @@
+openapi: 3.0.3
+info:
+  title: Todo API
+  version: 1.0.0
+  description: Todo 应用的 API 文档
+paths:
+  /api/token/:
+    post:
+      operationId: api_token_create
+      description: |-
+        Takes a set of user credentials and returns an access and refresh JSON web
+        token pair to prove the authentication of those credentials.
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPairRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPairRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPairRequest'
+        required: true
+      security:
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenObtainPair'
+          description: ''
+  /api/token/refresh/:
+    post:
+      operationId: api_token_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+        required: true
+      security:
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+  /api/token/verify/:
+    post:
+      operationId: api_token_verify_create
+      description: |-
+        Takes a token and indicates if it is valid.  This view provides no
+        information about a token's fitness for a particular use.
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenVerifyRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenVerifyRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenVerifyRequest'
+        required: true
+      security:
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          description: No response body
+  /api/v1/accounts/devices/:
+    get:
+      operationId: api_v1_accounts_devices_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - 用户设备
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedUserDeviceList'
+              examples:
+                UserDeviceExample:
+                  value:
+                    count: 123
+                    next: http://api.example.org/accounts/?page=4
+                    previous: http://api.example.org/accounts/?page=2
+                    results:
+                    - id: 1
+                      user: 1
+                      device_id: 1
+                      device_name: device_name
+                      device_type: device_type
+                      last_sync_time: '2024-12-09T12:00:00Z'
+                      is_active: true
+                  summary: UserDevice Example
+          description: ''
+    post:
+      operationId: api_v1_accounts_devices_create
+      tags:
+      - 用户设备
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserDeviceRequest'
+            examples:
+              UserDeviceExample:
+                value:
+                  id: 1
+                  user: 1
+                  device_id: 1
+                  device_name: device_name
+                  device_type: device_type
+                  last_sync_time: '2024-12-09T12:00:00Z'
+                  is_active: true
+                summary: UserDevice Example
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserDeviceRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserDeviceRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDevice'
+              examples:
+                UserDeviceExample:
+                  value:
+                    id: 1
+                    user: 1
+                    device_id: 1
+                    device_name: device_name
+                    device_type: device_type
+                    last_sync_time: '2024-12-09T12:00:00Z'
+                    is_active: true
+                  summary: UserDevice Example
+          description: ''
+  /api/v1/accounts/devices/{id}/:
+    get:
+      operationId: api_v1_accounts_devices_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 用户设备.
+        required: true
+      tags:
+      - 用户设备
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDevice'
+              examples:
+                UserDeviceExample:
+                  value:
+                    id: 1
+                    user: 1
+                    device_id: 1
+                    device_name: device_name
+                    device_type: device_type
+                    last_sync_time: '2024-12-09T12:00:00Z'
+                    is_active: true
+                  summary: UserDevice Example
+          description: ''
+    put:
+      operationId: api_v1_accounts_devices_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 用户设备.
+        required: true
+      tags:
+      - 用户设备
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserDeviceRequest'
+            examples:
+              UserDeviceExample:
+                value:
+                  id: 1
+                  user: 1
+                  device_id: 1
+                  device_name: device_name
+                  device_type: device_type
+                  last_sync_time: '2024-12-09T12:00:00Z'
+                  is_active: true
+                summary: UserDevice Example
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserDeviceRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserDeviceRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDevice'
+              examples:
+                UserDeviceExample:
+                  value:
+                    id: 1
+                    user: 1
+                    device_id: 1
+                    device_name: device_name
+                    device_type: device_type
+                    last_sync_time: '2024-12-09T12:00:00Z'
+                    is_active: true
+                  summary: UserDevice Example
+          description: ''
+    patch:
+      operationId: api_v1_accounts_devices_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 用户设备.
+        required: true
+      tags:
+      - 用户设备
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserDeviceRequest'
+            examples:
+              UserDeviceExample:
+                value:
+                  id: 1
+                  user: 1
+                  device_id: 1
+                  device_name: device_name
+                  device_type: device_type
+                  last_sync_time: '2024-12-09T12:00:00Z'
+                  is_active: true
+                summary: UserDevice Example
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserDeviceRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserDeviceRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDevice'
+              examples:
+                UserDeviceExample:
+                  value:
+                    id: 1
+                    user: 1
+                    device_id: 1
+                    device_name: device_name
+                    device_type: device_type
+                    last_sync_time: '2024-12-09T12:00:00Z'
+                    is_active: true
+                  summary: UserDevice Example
+          description: ''
+    delete:
+      operationId: api_v1_accounts_devices_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 用户设备.
+        required: true
+      tags:
+      - 用户设备
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '204':
+          description: No response body
+  /api/v1/accounts/devices/{id}/deactivate/:
+    post:
+      operationId: api_v1_accounts_devices_deactivate_create
+      description: 停用设备
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 用户设备.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserDeviceRequest'
+            examples:
+              UserDeviceExample:
+                value:
+                  id: 1
+                  user: 1
+                  device_id: 1
+                  device_name: device_name
+                  device_type: device_type
+                  last_sync_time: '2024-12-09T12:00:00Z'
+                  is_active: true
+                summary: UserDevice Example
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserDeviceRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserDeviceRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDevice'
+              examples:
+                UserDeviceExample:
+                  value:
+                    id: 1
+                    user: 1
+                    device_id: 1
+                    device_name: device_name
+                    device_type: device_type
+                    last_sync_time: '2024-12-09T12:00:00Z'
+                    is_active: true
+                  summary: UserDevice Example
+          description: ''
+  /api/v1/accounts/devices/{id}/sync/:
+    post:
+      operationId: api_v1_accounts_devices_sync_create
+      description: 同步设备数据
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 用户设备.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserDeviceRequest'
+            examples:
+              UserDeviceExample:
+                value:
+                  id: 1
+                  user: 1
+                  device_id: 1
+                  device_name: device_name
+                  device_type: device_type
+                  last_sync_time: '2024-12-09T12:00:00Z'
+                  is_active: true
+                summary: UserDevice Example
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserDeviceRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserDeviceRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDevice'
+              examples:
+                UserDeviceExample:
+                  value:
+                    id: 1
+                    user: 1
+                    device_id: 1
+                    device_name: device_name
+                    device_type: device_type
+                    last_sync_time: '2024-12-09T12:00:00Z'
+                    is_active: true
+                  summary: UserDevice Example
+          description: ''
+  /api/v1/accounts/feedback/:
+    get:
+      operationId: api_v1_accounts_feedback_list
+      summary: 获取用户反馈列表
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - 用户反馈
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedUserFeedbackList'
+          description: ''
+    post:
+      operationId: api_v1_accounts_feedback_create
+      summary: 创建用户反馈
+      tags:
+      - 用户反馈
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserFeedbackRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserFeedbackRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserFeedbackRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserFeedback'
+          description: ''
+  /api/v1/accounts/feedback/{id}/:
+    get:
+      operationId: api_v1_accounts_feedback_retrieve
+      summary: 获取用户反馈详情
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - 用户反馈
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserFeedback'
+          description: ''
+    put:
+      operationId: api_v1_accounts_feedback_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserFeedbackRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserFeedbackRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserFeedbackRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserFeedback'
+          description: ''
+    patch:
+      operationId: api_v1_accounts_feedback_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserFeedbackRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserFeedbackRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserFeedbackRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserFeedback'
+          description: ''
+    delete:
+      operationId: api_v1_accounts_feedback_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '204':
+          description: No response body
+  /api/v1/accounts/profiles/:
+    get:
+      operationId: api_v1_accounts_profiles_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - 用户配置
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedUserProfileList'
+              examples:
+                UserProfileExample:
+                  value:
+                    count: 123
+                    next: http://api.example.org/accounts/?page=4
+                    previous: http://api.example.org/accounts/?page=2
+                    results:
+                    - id: 1
+                      user: 1
+                      theme: light
+                      notification_preferences:
+                        email: true
+                        push: true
+                        sms: false
+                      timezone: Asia/Shanghai
+                      language: zh-hans
+                  summary: UserProfile Example
+          description: ''
+    post:
+      operationId: api_v1_accounts_profiles_create
+      tags:
+      - 用户配置
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserProfileRequest'
+            examples:
+              UserProfileExample:
+                value:
+                  id: 1
+                  user: 1
+                  theme: light
+                  notification_preferences:
+                    email: true
+                    push: true
+                    sms: false
+                  timezone: Asia/Shanghai
+                  language: zh-hans
+                summary: UserProfile Example
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserProfileRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserProfileRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+              examples:
+                UserProfileExample:
+                  value:
+                    id: 1
+                    user: 1
+                    theme: light
+                    notification_preferences:
+                      email: true
+                      push: true
+                      sms: false
+                    timezone: Asia/Shanghai
+                    language: zh-hans
+                  summary: UserProfile Example
+          description: ''
+  /api/v1/accounts/profiles/{id}/:
+    get:
+      operationId: api_v1_accounts_profiles_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 用户配置.
+        required: true
+      tags:
+      - 用户配置
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+              examples:
+                UserProfileExample:
+                  value:
+                    id: 1
+                    user: 1
+                    theme: light
+                    notification_preferences:
+                      email: true
+                      push: true
+                      sms: false
+                    timezone: Asia/Shanghai
+                    language: zh-hans
+                  summary: UserProfile Example
+          description: ''
+    put:
+      operationId: api_v1_accounts_profiles_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 用户配置.
+        required: true
+      tags:
+      - 用户配置
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserProfileRequest'
+            examples:
+              UserProfileExample:
+                value:
+                  id: 1
+                  user: 1
+                  theme: light
+                  notification_preferences:
+                    email: true
+                    push: true
+                    sms: false
+                  timezone: Asia/Shanghai
+                  language: zh-hans
+                summary: UserProfile Example
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserProfileRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserProfileRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+              examples:
+                UserProfileExample:
+                  value:
+                    id: 1
+                    user: 1
+                    theme: light
+                    notification_preferences:
+                      email: true
+                      push: true
+                      sms: false
+                    timezone: Asia/Shanghai
+                    language: zh-hans
+                  summary: UserProfile Example
+          description: ''
+    patch:
+      operationId: api_v1_accounts_profiles_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 用户配置.
+        required: true
+      tags:
+      - 用户配置
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserProfileRequest'
+            examples:
+              UserProfileExample:
+                value:
+                  id: 1
+                  user: 1
+                  theme: light
+                  notification_preferences:
+                    email: true
+                    push: true
+                    sms: false
+                  timezone: Asia/Shanghai
+                  language: zh-hans
+                summary: UserProfile Example
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserProfileRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserProfileRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserProfile'
+              examples:
+                UserProfileExample:
+                  value:
+                    id: 1
+                    user: 1
+                    theme: light
+                    notification_preferences:
+                      email: true
+                      push: true
+                      sms: false
+                    timezone: Asia/Shanghai
+                    language: zh-hans
+                  summary: UserProfile Example
+          description: ''
+    delete:
+      operationId: api_v1_accounts_profiles_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 用户配置.
+        required: true
+      tags:
+      - 用户配置
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '204':
+          description: No response body
+  /api/v1/accounts/users/:
+    get:
+      operationId: api_v1_accounts_users_list
+      summary: 获取用户列表
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - 用户管理
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedUserList'
+              examples:
+                UserExample:
+                  value:
+                    count: 123
+                    next: http://api.example.org/accounts/?page=4
+                    previous: http://api.example.org/accounts/?page=2
+                    results:
+                    - id: 1
+                      username: johndoe
+                      email: john@example.com
+                      first_name: John
+                      last_name: Doe
+                      is_active: true
+                  summary: User Example
+          description: ''
+    post:
+      operationId: api_v1_accounts_users_create
+      summary: 创建用户
+      tags:
+      - 用户管理
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+            examples:
+              UserExample:
+                value:
+                  id: 1
+                  username: johndoe
+                  email: john@example.com
+                  first_name: John
+                  last_name: Doe
+                  is_active: true
+                summary: User Example
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+              examples:
+                UserExample:
+                  value:
+                    id: 1
+                    username: johndoe
+                    email: john@example.com
+                    first_name: John
+                    last_name: Doe
+                    is_active: true
+                  summary: User Example
+          description: ''
+  /api/v1/accounts/users/{id}/:
+    get:
+      operationId: api_v1_accounts_users_retrieve
+      summary: 获取用户详情
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 用户.
+        required: true
+      tags:
+      - 用户管理
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+              examples:
+                UserExample:
+                  value:
+                    id: 1
+                    username: johndoe
+                    email: john@example.com
+                    first_name: John
+                    last_name: Doe
+                    is_active: true
+                  summary: User Example
+          description: ''
+    put:
+      operationId: api_v1_accounts_users_update
+      summary: 更新用户
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 用户.
+        required: true
+      tags:
+      - 用户管理
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+            examples:
+              UserExample:
+                value:
+                  id: 1
+                  username: johndoe
+                  email: john@example.com
+                  first_name: John
+                  last_name: Doe
+                  is_active: true
+                summary: User Example
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+              examples:
+                UserExample:
+                  value:
+                    id: 1
+                    username: johndoe
+                    email: john@example.com
+                    first_name: John
+                    last_name: Doe
+                    is_active: true
+                  summary: User Example
+          description: ''
+    patch:
+      operationId: api_v1_accounts_users_partial_update
+      summary: 部分更新用户
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 用户.
+        required: true
+      tags:
+      - 用户管理
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserRequest'
+            examples:
+              UserExample:
+                value:
+                  id: 1
+                  username: johndoe
+                  email: john@example.com
+                  first_name: John
+                  last_name: Doe
+                  is_active: true
+                summary: User Example
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+              examples:
+                UserExample:
+                  value:
+                    id: 1
+                    username: johndoe
+                    email: john@example.com
+                    first_name: John
+                    last_name: Doe
+                    is_active: true
+                  summary: User Example
+          description: ''
+    delete:
+      operationId: api_v1_accounts_users_destroy
+      summary: 删除用户
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 用户.
+        required: true
+      tags:
+      - 用户管理
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '204':
+          description: No response body
+  /api/v1/accounts/users/confirm_password_reset/:
+    post:
+      operationId: api_v1_accounts_users_confirm_password_reset_create
+      summary: 确认密码重置
+      tags:
+      - 用户认证
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetConfirmRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PasswordResetConfirmRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PasswordResetConfirmRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      - {}
+      responses:
+        '200':
+          description: 密码已重置
+  /api/v1/accounts/users/login/:
+    post:
+      operationId: api_v1_accounts_users_login_create
+      summary: 用户登录
+      tags:
+      - 用户认证
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+            examples:
+              LoginRequestExample:
+                value:
+                  username: johndoe
+                  password: securepassword123
+                summary: Login Request Example
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+        required: true
+      security:
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      - {}
+      responses:
+        '200':
+          description: 登录成功
+  /api/v1/accounts/users/me/:
+    get:
+      operationId: api_v1_accounts_users_me_retrieve
+      summary: 获取当前用户信息
+      tags:
+      - 用户管理
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+              examples:
+                UserExample:
+                  value:
+                    id: 1
+                    username: johndoe
+                    email: john@example.com
+                    first_name: John
+                    last_name: Doe
+                    is_active: true
+                  summary: User Example
+          description: ''
+  /api/v1/accounts/users/register/:
+    post:
+      operationId: api_v1_accounts_users_register_create
+      summary: 用户注册
+      tags:
+      - 用户认证
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+            examples:
+              RegisterExample:
+                value:
+                  username: johndoe
+                  email: john@example.com
+                  password: securepassword123
+                  confirm_password: securepassword123
+                  first_name: John
+                  last_name: Doe
+                summary: Register Example
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+        required: true
+      security:
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+              examples:
+                RegisterExample:
+                  value:
+                    username: johndoe
+                    email: john@example.com
+                    password: securepassword123
+                    confirm_password: securepassword123
+                    first_name: John
+                    last_name: Doe
+                  summary: Register Example
+          description: ''
+  /api/v1/accounts/users/request_password_reset/:
+    post:
+      operationId: api_v1_accounts_users_request_password_reset_create
+      summary: 请求密码重置
+      tags:
+      - 用户认证
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PasswordResetRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PasswordResetRequestRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      - {}
+      responses:
+        '200':
+          description: 重置邮件已发送
+  /api/v1/accounts/users/upload_avatar/:
+    post:
+      operationId: api_v1_accounts_users_upload_avatar_create
+      description: 上传用户头像
+      summary: 上传用户头像
+      tags:
+      - 用户管理
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                avatar:
+                  type: string
+                  format: binary
+                  description: 用户头像文件
+              required:
+              - avatar
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          description: 头像上传成功
+        '400':
+          description: 请求错误
+  /api/v1/notifications/devices/:
+    get:
+      operationId: api_v1_notifications_devices_list
+      summary: 获取通知设备列表
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - 通知设备
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          description: 成功获取通知设备列表
+    post:
+      operationId: api_v1_notifications_devices_create
+      summary: 创建通知设备
+      tags:
+      - 通知设备
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationDeviceRequest'
+            examples:
+              CreateDeviceExample:
+                value:
+                  device: 1
+                  push_token: new-fcm-token-xxx
+                  is_enabled: true
+                summary: Create Device Example
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/NotificationDeviceRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/NotificationDeviceRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationDevice'
+              examples:
+                CreateDeviceExample:
+                  value:
+                    device: 1
+                    push_token: new-fcm-token-xxx
+                    is_enabled: true
+                  summary: Create Device Example
+          description: ''
+  /api/v1/notifications/devices/{id}/:
+    get:
+      operationId: api_v1_notifications_devices_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationDevice'
+              examples:
+                NotificationDeviceExample:
+                  value:
+                    id: 1
+                    user: 1
+                    device: 1
+                    push_token: fcm-token-xxx
+                    is_enabled: true
+                    last_active: '2024-12-09T12:00:00Z'
+                    created_at: '2024-12-09T10:00:00Z'
+                    updated_at: '2024-12-09T12:00:00Z'
+                  summary: NotificationDevice Example
+          description: ''
+    put:
+      operationId: api_v1_notifications_devices_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationDeviceRequest'
+            examples:
+              NotificationDeviceExample:
+                value:
+                  id: 1
+                  user: 1
+                  device: 1
+                  push_token: fcm-token-xxx
+                  is_enabled: true
+                  last_active: '2024-12-09T12:00:00Z'
+                  created_at: '2024-12-09T10:00:00Z'
+                  updated_at: '2024-12-09T12:00:00Z'
+                summary: NotificationDevice Example
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/NotificationDeviceRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/NotificationDeviceRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationDevice'
+              examples:
+                NotificationDeviceExample:
+                  value:
+                    id: 1
+                    user: 1
+                    device: 1
+                    push_token: fcm-token-xxx
+                    is_enabled: true
+                    last_active: '2024-12-09T12:00:00Z'
+                    created_at: '2024-12-09T10:00:00Z'
+                    updated_at: '2024-12-09T12:00:00Z'
+                  summary: NotificationDevice Example
+          description: ''
+    patch:
+      operationId: api_v1_notifications_devices_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedNotificationDeviceRequest'
+            examples:
+              NotificationDeviceExample:
+                value:
+                  id: 1
+                  user: 1
+                  device: 1
+                  push_token: fcm-token-xxx
+                  is_enabled: true
+                  last_active: '2024-12-09T12:00:00Z'
+                  created_at: '2024-12-09T10:00:00Z'
+                  updated_at: '2024-12-09T12:00:00Z'
+                summary: NotificationDevice Example
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedNotificationDeviceRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedNotificationDeviceRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationDevice'
+              examples:
+                NotificationDeviceExample:
+                  value:
+                    id: 1
+                    user: 1
+                    device: 1
+                    push_token: fcm-token-xxx
+                    is_enabled: true
+                    last_active: '2024-12-09T12:00:00Z'
+                    created_at: '2024-12-09T10:00:00Z'
+                    updated_at: '2024-12-09T12:00:00Z'
+                  summary: NotificationDevice Example
+          description: ''
+    delete:
+      operationId: api_v1_notifications_devices_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '204':
+          description: No response body
+  /api/v1/notifications/notifications/:
+    get:
+      operationId: api_v1_notifications_notifications_list
+      summary: 获取通知列表
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - 通知管理
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          description: 成功获取通知列表
+    post:
+      operationId: api_v1_notifications_notifications_create
+      summary: 创建通知
+      tags:
+      - 通知管理
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationRequest'
+            examples:
+              CreateNotificationExample:
+                value:
+                  template: 1
+                  title: 新任务提醒
+                  content: 您有一个新的任务需要处理
+                  scheduled_time: '2024-12-10T09:00:00Z'
+                summary: Create Notification Example
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/NotificationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/NotificationRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+              examples:
+                CreateNotificationExample:
+                  value:
+                    template: 1
+                    title: 新任务提醒
+                    content: 您有一个新的任务需要处理
+                    scheduled_time: '2024-12-10T09:00:00Z'
+                  summary: Create Notification Example
+          description: ''
+  /api/v1/notifications/notifications/{id}/:
+    get:
+      operationId: api_v1_notifications_notifications_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+              examples:
+                NotificationExample:
+                  value:
+                    id: 1
+                    user: 1
+                    template: 1
+                    title: 任务 "完成项目报告" 即将到期
+                    content: 您的任务 "完成项目报告" 将在 2024-12-31 23:59:59 到期，请及时处理。
+                    status: pending
+                    error_message: null
+                    scheduled_time: '2024-12-31T10:00:00Z'
+                    sent_time: null
+                    read_time: null
+                    created_at: '2024-12-09T12:00:00Z'
+                  summary: Notification Example
+          description: ''
+    put:
+      operationId: api_v1_notifications_notifications_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationRequest'
+            examples:
+              NotificationExample:
+                value:
+                  id: 1
+                  user: 1
+                  template: 1
+                  title: 任务 "完成项目报告" 即将到期
+                  content: 您的任务 "完成项目报告" 将在 2024-12-31 23:59:59 到期，请及时处理。
+                  status: pending
+                  error_message: null
+                  scheduled_time: '2024-12-31T10:00:00Z'
+                  sent_time: null
+                  read_time: null
+                  created_at: '2024-12-09T12:00:00Z'
+                summary: Notification Example
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/NotificationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/NotificationRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+              examples:
+                NotificationExample:
+                  value:
+                    id: 1
+                    user: 1
+                    template: 1
+                    title: 任务 "完成项目报告" 即将到期
+                    content: 您的任务 "完成项目报告" 将在 2024-12-31 23:59:59 到期，请及时处理。
+                    status: pending
+                    error_message: null
+                    scheduled_time: '2024-12-31T10:00:00Z'
+                    sent_time: null
+                    read_time: null
+                    created_at: '2024-12-09T12:00:00Z'
+                  summary: Notification Example
+          description: ''
+    patch:
+      operationId: api_v1_notifications_notifications_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedNotificationRequest'
+            examples:
+              NotificationExample:
+                value:
+                  id: 1
+                  user: 1
+                  template: 1
+                  title: 任务 "完成项目报告" 即将到期
+                  content: 您的任务 "完成项目报告" 将在 2024-12-31 23:59:59 到期，请及时处理。
+                  status: pending
+                  error_message: null
+                  scheduled_time: '2024-12-31T10:00:00Z'
+                  sent_time: null
+                  read_time: null
+                  created_at: '2024-12-09T12:00:00Z'
+                summary: Notification Example
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedNotificationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedNotificationRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+              examples:
+                NotificationExample:
+                  value:
+                    id: 1
+                    user: 1
+                    template: 1
+                    title: 任务 "完成项目报告" 即将到期
+                    content: 您的任务 "完成项目报告" 将在 2024-12-31 23:59:59 到期，请及时处理。
+                    status: pending
+                    error_message: null
+                    scheduled_time: '2024-12-31T10:00:00Z'
+                    sent_time: null
+                    read_time: null
+                    created_at: '2024-12-09T12:00:00Z'
+                  summary: Notification Example
+          description: ''
+    delete:
+      operationId: api_v1_notifications_notifications_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '204':
+          description: No response body
+  /api/v1/notifications/notifications/mark_all_as_read/:
+    post:
+      operationId: api_v1_notifications_notifications_mark_all_as_read_create
+      summary: 标记所有通知为已读
+      tags:
+      - 通知管理
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationRequest'
+            examples:
+              NotificationExample:
+                value:
+                  id: 1
+                  user: 1
+                  template: 1
+                  title: 任务 "完成项目报告" 即将到期
+                  content: 您的任务 "完成项目报告" 将在 2024-12-31 23:59:59 到期，请及时处理。
+                  status: pending
+                  error_message: null
+                  scheduled_time: '2024-12-31T10:00:00Z'
+                  sent_time: null
+                  read_time: null
+                  created_at: '2024-12-09T12:00:00Z'
+                summary: Notification Example
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/NotificationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/NotificationRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Notification'
+              examples:
+                NotificationExample:
+                  value:
+                    id: 1
+                    user: 1
+                    template: 1
+                    title: 任务 "完成项目报告" 即将到期
+                    content: 您的任务 "完成项目报告" 将在 2024-12-31 23:59:59 到期，请及时处理。
+                    status: pending
+                    error_message: null
+                    scheduled_time: '2024-12-31T10:00:00Z'
+                    sent_time: null
+                    read_time: null
+                    created_at: '2024-12-09T12:00:00Z'
+                  summary: Notification Example
+          description: ''
+  /api/v1/notifications/templates/:
+    get:
+      operationId: api_v1_notifications_templates_list
+      summary: 获取通知模板列表
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - 通知模板
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          description: 成功获取通知模板列表
+    post:
+      operationId: api_v1_notifications_templates_create
+      summary: 创建通知模板
+      tags:
+      - 通知模板
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationTemplateRequest'
+            examples:
+              CreateTemplateExample:
+                value:
+                  name: 任务评论提醒
+                  type: push
+                  title_template: '{{ user.username }} 评论了您的任务'
+                  content_template: '{{ user.username }} 在任务 {{ task.title }} 中发表了评论:
+                    {{ comment.content }}'
+                summary: Create Template Example
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/NotificationTemplateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/NotificationTemplateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationTemplate'
+              examples:
+                CreateTemplateExample:
+                  value:
+                    name: 任务评论提醒
+                    type: push
+                    title_template: '{{ user.username }} 评论了您的任务'
+                    content_template: '{{ user.username }} 在任务 {{ task.title }} 中发表了评论:
+                      {{ comment.content }}'
+                  summary: Create Template Example
+          description: ''
+  /api/v1/notifications/templates/{id}/:
+    get:
+      operationId: api_v1_notifications_templates_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 通知模板.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationTemplate'
+              examples:
+                NotificationTemplateExample:
+                  value:
+                    id: 1
+                    name: 任务到期提醒
+                    type: email
+                    title_template: 任务 {{ task.title }} 即将到期
+                    content_template: 您的任务 {{ task.title }} 将在 {{ task.due_date }}
+                      到期，请及时处理。
+                    created_at: '2024-12-09T12:00:00Z'
+                    updated_at: '2024-12-09T12:00:00Z'
+                  summary: NotificationTemplate Example
+          description: ''
+    put:
+      operationId: api_v1_notifications_templates_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 通知模板.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationTemplateRequest'
+            examples:
+              NotificationTemplateExample:
+                value:
+                  id: 1
+                  name: 任务到期提醒
+                  type: email
+                  title_template: 任务 {{ task.title }} 即将到期
+                  content_template: 您的任务 {{ task.title }} 将在 {{ task.due_date }} 到期，请及时处理。
+                  created_at: '2024-12-09T12:00:00Z'
+                  updated_at: '2024-12-09T12:00:00Z'
+                summary: NotificationTemplate Example
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/NotificationTemplateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/NotificationTemplateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationTemplate'
+              examples:
+                NotificationTemplateExample:
+                  value:
+                    id: 1
+                    name: 任务到期提醒
+                    type: email
+                    title_template: 任务 {{ task.title }} 即将到期
+                    content_template: 您的任务 {{ task.title }} 将在 {{ task.due_date }}
+                      到期，请及时处理。
+                    created_at: '2024-12-09T12:00:00Z'
+                    updated_at: '2024-12-09T12:00:00Z'
+                  summary: NotificationTemplate Example
+          description: ''
+    patch:
+      operationId: api_v1_notifications_templates_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 通知模板.
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedNotificationTemplateRequest'
+            examples:
+              NotificationTemplateExample:
+                value:
+                  id: 1
+                  name: 任务到期提醒
+                  type: email
+                  title_template: 任务 {{ task.title }} 即将到期
+                  content_template: 您的任务 {{ task.title }} 将在 {{ task.due_date }} 到期，请及时处理。
+                  created_at: '2024-12-09T12:00:00Z'
+                  updated_at: '2024-12-09T12:00:00Z'
+                summary: NotificationTemplate Example
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedNotificationTemplateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedNotificationTemplateRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationTemplate'
+              examples:
+                NotificationTemplateExample:
+                  value:
+                    id: 1
+                    name: 任务到期提醒
+                    type: email
+                    title_template: 任务 {{ task.title }} 即将到期
+                    content_template: 您的任务 {{ task.title }} 将在 {{ task.due_date }}
+                      到期，请及时处理。
+                    created_at: '2024-12-09T12:00:00Z'
+                    updated_at: '2024-12-09T12:00:00Z'
+                  summary: NotificationTemplate Example
+          description: ''
+    delete:
+      operationId: api_v1_notifications_templates_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this 通知模板.
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '204':
+          description: No response body
+  /api/v1/tasks/categories/:
+    get:
+      operationId: api_v1_tasks_categories_list
+      summary: 获取分类列表
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - 任务分类
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          description: 成功获取分类列表
+    post:
+      operationId: api_v1_tasks_categories_create
+      summary: 创建分类
+      tags:
+      - 任务分类
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryRequest'
+            examples:
+              CreateCategoryExample:
+                value:
+                  name: 学习
+                  color: '#3357FF'
+                  icon: study
+                  order: 3
+                summary: Create Category Example
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CategoryRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CategoryRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+              examples:
+                CreateCategoryExample:
+                  value:
+                    name: 学习
+                    color: '#3357FF'
+                    icon: study
+                    order: 3
+                  summary: Create Category Example
+          description: ''
+  /api/v1/tasks/categories/{id}/:
+    get:
+      operationId: api_v1_tasks_categories_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+              examples:
+                CategoryExample:
+                  value:
+                    id: 1
+                    user: 1
+                    name: 工作
+                    color: '#FF5733'
+                    icon: work
+                    order: 1
+                  summary: Category Example
+          description: ''
+    put:
+      operationId: api_v1_tasks_categories_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryRequest'
+            examples:
+              CategoryExample:
+                value:
+                  id: 1
+                  user: 1
+                  name: 工作
+                  color: '#FF5733'
+                  icon: work
+                  order: 1
+                summary: Category Example
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CategoryRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CategoryRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+              examples:
+                CategoryExample:
+                  value:
+                    id: 1
+                    user: 1
+                    name: 工作
+                    color: '#FF5733'
+                    icon: work
+                    order: 1
+                  summary: Category Example
+          description: ''
+    patch:
+      operationId: api_v1_tasks_categories_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCategoryRequest'
+            examples:
+              CategoryExample:
+                value:
+                  id: 1
+                  user: 1
+                  name: 工作
+                  color: '#FF5733'
+                  icon: work
+                  order: 1
+                summary: Category Example
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCategoryRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCategoryRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+              examples:
+                CategoryExample:
+                  value:
+                    id: 1
+                    user: 1
+                    name: 工作
+                    color: '#FF5733'
+                    icon: work
+                    order: 1
+                  summary: Category Example
+          description: ''
+    delete:
+      operationId: api_v1_tasks_categories_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '204':
+          description: No response body
+  /api/v1/tasks/tags/:
+    get:
+      operationId: api_v1_tasks_tags_list
+      summary: 获取标签列表
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - 任务标签
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          description: 成功获取标签列表
+    post:
+      operationId: api_v1_tasks_tags_create
+      summary: 创建标签
+      tags:
+      - 任务标签
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TagRequest'
+            examples:
+              CreateTagExample:
+                value:
+                  name: 个人
+                  color: '#0033FF'
+                summary: Create Tag Example
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TagRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TagRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tag'
+              examples:
+                CreateTagExample:
+                  value:
+                    name: 个人
+                    color: '#0033FF'
+                  summary: Create Tag Example
+          description: ''
+  /api/v1/tasks/tags/{id}/:
+    get:
+      operationId: api_v1_tasks_tags_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tag'
+              examples:
+                TagExample:
+                  value:
+                    id: 1
+                    user: 1
+                    name: 重要
+                    color: '#FF0000'
+                  summary: Tag Example
+          description: ''
+    put:
+      operationId: api_v1_tasks_tags_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TagRequest'
+            examples:
+              TagExample:
+                value:
+                  id: 1
+                  user: 1
+                  name: 重要
+                  color: '#FF0000'
+                summary: Tag Example
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TagRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TagRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tag'
+              examples:
+                TagExample:
+                  value:
+                    id: 1
+                    user: 1
+                    name: 重要
+                    color: '#FF0000'
+                  summary: Tag Example
+          description: ''
+    patch:
+      operationId: api_v1_tasks_tags_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedTagRequest'
+            examples:
+              TagExample:
+                value:
+                  id: 1
+                  user: 1
+                  name: 重要
+                  color: '#FF0000'
+                summary: Tag Example
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedTagRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedTagRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tag'
+              examples:
+                TagExample:
+                  value:
+                    id: 1
+                    user: 1
+                    name: 重要
+                    color: '#FF0000'
+                  summary: Tag Example
+          description: ''
+    delete:
+      operationId: api_v1_tasks_tags_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '204':
+          description: No response body
+  /api/v1/tasks/tasks/:
+    get:
+      operationId: api_v1_tasks_tasks_list
+      summary: 获取任务列表
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - 任务管理
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          description: 成功获取任务列表
+    post:
+      operationId: api_v1_tasks_tasks_create
+      summary: 创建任务
+      tags:
+      - 任务管理
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskRequest'
+            examples:
+              CreateTaskExample:
+                value:
+                  title: 准备会议材料
+                  description: 准备下周一的项目进度会议材料
+                  due_date: '2024-12-15T14:00:00Z'
+                  priority: 1
+                  category: 1
+                  tag_ids:
+                  - 1
+                  is_important: true
+                summary: Create Task Example
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TaskRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TaskRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+              examples:
+                CreateTaskExample:
+                  value:
+                    title: 准备会议材料
+                    description: 准备下周一的项目进度会议材料
+                    due_date: '2024-12-15T14:00:00Z'
+                    priority: 1
+                    category: 1
+                    tag_ids:
+                    - 1
+                    is_important: true
+                  summary: Create Task Example
+          description: ''
+  /api/v1/tasks/tasks/{id}/:
+    get:
+      operationId: api_v1_tasks_tasks_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+              examples:
+                TaskExample:
+                  value:
+                    id: 1
+                    user: 1
+                    title: 完成项目报告
+                    description: 准备第四季度项目总结报告
+                    due_date: '2024-12-31T23:59:59Z'
+                    priority: 2
+                    status: pending
+                    category: 1
+                    tags:
+                    - 1
+                    - 2
+                    tag_ids:
+                    - 1
+                    - 2
+                    repeat_type: none
+                    repeat_config: null
+                    reminder_time: '2024-12-31T10:00:00Z'
+                    completed_at: null
+                    is_important: true
+                    order: 1
+                    created_at: '2024-12-09T12:00:00Z'
+                    updated_at: '2024-12-09T12:00:00Z'
+                    comments: []
+                  summary: Task Example
+          description: ''
+    put:
+      operationId: api_v1_tasks_tasks_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskRequest'
+            examples:
+              TaskExample:
+                value:
+                  id: 1
+                  user: 1
+                  title: 完成项目报告
+                  description: 准备第四季度项目总结报告
+                  due_date: '2024-12-31T23:59:59Z'
+                  priority: 2
+                  status: pending
+                  category: 1
+                  tags:
+                  - 1
+                  - 2
+                  tag_ids:
+                  - 1
+                  - 2
+                  repeat_type: none
+                  repeat_config: null
+                  reminder_time: '2024-12-31T10:00:00Z'
+                  completed_at: null
+                  is_important: true
+                  order: 1
+                  created_at: '2024-12-09T12:00:00Z'
+                  updated_at: '2024-12-09T12:00:00Z'
+                  comments: []
+                summary: Task Example
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TaskRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TaskRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+              examples:
+                TaskExample:
+                  value:
+                    id: 1
+                    user: 1
+                    title: 完成项目报告
+                    description: 准备第四季度项目总结报告
+                    due_date: '2024-12-31T23:59:59Z'
+                    priority: 2
+                    status: pending
+                    category: 1
+                    tags:
+                    - 1
+                    - 2
+                    tag_ids:
+                    - 1
+                    - 2
+                    repeat_type: none
+                    repeat_config: null
+                    reminder_time: '2024-12-31T10:00:00Z'
+                    completed_at: null
+                    is_important: true
+                    order: 1
+                    created_at: '2024-12-09T12:00:00Z'
+                    updated_at: '2024-12-09T12:00:00Z'
+                    comments: []
+                  summary: Task Example
+          description: ''
+    patch:
+      operationId: api_v1_tasks_tasks_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedTaskRequest'
+            examples:
+              TaskExample:
+                value:
+                  id: 1
+                  user: 1
+                  title: 完成项目报告
+                  description: 准备第四季度项目总结报告
+                  due_date: '2024-12-31T23:59:59Z'
+                  priority: 2
+                  status: pending
+                  category: 1
+                  tags:
+                  - 1
+                  - 2
+                  tag_ids:
+                  - 1
+                  - 2
+                  repeat_type: none
+                  repeat_config: null
+                  reminder_time: '2024-12-31T10:00:00Z'
+                  completed_at: null
+                  is_important: true
+                  order: 1
+                  created_at: '2024-12-09T12:00:00Z'
+                  updated_at: '2024-12-09T12:00:00Z'
+                  comments: []
+                summary: Task Example
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedTaskRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedTaskRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+              examples:
+                TaskExample:
+                  value:
+                    id: 1
+                    user: 1
+                    title: 完成项目报告
+                    description: 准备第四季度项目总结报告
+                    due_date: '2024-12-31T23:59:59Z'
+                    priority: 2
+                    status: pending
+                    category: 1
+                    tags:
+                    - 1
+                    - 2
+                    tag_ids:
+                    - 1
+                    - 2
+                    repeat_type: none
+                    repeat_config: null
+                    reminder_time: '2024-12-31T10:00:00Z'
+                    completed_at: null
+                    is_important: true
+                    order: 1
+                    created_at: '2024-12-09T12:00:00Z'
+                    updated_at: '2024-12-09T12:00:00Z'
+                    comments: []
+                  summary: Task Example
+          description: ''
+    delete:
+      operationId: api_v1_tasks_tasks_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '204':
+          description: No response body
+  /api/v1/tasks/tasks/{task_pk}/comments/:
+    get:
+      operationId: api_v1_tasks_tasks_comments_list
+      summary: 获取任务评论列表
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: path
+        name: task_pk
+        schema:
+          type: string
+        required: true
+      tags:
+      - 任务评论
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          description: 成功获取任务评论列表
+    post:
+      operationId: api_v1_tasks_tasks_comments_create
+      summary: 创建任务评论
+      parameters:
+      - in: path
+        name: task_pk
+        schema:
+          type: string
+        required: true
+      tags:
+      - 任务评论
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskCommentRequest'
+            examples:
+              CreateTaskCommentExample:
+                value:
+                  task: 1
+                  content: 这部分需要修改一下格式
+                summary: Create Task Comment Example
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TaskCommentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TaskCommentRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskComment'
+              examples:
+                CreateTaskCommentExample:
+                  value:
+                    task: 1
+                    content: 这部分需要修改一下格式
+                  summary: Create Task Comment Example
+          description: ''
+  /api/v1/tasks/tasks/{task_pk}/comments/{id}/:
+    get:
+      operationId: api_v1_tasks_tasks_comments_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: task_pk
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskComment'
+              examples:
+                TaskCommentExample:
+                  value:
+                    id: 1
+                    task: 1
+                    user: 1
+                    content: 已经完成初稿，请查看
+                    created_at: '2024-12-09T12:00:00Z'
+                    updated_at: '2024-12-09T12:00:00Z'
+                  summary: TaskComment Example
+          description: ''
+    put:
+      operationId: api_v1_tasks_tasks_comments_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: task_pk
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskCommentRequest'
+            examples:
+              TaskCommentExample:
+                value:
+                  id: 1
+                  task: 1
+                  user: 1
+                  content: 已经完成初稿，请查看
+                  created_at: '2024-12-09T12:00:00Z'
+                  updated_at: '2024-12-09T12:00:00Z'
+                summary: TaskComment Example
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TaskCommentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TaskCommentRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskComment'
+              examples:
+                TaskCommentExample:
+                  value:
+                    id: 1
+                    task: 1
+                    user: 1
+                    content: 已经完成初稿，请查看
+                    created_at: '2024-12-09T12:00:00Z'
+                    updated_at: '2024-12-09T12:00:00Z'
+                  summary: TaskComment Example
+          description: ''
+    patch:
+      operationId: api_v1_tasks_tasks_comments_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: task_pk
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedTaskCommentRequest'
+            examples:
+              TaskCommentExample:
+                value:
+                  id: 1
+                  task: 1
+                  user: 1
+                  content: 已经完成初稿，请查看
+                  created_at: '2024-12-09T12:00:00Z'
+                  updated_at: '2024-12-09T12:00:00Z'
+                summary: TaskComment Example
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedTaskCommentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedTaskCommentRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskComment'
+              examples:
+                TaskCommentExample:
+                  value:
+                    id: 1
+                    task: 1
+                    user: 1
+                    content: 已经完成初稿，请查看
+                    created_at: '2024-12-09T12:00:00Z'
+                    updated_at: '2024-12-09T12:00:00Z'
+                  summary: TaskComment Example
+          description: ''
+    delete:
+      operationId: api_v1_tasks_tasks_comments_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: task_pk
+        schema:
+          type: string
+        required: true
+      tags:
+      - api
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - Bearer:
+          type: apiKey
+          name: Authorization
+          in: header
+          description: 在此输入 "Bearer your-token"，注意 Bearer 和 token 之间有一个空格
+      responses:
+        '204':
+          description: No response body
+components:
+  schemas:
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          title: 分类名称
+          maxLength: 50
+        color:
+          type: string
+          title: 颜色
+          maxLength: 7
+        icon:
+          type: string
+          nullable: true
+          title: 图标
+          maxLength: 50
+        order:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          title: 排序
+      required:
+      - id
+      - name
+      - user
+    CategoryRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          title: 分类名称
+          maxLength: 50
+        color:
+          type: string
+          minLength: 1
+          title: 颜色
+          maxLength: 7
+        icon:
+          type: string
+          nullable: true
+          title: 图标
+          maxLength: 50
+        order:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          title: 排序
+      required:
+      - name
+    LoginRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 1
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - password
+      - username
+    Notification:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+        template:
+          type: integer
+          nullable: true
+        title:
+          type: string
+          title: 标题
+          maxLength: 200
+        content:
+          type: string
+          title: 内容
+        status:
+          allOf:
+          - $ref: '#/components/schemas/NotificationStatusEnum'
+          title: 状态
+        error_message:
+          type: string
+          nullable: true
+          title: 错误信息
+        scheduled_time:
+          type: string
+          format: date-time
+          nullable: true
+          title: 计划发送时间
+        sent_time:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: 发送时间
+        read_time:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+          title: 阅读时间
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: 创建时间
+      required:
+      - content
+      - created_at
+      - id
+      - read_time
+      - sent_time
+      - title
+      - user
+    NotificationDevice:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+        device:
+          type: integer
+        push_token:
+          type: string
+          nullable: true
+          title: 推送令牌
+          maxLength: 255
+        is_enabled:
+          type: boolean
+          title: 是否启用
+        last_active:
+          type: string
+          format: date-time
+          nullable: true
+          title: 最后活跃时间
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: 创建时间
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: 更新时间
+      required:
+      - created_at
+      - device
+      - id
+      - updated_at
+      - user
+    NotificationDeviceRequest:
+      type: object
+      properties:
+        user:
+          type: integer
+        device:
+          type: integer
+        push_token:
+          type: string
+          nullable: true
+          title: 推送令牌
+          maxLength: 255
+        is_enabled:
+          type: boolean
+          title: 是否启用
+        last_active:
+          type: string
+          format: date-time
+          nullable: true
+          title: 最后活跃时间
+      required:
+      - device
+      - user
+    NotificationRequest:
+      type: object
+      properties:
+        user:
+          type: integer
+        template:
+          type: integer
+          nullable: true
+        title:
+          type: string
+          minLength: 1
+          title: 标题
+          maxLength: 200
+        content:
+          type: string
+          minLength: 1
+          title: 内容
+        status:
+          allOf:
+          - $ref: '#/components/schemas/NotificationStatusEnum'
+          title: 状态
+        error_message:
+          type: string
+          nullable: true
+          title: 错误信息
+        scheduled_time:
+          type: string
+          format: date-time
+          nullable: true
+          title: 计划发送时间
+      required:
+      - content
+      - title
+      - user
+    NotificationStatusEnum:
+      enum:
+      - pending
+      - sent
+      - failed
+      - read
+      type: string
+      description: |-
+        * `pending` - 待发送
+        * `sent` - 已发送
+        * `failed` - 发送失败
+        * `read` - 已读
+    NotificationTemplate:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          title: 模板名称
+          maxLength: 100
+        type:
+          allOf:
+          - $ref: '#/components/schemas/TypeEnum'
+          title: 类型
+        title_template:
+          type: string
+          title: 标题模板
+          maxLength: 200
+        content_template:
+          type: string
+          title: 内容模板
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: 创建时间
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: 更新时间
+      required:
+      - content_template
+      - created_at
+      - id
+      - name
+      - title_template
+      - type
+      - updated_at
+    NotificationTemplateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          title: 模板名称
+          maxLength: 100
+        type:
+          allOf:
+          - $ref: '#/components/schemas/TypeEnum'
+          title: 类型
+        title_template:
+          type: string
+          minLength: 1
+          title: 标题模板
+          maxLength: 200
+        content_template:
+          type: string
+          minLength: 1
+          title: 内容模板
+      required:
+      - content_template
+      - name
+      - title_template
+      - type
+    PaginatedUserDeviceList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserDevice'
+    PaginatedUserFeedbackList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserFeedback'
+    PaginatedUserList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+    PaginatedUserProfileList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserProfile'
+    PasswordResetConfirmRequest:
+      type: object
+      description: 密码重置确认序列化器
+      properties:
+        token:
+          type: string
+          minLength: 1
+        new_password:
+          type: string
+          writeOnly: true
+          minLength: 1
+        confirm_password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - confirm_password
+      - new_password
+      - token
+    PasswordResetRequestRequest:
+      type: object
+      description: 密码重置请求序列化器
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+      required:
+      - email
+    PatchedCategoryRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          title: 分类名称
+          maxLength: 50
+        color:
+          type: string
+          minLength: 1
+          title: 颜色
+          maxLength: 7
+        icon:
+          type: string
+          nullable: true
+          title: 图标
+          maxLength: 50
+        order:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          title: 排序
+    PatchedNotificationDeviceRequest:
+      type: object
+      properties:
+        user:
+          type: integer
+        device:
+          type: integer
+        push_token:
+          type: string
+          nullable: true
+          title: 推送令牌
+          maxLength: 255
+        is_enabled:
+          type: boolean
+          title: 是否启用
+        last_active:
+          type: string
+          format: date-time
+          nullable: true
+          title: 最后活跃时间
+    PatchedNotificationRequest:
+      type: object
+      properties:
+        user:
+          type: integer
+        template:
+          type: integer
+          nullable: true
+        title:
+          type: string
+          minLength: 1
+          title: 标题
+          maxLength: 200
+        content:
+          type: string
+          minLength: 1
+          title: 内容
+        status:
+          allOf:
+          - $ref: '#/components/schemas/NotificationStatusEnum'
+          title: 状态
+        error_message:
+          type: string
+          nullable: true
+          title: 错误信息
+        scheduled_time:
+          type: string
+          format: date-time
+          nullable: true
+          title: 计划发送时间
+    PatchedNotificationTemplateRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          title: 模板名称
+          maxLength: 100
+        type:
+          allOf:
+          - $ref: '#/components/schemas/TypeEnum'
+          title: 类型
+        title_template:
+          type: string
+          minLength: 1
+          title: 标题模板
+          maxLength: 200
+        content_template:
+          type: string
+          minLength: 1
+          title: 内容模板
+    PatchedTagRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          title: 标签名称
+          maxLength: 50
+        color:
+          type: string
+          minLength: 1
+          title: 颜色
+          maxLength: 7
+    PatchedTaskCommentRequest:
+      type: object
+      properties:
+        task:
+          type: integer
+        content:
+          type: string
+          minLength: 1
+          title: 内容
+    PatchedTaskRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          title: 标题
+          maxLength: 200
+        description:
+          type: string
+          nullable: true
+          title: 描述
+        due_date:
+          type: string
+          format: date-time
+          nullable: true
+          title: 截止时间
+        priority:
+          allOf:
+          - $ref: '#/components/schemas/PriorityEnum'
+          title: 优先级
+          minimum: -2147483648
+          maximum: 2147483647
+        status:
+          allOf:
+          - $ref: '#/components/schemas/TaskStatusEnum'
+          title: 状态
+        category:
+          type: integer
+          nullable: true
+        tag_ids:
+          type: array
+          items:
+            type: integer
+            writeOnly: true
+          writeOnly: true
+        repeat_type:
+          allOf:
+          - $ref: '#/components/schemas/RepeatTypeEnum'
+          title: 重复类型
+        repeat_config:
+          nullable: true
+          title: 重复配置
+        reminder_time:
+          type: string
+          format: date-time
+          nullable: true
+          title: 提醒时间
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+          title: 完成时间
+        is_important:
+          type: boolean
+          title: 是否重要
+        order:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          title: 排序
+    PatchedUserDeviceRequest:
+      type: object
+      properties:
+        user:
+          type: integer
+        device_id:
+          type: string
+          minLength: 1
+          title: 设备ID
+          maxLength: 100
+        device_name:
+          type: string
+          minLength: 1
+          title: 设备名称
+          maxLength: 100
+        device_type:
+          type: string
+          minLength: 1
+          title: 设备类型
+          maxLength: 50
+        last_sync_time:
+          type: string
+          format: date-time
+          nullable: true
+          title: 最后同步时间
+        is_active:
+          type: boolean
+          title: 是否活跃
+    PatchedUserFeedbackRequest:
+      type: object
+      description: 用户反馈序列化器
+      properties:
+        type:
+          type: string
+          minLength: 1
+          title: 反馈类型
+          maxLength: 20
+        title:
+          type: string
+          minLength: 1
+          title: 标题
+          maxLength: 200
+        content:
+          type: string
+          minLength: 1
+          title: 内容
+    PatchedUserProfileRequest:
+      type: object
+      properties:
+        theme:
+          type: string
+          minLength: 1
+          title: 主题
+          maxLength: 20
+        notification_preferences:
+          title: 通知偏好
+        timezone:
+          type: string
+          minLength: 1
+          title: 时区
+          maxLength: 50
+        language:
+          type: string
+          minLength: 1
+          title: 语言
+          maxLength: 10
+    PatchedUserRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 1
+          title: 用户名
+          description: 必填；长度为150个字符或以下；只能包含字母、数字、特殊字符“@”、“.”、“-”和“_”。
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          title: 电子邮件地址
+          maxLength: 254
+        first_name:
+          type: string
+          title: 名字
+          maxLength: 150
+        last_name:
+          type: string
+          title: 姓氏
+          maxLength: 150
+        avatar:
+          type: string
+          format: binary
+          nullable: true
+          title: 头像
+    PriorityEnum:
+      enum:
+      - 1
+      - 2
+      - 3
+      type: integer
+      description: |-
+        * `1` - 低
+        * `2` - 中
+        * `3` - 高
+    RegisterRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 1
+          title: 用户名
+          description: 必填；长度为150个字符或以下；只能包含字母、数字、特殊字符“@”、“.”、“-”和“_”。
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          title: 电子邮件地址
+          maxLength: 254
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+        confirm_password:
+          type: string
+          writeOnly: true
+          minLength: 1
+        first_name:
+          type: string
+          title: 名字
+          maxLength: 150
+        last_name:
+          type: string
+          title: 姓氏
+          maxLength: 150
+      required:
+      - confirm_password
+      - password
+      - username
+    RepeatTypeEnum:
+      enum:
+      - none
+      - daily
+      - weekly
+      - monthly
+      - yearly
+      - custom
+      type: string
+      description: |-
+        * `none` - 不重复
+        * `daily` - 每天
+        * `weekly` - 每周
+        * `monthly` - 每月
+        * `yearly` - 每年
+        * `custom` - 自定义
+    Tag:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          title: 标签名称
+          maxLength: 50
+        color:
+          type: string
+          title: 颜色
+          maxLength: 7
+      required:
+      - id
+      - name
+      - user
+    TagRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          title: 标签名称
+          maxLength: 50
+        color:
+          type: string
+          minLength: 1
+          title: 颜色
+          maxLength: 7
+      required:
+      - name
+    Task:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          title: 标题
+          maxLength: 200
+        description:
+          type: string
+          nullable: true
+          title: 描述
+        due_date:
+          type: string
+          format: date-time
+          nullable: true
+          title: 截止时间
+        priority:
+          allOf:
+          - $ref: '#/components/schemas/PriorityEnum'
+          title: 优先级
+          minimum: -2147483648
+          maximum: 2147483647
+        status:
+          allOf:
+          - $ref: '#/components/schemas/TaskStatusEnum'
+          title: 状态
+        category:
+          type: integer
+          nullable: true
+        tags:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tag'
+          readOnly: true
+        repeat_type:
+          allOf:
+          - $ref: '#/components/schemas/RepeatTypeEnum'
+          title: 重复类型
+        repeat_config:
+          nullable: true
+          title: 重复配置
+        reminder_time:
+          type: string
+          format: date-time
+          nullable: true
+          title: 提醒时间
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+          title: 完成时间
+        is_important:
+          type: boolean
+          title: 是否重要
+        order:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          title: 排序
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: 创建时间
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: 更新时间
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/TaskComment'
+          readOnly: true
+      required:
+      - comments
+      - created_at
+      - id
+      - tags
+      - title
+      - updated_at
+      - user
+    TaskComment:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        task:
+          type: integer
+        user:
+          type: integer
+          readOnly: true
+        content:
+          type: string
+          title: 内容
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: 创建时间
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: 更新时间
+      required:
+      - content
+      - created_at
+      - id
+      - task
+      - updated_at
+      - user
+    TaskCommentRequest:
+      type: object
+      properties:
+        task:
+          type: integer
+        content:
+          type: string
+          minLength: 1
+          title: 内容
+      required:
+      - content
+      - task
+    TaskRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+          title: 标题
+          maxLength: 200
+        description:
+          type: string
+          nullable: true
+          title: 描述
+        due_date:
+          type: string
+          format: date-time
+          nullable: true
+          title: 截止时间
+        priority:
+          allOf:
+          - $ref: '#/components/schemas/PriorityEnum'
+          title: 优先级
+          minimum: -2147483648
+          maximum: 2147483647
+        status:
+          allOf:
+          - $ref: '#/components/schemas/TaskStatusEnum'
+          title: 状态
+        category:
+          type: integer
+          nullable: true
+        tag_ids:
+          type: array
+          items:
+            type: integer
+            writeOnly: true
+          writeOnly: true
+        repeat_type:
+          allOf:
+          - $ref: '#/components/schemas/RepeatTypeEnum'
+          title: 重复类型
+        repeat_config:
+          nullable: true
+          title: 重复配置
+        reminder_time:
+          type: string
+          format: date-time
+          nullable: true
+          title: 提醒时间
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+          title: 完成时间
+        is_important:
+          type: boolean
+          title: 是否重要
+        order:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          title: 排序
+      required:
+      - title
+    TaskStatusEnum:
+      enum:
+      - pending
+      - in_progress
+      - completed
+      - archived
+      type: string
+      description: |-
+        * `pending` - 待处理
+        * `in_progress` - 进行中
+        * `completed` - 已完成
+        * `archived` - 已归档
+    TokenObtainPair:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+          readOnly: true
+      required:
+      - access
+      - refresh
+    TokenObtainPairRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          writeOnly: true
+          minLength: 1
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - password
+      - username
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+      required:
+      - access
+      - refresh
+    TokenRefreshRequest:
+      type: object
+      properties:
+        refresh:
+          type: string
+          minLength: 1
+      required:
+      - refresh
+    TokenVerifyRequest:
+      type: object
+      properties:
+        token:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - token
+    TypeEnum:
+      enum:
+      - email
+      - push
+      - sms
+      type: string
+      description: |-
+        * `email` - 邮件
+        * `push` - 推送
+        * `sms` - 短信
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        username:
+          type: string
+          title: 用户名
+          description: 必填；长度为150个字符或以下；只能包含字母、数字、特殊字符“@”、“.”、“-”和“_”。
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          title: 电子邮件地址
+          maxLength: 254
+        first_name:
+          type: string
+          title: 名字
+          maxLength: 150
+        last_name:
+          type: string
+          title: 姓氏
+          maxLength: 150
+        is_active:
+          type: boolean
+          readOnly: true
+          title: 有效
+          description: 指明用户是否被认为是活跃的。以反选代替删除帐号。
+        avatar:
+          type: string
+          format: uri
+          nullable: true
+          title: 头像
+      required:
+      - id
+      - is_active
+      - username
+    UserDevice:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+        device_id:
+          type: string
+          title: 设备ID
+          maxLength: 100
+        device_name:
+          type: string
+          title: 设备名称
+          maxLength: 100
+        device_type:
+          type: string
+          title: 设备类型
+          maxLength: 50
+        last_sync_time:
+          type: string
+          format: date-time
+          nullable: true
+          title: 最后同步时间
+        is_active:
+          type: boolean
+          title: 是否活跃
+      required:
+      - device_id
+      - device_name
+      - device_type
+      - id
+      - user
+    UserDeviceRequest:
+      type: object
+      properties:
+        user:
+          type: integer
+        device_id:
+          type: string
+          minLength: 1
+          title: 设备ID
+          maxLength: 100
+        device_name:
+          type: string
+          minLength: 1
+          title: 设备名称
+          maxLength: 100
+        device_type:
+          type: string
+          minLength: 1
+          title: 设备类型
+          maxLength: 50
+        last_sync_time:
+          type: string
+          format: date-time
+          nullable: true
+          title: 最后同步时间
+        is_active:
+          type: boolean
+          title: 是否活跃
+      required:
+      - device_id
+      - device_name
+      - device_type
+      - user
+    UserFeedback:
+      type: object
+      description: 用户反馈序列化器
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        type:
+          type: string
+          title: 反馈类型
+          maxLength: 20
+        title:
+          type: string
+          title: 标题
+          maxLength: 200
+        content:
+          type: string
+          title: 内容
+        status:
+          type: string
+          readOnly: true
+          title: 状态
+        response:
+          type: string
+          readOnly: true
+          nullable: true
+          title: 回复
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: 创建时间
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: 更新时间
+      required:
+      - content
+      - created_at
+      - id
+      - response
+      - status
+      - title
+      - type
+      - updated_at
+    UserFeedbackRequest:
+      type: object
+      description: 用户反馈序列化器
+      properties:
+        type:
+          type: string
+          minLength: 1
+          title: 反馈类型
+          maxLength: 20
+        title:
+          type: string
+          minLength: 1
+          title: 标题
+          maxLength: 200
+        content:
+          type: string
+          minLength: 1
+          title: 内容
+      required:
+      - content
+      - title
+      - type
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+          readOnly: true
+        theme:
+          type: string
+          title: 主题
+          maxLength: 20
+        notification_preferences:
+          title: 通知偏好
+        timezone:
+          type: string
+          title: 时区
+          maxLength: 50
+        language:
+          type: string
+          title: 语言
+          maxLength: 10
+      required:
+      - id
+      - user
+    UserProfileRequest:
+      type: object
+      properties:
+        theme:
+          type: string
+          minLength: 1
+          title: 主题
+          maxLength: 20
+        notification_preferences:
+          title: 通知偏好
+        timezone:
+          type: string
+          minLength: 1
+          title: 时区
+          maxLength: 50
+        language:
+          type: string
+          minLength: 1
+          title: 语言
+          maxLength: 10
+    UserRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 1
+          title: 用户名
+          description: 必填；长度为150个字符或以下；只能包含字母、数字、特殊字符“@”、“.”、“-”和“_”。
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          title: 电子邮件地址
+          maxLength: 254
+        first_name:
+          type: string
+          title: 名字
+          maxLength: 150
+        last_name:
+          type: string
+          title: 姓氏
+          maxLength: 150
+        avatar:
+          type: string
+          format: binary
+          nullable: true
+          title: 头像
+      required:
+      - username
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

@@ -237,6 +237,11 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
+    'DEFAULT_PARSER_CLASSES': [
+        'rest_framework.parsers.JSONParser',
+        'rest_framework.parsers.MultiPartParser',
+        'rest_framework.parsers.FormParser',
+    ],
 }
 
 # JWT Settings
@@ -267,6 +272,10 @@ SPECTACULAR_SETTINGS = {
     'DESCRIPTION': 'Todo 应用的 API 文档',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SWAGGER_UI_SETTINGS': {
+        'persistAuthorization': True,
+    },
     'SECURITY': [
         {
             'Bearer': {
@@ -277,9 +286,6 @@ SPECTACULAR_SETTINGS = {
             }
         }
     ],
-    'SWAGGER_UI_SETTINGS': {
-        'persistAuthorization': True,
-    },
 }
 
 # OAuth2 settings
@@ -307,10 +313,10 @@ USE_I18N = True
 USE_TZ = True
 
 # Static files
-STATIC_URL = 'static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-MEDIA_URL = 'media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Field Encryption
 FIELD_ENCRYPTION_KEY = 'oMSLguTaISPYnPRUJFHFxs30FkxZ737tdwTwDZOsOC4='
@@ -333,3 +339,6 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# 确保上传目录存在
+AVATAR_UPLOAD_PATH = 'images/avatar'

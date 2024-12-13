@@ -20,6 +20,9 @@ from django.core.mail import send_mail
 from django.utils import timezone
 import random
 import string
+import os
+import uuid
+from rest_framework.parsers import MultiPartParser
 
 User = get_user_model()
 
@@ -119,6 +122,48 @@ User = get_user_model()
         tags=['用户认证'],
         request=PasswordResetConfirmSerializer,
         responses={200: OpenApiResponse(description="密码已重置")}
+    ),
+    upload_avatar=extend_schema(
+        summary="上传用户头像",
+        tags=['用户管理'],
+        request={
+            'multipart/form-data': {
+                'type': 'object',
+                'properties': {
+                    'avatar': {
+                        'type': 'string',
+                        'format': 'binary',
+                        'description': '用户头像文件'
+                    }
+                },
+                'required': ['avatar']
+            }
+        },
+        responses={
+            200: OpenApiResponse(
+                description='头像上传成功',
+                examples=[
+                    OpenApiExample(
+                        'Success Response',
+                        value={
+                            'message': '头像上传成功',
+                            'avatar_url': 'http://example.com/media/images/avatar/username_12345678.jpg'
+                        }
+                    )
+                ]
+            ),
+            400: OpenApiResponse(
+                description='请求错误',
+                examples=[
+                    OpenApiExample(
+                        'Error Response',
+                        value={
+                            'error': '没有提供头像文件'
+                        }
+                    )
+                ]
+            )
+        }
     )
 )
 class UserViewSet(viewsets.ModelViewSet):
@@ -338,6 +383,50 @@ class UserViewSet(viewsets.ModelViewSet):
                 {'error': '验证码验证失败'},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+    @action(detail=False, methods=['POST'], parser_classes=[MultiPartParser])
+    def upload_avatar(self, request):
+        """
+        上传用户头像
+        """
+        try:
+            avatar_file = request.FILES.get('avatar')
+            if not avatar_file:
+                return Response({'error': '没有提供头像文件'}, status=status.HTTP_400_BAD_REQUEST)
+
+            # 创建上传目录
+            upload_path = os.path.join(settings.MEDIA_ROOT, settings.AVATAR_UPLOAD_PATH)
+            os.makedirs(upload_path, exist_ok=True)
+
+            # 生成文件名
+            file_extension = os.path.splitext(avatar_file.name)[1]
+            new_filename = f"{request.user.username}_{uuid.uuid4().hex[:8]}{file_extension}"
+            file_path = os.path.join(upload_path, new_filename)
+
+            # 删除旧头像
+            if request.user.avatar:
+                old_avatar_path = os.path.join(settings.MEDIA_ROOT, str(request.user.avatar))
+                if os.path.exists(old_avatar_path):
+                    os.remove(old_avatar_path)
+
+            # 保存新头像
+            with open(file_path, 'wb+') as destination:
+                for chunk in avatar_file.chunks():
+                    destination.write(chunk)
+
+            # 更新用户头像字段
+            relative_path = os.path.join(settings.AVATAR_UPLOAD_PATH, new_filename)
+            request.user.avatar = relative_path
+            request.user.save()
+
+            return Response({
+                'message': '头像上传成功',
+                'avatar_url': request.build_absolute_uri(settings.MEDIA_URL + relative_path)
+            })
+
+        except Exception as e:
+            return Response({'error': f'头像上传失败: {str(e)}'}, 
+                          status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 @extend_schema_view(
     list=extend_schema(tags=['用户配置']),

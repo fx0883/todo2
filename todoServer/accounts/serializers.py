@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
 from .models import User, UserProfile, UserDevice, VerificationCode, UserFeedback
+from django.conf import settings
 
 @extend_schema_serializer(
     examples=[
@@ -12,16 +13,26 @@ from .models import User, UserProfile, UserDevice, VerificationCode, UserFeedbac
                 'email': 'john@example.com',
                 'first_name': 'John',
                 'last_name': 'Doe',
-                'is_active': True
+                'is_active': True,
+                'avatar': 'http://example.com/media/avatars/user.jpg'
             }
         )
     ]
 )
 class UserSerializer(serializers.ModelSerializer):
+    avatar = serializers.SerializerMethodField()
+
     class Meta:
         model = User
         fields = ('id', 'username', 'email', 'first_name', 'last_name', 'is_active', 'avatar')
         read_only_fields = ('id', 'is_active')
+
+    def get_avatar(self, obj):
+        if obj.avatar:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.avatar.url)
+        return None
 
 @extend_schema_serializer(
     examples=[

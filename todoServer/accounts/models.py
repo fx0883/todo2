@@ -3,6 +3,16 @@ from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
 from encrypted_model_fields.fields import EncryptedCharField
 from simple_history.models import HistoricalRecords
+import uuid
+
+def user_avatar_path(instance, filename):
+    """为每个用户生成独特的头像保存路径"""
+    # 获取文件扩展名
+    ext = filename.split('.')[-1]
+    # 生成新的文件名：username_随机字符串.扩展名
+    filename = f"{instance.username}_{uuid.uuid4().hex[:8]}.{ext}"
+    # 返回完整的上传路径
+    return f'images/avatar/{filename}'
 
 class User(AbstractUser):
     """
@@ -10,7 +20,12 @@ class User(AbstractUser):
     """
     phone = models.CharField(_('手机号'), max_length=11, unique=True, null=True, blank=True)
     wechat_id = models.CharField(_('微信ID'), max_length=100, unique=True, null=True, blank=True)
-    avatar = models.ImageField(_('头像'), upload_to='avatars/', null=True, blank=True)
+    avatar = models.ImageField(
+        _('头像'),
+        upload_to=user_avatar_path,  # 使用自定义的路径生成函数
+        null=True,
+        blank=True
+    )
     is_email_verified = models.BooleanField(_('邮箱是否验证'), default=False)
     last_login_ip = models.GenericIPAddressField(_('最后登录IP'), null=True, blank=True)
     created_at = models.DateTimeField(_('创建时间'), auto_now_add=True)

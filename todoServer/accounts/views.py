@@ -290,7 +290,7 @@ class UserViewSet(viewsets.ModelViewSet):
     )
     @action(detail=False, methods=['get'])
     def me(self, request):
-        serializer = UserSerializer(request.user)
+        serializer = UserSerializer(request.user, context={'request': request})
         return Response(serializer.data)
 
     @extend_schema(
@@ -394,39 +394,34 @@ class UserViewSet(viewsets.ModelViewSet):
             if not avatar_file:
                 return Response({'error': '没有提供头像文件'}, status=status.HTTP_400_BAD_REQUEST)
 
-            # 创建上传目录
-            upload_path = os.path.join(settings.MEDIA_ROOT, settings.AVATAR_UPLOAD_PATH)
-            os.makedirs(upload_path, exist_ok=True)
+            # 删除旧头像文件
+            if request.user.avatar:
+                request.user.avatar.delete(save=False)  # 删除文件但不保存模型
 
             # 生成文件名
             file_extension = os.path.splitext(avatar_file.name)[1]
             new_filename = f"{request.user.username}_{uuid.uuid4().hex[:8]}{file_extension}"
-            file_path = os.path.join(upload_path, new_filename)
+            
+            # 直接使用 ImageField 保存文件
+            request.user.avatar.save(
+                new_filename,
+                avatar_file,
+                save=True  # 自动保存模型
+            )
 
-            # 删除旧头像
-            if request.user.avatar:
-                old_avatar_path = os.path.join(settings.MEDIA_ROOT, str(request.user.avatar))
-                if os.path.exists(old_avatar_path):
-                    os.remove(old_avatar_path)
-
-            # 保存新头像
-            with open(file_path, 'wb+') as destination:
-                for chunk in avatar_file.chunks():
-                    destination.write(chunk)
-
-            # 更新用户头像字段
-            relative_path = os.path.join(settings.AVATAR_UPLOAD_PATH, new_filename)
-            request.user.avatar = relative_path
-            request.user.save()
+            # 构建完整的URL
+            avatar_url = request.build_absolute_uri(request.user.avatar.url)
 
             return Response({
                 'message': '头像上传成功',
-                'avatar_url': request.build_absolute_uri(settings.MEDIA_URL + relative_path)
+                'avatar_url': avatar_url
             })
 
         except Exception as e:
-            return Response({'error': f'头像上传失败: {str(e)}'}, 
-                          status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {'error': f'头像上传失败: {str(e)}'}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 @extend_schema_view(
     list=extend_schema(tags=['用户配置']),

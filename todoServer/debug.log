@@ -7515,3 +7515,69 @@ Traceback (most recent call last):
 rest_framework_simplejwt.exceptions.InvalidToken: {'detail': ErrorDetail(string='此令牌对任何类型的令牌无效', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 'token_type': ErrorDetail(string='access', code='token_not_valid'), 'message': ErrorDetail(string='令牌无效或已过期', code='token_not_valid')}]}
 
     
+ERROR 2024-12-13 18:30:26,233 utils 23204 20148 
+API Error Details:
+View: UserViewSet
+URL: /api/v1/accounts/users/me/
+Method: GET
+User: AnonymousUser
+Error Type: NotAuthenticated
+Error Message: 身份认证信息未提供。
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 415, in initial
+    self.check_permissions(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 333, in check_permissions
+    self.permission_denied(
+    ~~~~~~~~~~~~~~~~~~~~~~^
+        request,
+        ^^^^^^^^
+        message=getattr(permission, 'message', None),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        code=getattr(permission, 'code', None)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 174, in permission_denied
+    raise exceptions.NotAuthenticated()
+rest_framework.exceptions.NotAuthenticated: 身份认证信息未提供。
+
+    
+ERROR 2024-12-13 18:48:53,986 utils 5872 22472 
+API Error Details:
+View: UserViewSet
+URL: /api/v1/accounts/users/me/
+Method: GET
+User: fx0883
+Error Type: TypeError
+Error Message: can only concatenate str (not "ImageFieldFile") to str
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "E:\Github\todo2\todoServer\accounts\views.py", line 294, in me
+    return Response(serializer.data)
+                    ^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\serializers.py", line 555, in data
+    ret = super().data
+          ^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\serializers.py", line 253, in data
+    self._data = self.to_representation(self.instance)
+                 ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\serializers.py", line 522, in to_representation
+    ret[field.field_name] = field.to_representation(attribute)
+                            ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\fields.py", line 1838, in to_representation
+    return method(value)
+  File "E:\Github\todo2\todoServer\accounts\serializers.py", line 34, in get_avatar
+    return request.build_absolute_uri(settings.MEDIA_URL + obj.avatar)
+                                      ~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~
+TypeError: can only concatenate str (not "ImageFieldFile") to str
+
+    
+ERROR 2024-12-13 18:48:53,987 log 5872 22472 Internal Server Error: /api/v1/accounts/users/me/
+ERROR 2024-12-13 18:48:53,987 basehttp 5872 22472 "GET /api/v1/accounts/users/me/ HTTP/1.1" 500 101

@@ -19,9 +19,7 @@ export const useUserStore = defineStore('user', () => {
   // Actions
   const setToken = (accessToken, refreshToken) => {
     uni.setStorageSync('accessToken', accessToken)
-    if (refreshToken) {
-      uni.setStorageSync('refreshToken', refreshToken)
-    }
+    uni.setStorageSync('refreshToken', refreshToken)
   }
 
   const setUserInfo = (info) => {
@@ -40,6 +38,8 @@ export const useUserStore = defineStore('user', () => {
   const login = async (credentials) => {
     try {
       const response = await userApi.login(credentials)
+	  setToken(response.access, response.refresh)
+	  setUserInfo(response.user)
       return response
     } catch (err) {
       throw new Error(err.data?.message || '登录失败')

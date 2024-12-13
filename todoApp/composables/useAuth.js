@@ -31,10 +31,9 @@ export function useAuth() {
 		error.value = null
 		try {
 			console.log('Login credentials:', credentials)
-			const response = await userApi.login(credentials)
+			const response = await userStore.login(credentials)
 			console.log('Login response:', response)
-			userStore.setToken(response.access, response.refresh)
-			userStore.setUserInfo(response.user)
+
 			
 			await refreshData()
 			await refreshUserData()

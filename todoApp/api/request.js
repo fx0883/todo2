@@ -211,4 +211,40 @@ const request = async (options) => {
   }
 }
 
-export default request
+// 添加文件上传方法
+const uploadFile = (options) => {
+  const token = uni.getStorageSync('accessToken')
+  
+  return new Promise((resolve, reject) => {
+    uni.uploadFile({
+      url: BASE_URL + options.url,
+      filePath: options.filePath,
+      name: options.name,
+      header: {
+        'Authorization': token ? `Bearer ${token}` : ''
+      },
+      success: (res) => {
+        if (res.statusCode === 401) {
+          // Token 过期处理逻辑
+          handleTokenExpired(() => uploadFile(options))
+            .then(resolve)
+            .catch(reject)
+          return
+        }
+        resolve(res)
+      },
+      fail: (err) => {
+        reject({
+          statusCode: 0,
+          data: { message: '上传失败' },
+          error: err
+        })
+      }
+    })
+  })
+}
+
+export {
+  request,
+  uploadFile  // 导出上传方法
+}

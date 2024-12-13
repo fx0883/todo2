@@ -1,9 +1,4 @@
-import request from './request'
-
-
-
-
-
+import { uploadFile, request } from './request'
 
 export default {
   // 用户登录
@@ -56,6 +51,15 @@ export default {
       url: '/token/refresh/',
       method: 'POST',
       data: { refresh: refreshToken }
+    })
+  },
+
+  // 修改头像上传方法
+  uploadAvatar: (file) => {
+    return uploadFile({
+      url: '/accounts/users/upload_avatar/',
+      filePath: file.path,
+      name: 'avatar'
     })
   }
 }

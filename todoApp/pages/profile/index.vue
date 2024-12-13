@@ -1,10 +1,14 @@
 <template>
   <view class="profile-container">
     <view class="user-info">
-      <image 
-        class="avatar" 
-        :src="userInfo?.avatar || '/static/default-avatar.png'"
-      />
+      <view class="avatar-section">
+        <image 
+          class="avatar" 
+          :src="userInfo?.avatar || '/static/default-avatar.png'"
+          @tap="chooseImage"
+        />
+        <text v-if="uploading" class="uploading-text">上传中...</text>
+      </view>
       <text class="username">{{ userInfo?.username || '未登录' }}</text>
       <text class="email">{{ userInfo?.email }}</text>
     </view>
@@ -69,10 +73,12 @@ import { storeToRefs } from 'pinia'
 import { useUserStore } from '@/store/modules/user'
 import { useTask } from '@/composables/useTask'
 import { useAuth } from '@/composables/useAuth'
+import { useProfile } from '@/composables/useProfile'
 
 // 使用 composables
 const { fetchTaskStats } = useTask()
 const { refreshUserData, loading: authLoading } = useAuth()
+const { uploading, uploadAvatar } = useProfile()
 
 // 状态管理
 const userStore = useUserStore()
@@ -80,6 +86,27 @@ const { userInfo } = storeToRefs(userStore)
 const stats = ref({ total: 0, completed: 0, pending: 0 })
 const loading = ref(false)
 const error = ref(null)
+
+// 选择并上传图片
+const chooseImage = async () => {
+  try {
+    const { tempFiles } = await uni.chooseImage({
+      count: 1,
+      sizeType: ['compressed'],
+      sourceType: ['album', 'camera']
+    })
+    
+    if (tempFiles[0]) {
+      await uploadAvatar(tempFiles[0])
+    }
+  } catch (error) {
+    console.error('选择图片失败:', error)
+    uni.showToast({
+      title: '选择图片失败',
+      icon: 'none'
+    })
+  }
+}
 
 // 刷新页面数据
 const refreshPageData = async () => {
@@ -176,11 +203,25 @@ onActivated (() => {
     flex-direction: column;
     align-items: center;
     
-    .avatar {
-      width: 160rpx;
-      height: 160rpx;
-      border-radius: 50%;
+    .avatar-section {
+      position: relative;
       margin-bottom: 20rpx;
+      
+      .avatar {
+        width: 160rpx;
+        height: 160rpx;
+        border-radius: 50%;
+        border: 2rpx solid #eee;
+      }
+      
+      .uploading-text {
+        position: absolute;
+        bottom: -30rpx;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 24rpx;
+        color: #666;
+      }
     }
     
     .username {

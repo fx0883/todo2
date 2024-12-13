@@ -109,6 +109,21 @@ export const useUserStore = defineStore('user', () => {
     if (storedUserInfo) userInfo.value = storedUserInfo
   }
 
+  const updateAvatar = async (file) => {
+    try {
+      const response = await userApi.uploadAvatar(file)
+      if (response.statusCode === 200) {
+        const data = JSON.parse(response.data)
+        // 更新本地用户头像
+        userInfo.value.avatar = data.avatar_url
+        return data
+      }
+      throw new Error('上传失败')
+    } catch (error) {
+      throw error
+    }
+  }
+
   return {
     // 状态
     userInfo,
@@ -126,6 +141,7 @@ export const useUserStore = defineStore('user', () => {
     fetchUserInfo,
     refreshToken,
     requestPasswordReset,
-    confirmPasswordReset
+    confirmPasswordReset,
+    updateAvatar
   }
 })

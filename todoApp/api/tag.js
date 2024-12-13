@@ -1,4 +1,4 @@
-import request from './request'
+import { request } from './request'
 
 export default {
   // 获取标签列表

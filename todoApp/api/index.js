@@ -1,4 +1,4 @@
-export { default as request } from './request'
+
 export { default as userApi } from './user'
 export { default as taskApi } from './task'
 export { default as categoryApi } from './category'

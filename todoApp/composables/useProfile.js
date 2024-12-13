@@ -1,8 +1,10 @@
 import { ref } from 'vue'
 import { useUserStore } from '@/store/modules/user'
+import { useTaskStatsStore } from '@/store/modules/taskStats'
 
 export function useProfile() {
   const userStore = useUserStore()
+  const taskStatsStore = useTaskStatsStore()
   const uploading = ref(false)
   const error = ref(null)
 
@@ -16,7 +18,6 @@ export function useProfile() {
         title: '上传成功',
         icon: 'success'
       })
-      return result
     } catch (err) {
       error.value = err.message
       uni.showToast({
@@ -29,9 +30,21 @@ export function useProfile() {
     }
   }
 
+  const fetchStats = async () => {
+    try {
+      await taskStatsStore.fetchTaskStats()
+    } catch (err) {
+      error.value = err.message
+      throw err
+    }
+  }
+
   return {
     uploading,
     error,
-    uploadAvatar
+    uploadAvatar,
+    fetchStats,
+    taskStats: taskStatsStore.stats,
+    taskStatsLoading: taskStatsStore.loading
   }
 } 

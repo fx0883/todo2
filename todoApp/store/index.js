@@ -5,6 +5,7 @@ import { useUserStore } from './modules/user'
 import { useTaskStore } from './modules/task'
 import { useCategoryStore } from './modules/category'
 import { useTagStore } from './modules/tag'
+import { useTaskStatsStore } from './modules/taskStats'
 
 // 创建 pinia 实例
 const pinia = createPinia()
@@ -14,7 +15,8 @@ export {
   useUserStore,
   useTaskStore,
   useCategoryStore,
-  useTagStore
+  useTagStore,
+  useTaskStatsStore
 }
 
 // 导出 pinia 实例

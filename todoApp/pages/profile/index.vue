@@ -15,16 +15,20 @@
     
     <view class="stats-cards">
       <view class="stats-card">
-        <text class="number">{{ stats.total || 0 }}</text>
-        <text class="label">总任务</text>
+        <text class="number">{{ taskStats.total || 0 }}</text>
+        <text class="label">总任务数</text>
       </view>
       <view class="stats-card">
-        <text class="number">{{ stats.completed || 0 }}</text>
+        <text class="number">{{ taskStats.completed || 0 }}</text>
         <text class="label">已完成</text>
       </view>
       <view class="stats-card">
-        <text class="number">{{ stats.pending || 0 }}</text>
+        <text class="number">{{ taskStats.pending || 0 }}</text>
         <text class="label">待完成</text>
+      </view>
+      <view class="stats-card">
+        <text class="number">{{ taskStats.completion_rate || 0 }}%</text>
+        <text class="label">完成率</text>
       </view>
     </view>
     
@@ -71,21 +75,12 @@
 import { ref, onMounted, onActivated  } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useUserStore } from '@/store/modules/user'
-import { useTask } from '@/composables/useTask'
-import { useAuth } from '@/composables/useAuth'
 import { useProfile } from '@/composables/useProfile'
-
-// 使用 composables
-const { fetchTaskStats } = useTask()
-const { refreshUserData, loading: authLoading } = useAuth()
-const { uploading, uploadAvatar } = useProfile()
 
 // 状态管理
 const userStore = useUserStore()
 const { userInfo } = storeToRefs(userStore)
-const stats = ref({ total: 0, completed: 0, pending: 0 })
-const loading = ref(false)
-const error = ref(null)
+const { uploading, uploadAvatar, taskStats, taskStatsLoading, fetchStats } = useProfile()
 
 // 选择并上传图片
 const chooseImage = async () => {
@@ -108,39 +103,14 @@ const chooseImage = async () => {
   }
 }
 
-// 刷新页面数据
-const refreshPageData = async () => {
-  loading.value = true
-  error.value = null
-  
+// 页面加载时获取统计数据
+onMounted(async () => {
   try {
-    // 并行请求数据
-    await Promise.all([
-      refreshUserData(),  // 刷新用户数据
-      fetchStats()        // 刷新统计数据
-    ])
-  } catch (e) {
-    error.value = e.message || '获取数据失败'
-    uni.showToast({
-      title: error.value,
-      icon: 'none'
-    })
-  } finally {
-    loading.value = false
+    // await fetchStats()
+  } catch (error) {
+    console.error('获取统计数据失败:', error)
   }
-}
-
-// 获取任务统计
-const fetchStats = async () => {
-  try {
-    const result = await fetchTaskStats()
-    if (result) {
-      stats.value = result
-    }
-  } catch (e) {
-    console.error('获取统计失败:', e)
-  }
-}
+})
 
 // 页面跳转
 const navigateTo = (url) => {
@@ -180,14 +150,12 @@ const handleLogout = async () => {
   }
 }
 
-// 生命周期钩子
-onMounted(() => {
-  // refreshPageData()
-})
+
 
 // 页面显示时刷新数据
-onActivated (() => {
-  refreshPageData()
+onActivated (async () => {
+  await fetchStats()
+  console.log(taskStats.total)
 })
 </script>
 
@@ -239,27 +207,31 @@ onActivated (() => {
   
   .stats-cards {
     display: flex;
-    padding: 30rpx;
     gap: 20rpx;
+    margin-top: 30rpx;
+    padding: 0 30rpx;
     
     .stats-card {
       flex: 1;
       background-color: #fff;
+      padding: 20rpx;
       border-radius: 12rpx;
-      padding: 30rpx;
+      box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.1);
       text-align: center;
       
       .number {
-        display: block;
-        font-size: 40rpx;
+        font-size: 32rpx;
         font-weight: bold;
         color: #333;
-        margin-bottom: 10rpx;
+        display: block;
       }
       
       .label {
-        font-size: 26rpx;
+        font-size: 22rpx;
         color: #666;
+        margin-top: 10rpx;
+        display: block;
+        white-space: nowrap;
       }
     }
   }

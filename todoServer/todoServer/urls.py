@@ -57,3 +57,6 @@ urlpatterns = [
 #
 # new_password = make_password('Fengxuan_0027337')
 # print(new_password)
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

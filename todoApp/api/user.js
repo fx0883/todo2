@@ -61,5 +61,13 @@ export default {
       filePath: file.path,
       name: 'avatar'
     })
+  },
+
+  // 获取任务统计
+  getTaskStats: () => {
+    return request({
+      url: '/accounts/users/task_stats/',
+      method: 'GET'
+    })
   }
 }

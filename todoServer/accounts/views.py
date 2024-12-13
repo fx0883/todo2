@@ -23,6 +23,7 @@ import string
 import os
 import uuid
 from rest_framework.parsers import MultiPartParser
+from django.db.models import Count, Q
 
 User = get_user_model()
 
@@ -159,6 +160,26 @@ User = get_user_model()
                         'Error Response',
                         value={
                             'error': '没有提供头像文件'
+                        }
+                    )
+                ]
+            )
+        }
+    ),
+    get_task_stats=extend_schema(
+        summary="获取用户任务统计",
+        tags=['任务管理'],
+        responses={
+            200: OpenApiResponse(
+                description="任务统计信息",
+                examples=[
+                    OpenApiExample(
+                        'Task Stats Example',
+                        value={
+                            'total': 10,
+                            'completed': 5,
+                            'pending': 5,
+                            'completion_rate': 50.0  # 完成率（百分比）
                         }
                     )
                 ]
@@ -420,6 +441,39 @@ class UserViewSet(viewsets.ModelViewSet):
         except Exception as e:
             return Response(
                 {'error': f'头像上传失败: {str(e)}'}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    @action(detail=False, methods=['GET'])
+    def task_stats(self, request):
+        """
+        获取当前用户的任务统计信息
+        
+        返回：
+        - total: 总任务数
+        - completed: 已完成任务数
+        - pending: 未完成任务数
+        - completion_rate: 完成率（百分比）
+        """
+        try:
+            # 获取用户的所有任务
+            total = Task.objects.filter(user=request.user).count()
+            completed = Task.objects.filter(user=request.user, status='completed').count()
+            pending = total - completed
+            
+            # 计算完成率
+            completion_rate = (completed / total * 100) if total > 0 else 0
+            
+            return Response({
+                'total': total,
+                'completed': completed,
+                'pending': pending,
+                'completion_rate': round(completion_rate, 2)  # 保留两位小数
+            })
+            
+        except Exception as e:
+            return Response(
+                {'error': f'获取统计信息失败: {str(e)}'}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 

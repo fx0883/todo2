@@ -4,8 +4,15 @@ export default {
   // 获取任务列表
   fetchTasks: async (params = {}) => {
     try {
+		
+	  const paramsTemp = {
+	    page: params.page || 1,
+	    page_size: params.pageSize || 10,
+	    ...params
+	  }
+		
       const response = await request({
-        url: '/tasks/tasks/',
+        url: `/tasks/tasks/?page=${paramsTemp.page}&pageSize=${paramsTemp.pageSize}`,
         method: 'GET',
         params: {
           page: params.page || 1,

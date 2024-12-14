@@ -229,9 +229,9 @@ const handleDelete = () => {
             icon: 'success'
           })
           
-          setTimeout(() => {
-            uni.navigateBack()
-          }, 1500)
+          // 立即返回上一页
+          uni.navigateBack()
+          
         } catch (error) {
           uni.showToast({
             title: '删除失败',

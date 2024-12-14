@@ -73,6 +73,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useTask } from '@/composables/useTask'
 import { useRoute } from '@/composables/useRoute'
+import { formatDate } from '@/utils/date'
 
 const route = useRoute()
 const { getTaskDetail, updateTask, loading } = useTask()
@@ -83,7 +84,7 @@ const editForm = ref({})
 const priorityOptions = ['低', '中', '高']
 const priorityMap = { '低': 1, '中': 2, '高': 3 }
 const priorityIndex = computed(() => {
-  return editForm.value.priority ? priorityOptions[editForm.value.priority - 1] : 0
+  return editForm.value.priority ? editForm.value.priority - 1 : 0
 })
 
 // 获取任务详情
@@ -94,7 +95,7 @@ const fetchTaskDetail = async () => {
     editForm.value = {
       title: task.value.title,
       description: task.value.description,
-      due_date: task.value.due_date,
+      due_date: task.value.due_date ? task.value.due_date.split('T')[0] : '',
       priority: task.value.priority
     }
   } catch (error) {
@@ -107,7 +108,7 @@ const fetchTaskDetail = async () => {
 
 // 日期选择处理
 const onDateChange = (e) => {
-  editForm.value.due_date = e.detail.value
+  editForm.value.due_date = e.detail.value + 'T00:00:00+08:00'
 }
 
 // 优先级选择处理
@@ -126,11 +127,16 @@ const handleSave = async () => {
     return
   }
 
+  const formData = {
+    ...task.value,
+    ...editForm.value,
+    due_date: editForm.value.due_date.includes('T') 
+      ? editForm.value.due_date 
+      : editForm.value.due_date + 'T00:00:00+08:00'
+  }
+
   try {
-    await updateTask(route.params.id, {
-      ...task.value,
-      ...editForm.value
-    })
+    await updateTask(route.params.id, formData)
     
     uni.showToast({
       title: '更新成功',

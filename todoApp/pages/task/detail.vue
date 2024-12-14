@@ -103,7 +103,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onActivated } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useTaskStore } from '@/store/modules/task'
 import { formatDate } from '@/utils/date'
@@ -256,11 +256,21 @@ const onLoadMoreComments = async () => {
   }
 }
 
-onMounted(() => {
-  fetchTaskDetail()
-  fetchComments()
+
+
+onMounted(async () => {
+  await fetchTaskDetail()
+  await fetchComments()
+})
+
+// 页面显示时刷新数据
+onActivated(async () => {
+  await fetchTaskDetail()
+  await fetchComments()
 })
 </script>
+
+
 
 <style lang="scss">
 .task-detail-container {
@@ -444,14 +454,18 @@ onMounted(() => {
   
   .action-buttons {
     position: fixed;
-    bottom: 0;
     left: 0;
     right: 0;
+    bottom: 0;
     padding: 20rpx 30rpx;
     background-color: #fff;
     box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
     display: flex;
     gap: 20rpx;
+    z-index: 100;
+    
+    // 适配底部安全区
+    padding-bottom: calc(20rpx + env(safe-area-inset-bottom));
     
     .action-btn {
       flex: 1;

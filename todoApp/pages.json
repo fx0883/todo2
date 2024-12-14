@@ -74,6 +74,12 @@
 	  "style": {
 	    "navigationBarTitleText": "登录"
 	  }
+	},
+	{
+	  "path": "pages/task/edit",
+	  "style": {
+	    "navigationBarTitleText": "编辑任务"
+	  }
 	}
   ],
   "tabBar": {

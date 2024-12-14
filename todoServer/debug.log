@@ -10237,3 +10237,132 @@ Traceback (most recent call last):
 rest_framework_simplejwt.exceptions.InvalidToken: {'detail': ErrorDetail(string='此令牌对任何类型的令牌无效', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 'token_type': ErrorDetail(string='access', code='token_not_valid'), 'message': ErrorDetail(string='令牌无效或已过期', code='token_not_valid')}]}
 
     
+ERROR 2024-12-14 11:43:07,926 utils 10252 24016 
+API Error Details:
+View: TaskViewSet
+URL: /api/v1/tasks/tasks/
+Method: GET
+User: fx0883
+Error Type: NotFound
+Error Message: 无效页面。
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\django\core\paginator.py", line 65, in validate_number
+    number = int(number)
+ValueError: invalid literal for int() with base 10: 'NaN'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\pagination.py", line 204, in paginate_queryset
+    self.page = paginator.page(page_number)
+                ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\django\core\paginator.py", line 89, in page
+    number = self.validate_number(number)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\django\core\paginator.py", line 67, in validate_number
+    raise PageNotAnInteger(self.error_messages["invalid_page"])
+django.core.paginator.PageNotAnInteger: 页码不是整数
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\drf_spectacular\drainage.py", line 207, in wrapped_method
+    return method(self, request, *args, **kwargs)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\mixins.py", line 40, in list
+    page = self.paginate_queryset(queryset)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\generics.py", line 171, in paginate_queryset
+    return self.paginator.paginate_queryset(queryset, self.request, view=self)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\pagination.py", line 209, in paginate_queryset
+    raise NotFound(msg)
+rest_framework.exceptions.NotFound: 无效页面。
+
+    
+ERROR 2024-12-14 11:43:17,538 utils 10252 24016 
+API Error Details:
+View: TaskViewSet
+URL: /api/v1/tasks/tasks/
+Method: GET
+User: fx0883
+Error Type: NotFound
+Error Message: 无效页面。
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\django\core\paginator.py", line 65, in validate_number
+    number = int(number)
+ValueError: invalid literal for int() with base 10: 'NaN'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\pagination.py", line 204, in paginate_queryset
+    self.page = paginator.page(page_number)
+                ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\django\core\paginator.py", line 89, in page
+    number = self.validate_number(number)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\django\core\paginator.py", line 67, in validate_number
+    raise PageNotAnInteger(self.error_messages["invalid_page"])
+django.core.paginator.PageNotAnInteger: 页码不是整数
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\drf_spectacular\drainage.py", line 207, in wrapped_method
+    return method(self, request, *args, **kwargs)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\mixins.py", line 40, in list
+    page = self.paginate_queryset(queryset)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\generics.py", line 171, in paginate_queryset
+    return self.paginator.paginate_queryset(queryset, self.request, view=self)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\pagination.py", line 209, in paginate_queryset
+    raise NotFound(msg)
+rest_framework.exceptions.NotFound: 无效页面。
+
+    
+ERROR 2024-12-14 11:43:17,785 utils 10252 24016 
+API Error Details:
+View: TaskViewSet
+URL: /api/v1/tasks/tasks/
+Method: GET
+User: fx0883
+Error Type: NotFound
+Error Message: 无效页面。
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\django\core\paginator.py", line 65, in validate_number
+    number = int(number)
+ValueError: invalid literal for int() with base 10: 'NaN'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\pagination.py", line 204, in paginate_queryset
+    self.page = paginator.page(page_number)
+                ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\django\core\paginator.py", line 89, in page
+    number = self.validate_number(number)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\django\core\paginator.py", line 67, in validate_number
+    raise PageNotAnInteger(self.error_messages["invalid_page"])
+django.core.paginator.PageNotAnInteger: 页码不是整数
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\drf_spectacular\drainage.py", line 207, in wrapped_method
+    return method(self, request, *args, **kwargs)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\mixins.py", line 40, in list
+    page = self.paginate_queryset(queryset)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\generics.py", line 171, in paginate_queryset
+    return self.paginator.paginate_queryset(queryset, self.request, view=self)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\pagination.py", line 209, in paginate_queryset
+    raise NotFound(msg)
+rest_framework.exceptions.NotFound: 无效页面。
+
+    

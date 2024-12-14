@@ -208,6 +208,51 @@ export function useTask() {
     }
   }
 
+  // 获取任务详情
+  const getTaskDetail = async (taskId) => {
+    try {
+      loading.value = true
+      clearError()
+      const task = await taskStore.getTaskDetail(taskId)
+      return task
+    } catch (e) {
+      error.value = e.message || '获取任务详情失败'
+      throw e
+    } finally {
+      loading.value = false
+    }
+  }
+
+  // 获取任务评论
+  const getTaskComments = async (taskId) => {
+    try {
+      loading.value = true
+      clearError()
+      const comments = await taskStore.getTaskComments(taskId)
+      return comments
+    } catch (e) {
+      error.value = e.message || '获取任务评论失败'
+      throw e
+    } finally {
+      loading.value = false
+    }
+  }
+
+  // 添加评论
+  const addComment = async (commentData) => {
+    try {
+      loading.value = true
+      clearError()
+      const comment = await taskStore.addComment(commentData)
+      return comment
+    } catch (e) {
+      error.value = e.message || '添加评论失败'
+      throw e
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     // 状态
     loading,
@@ -227,6 +272,9 @@ export function useTask() {
     deleteTask,
     batchUpdateTasks,
     fetchTaskStats,
+    getTaskDetail,
+    getTaskComments,
+    addComment,
     
     // 添加到返回对象中
     toggleTaskStatus,

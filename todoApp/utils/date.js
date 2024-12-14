@@ -2,10 +2,19 @@
 export const formatDate = (date, fmt = 'YYYY-MM-DD HH:mm:ss') => {
   if (!date) return ''
   if (typeof date === 'string') {
-    date = new Date(date.replace(/-/g, '/'))
+    date = new Date(date)
+    
+    if (isNaN(date.getTime())) {
+      date = new Date(date.replace(/-/g, '/'))
+    }
   }
   if (typeof date === 'number') {
     date = new Date(date)
+  }
+  
+  if (isNaN(date.getTime())) {
+    console.error('Invalid date:', date)
+    return ''
   }
   
   const o = {

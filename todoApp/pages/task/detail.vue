@@ -12,11 +12,11 @@
         <view class="info-row">
           <view class="info-item">
             <text class="label">优先级：</text>
-            <text class="value" :class="task.priority">{{ priorityText[task.priority] }}</text>
+            <text class="value" :class="'p' + task.priority">{{ priorityText[task.priority] }}</text>
           </view>
           <view class="info-item">
             <text class="label">截止日期：</text>
-            <text class="value">{{ formatDate(task.due_date) }}</text>
+            <text class="value">{{ formatTaskDate(task.due_date) }}</text>
           </view>
         </view>
       </view>
@@ -95,11 +95,16 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { storeToRefs } from 'pinia'
 import { useTaskStore } from '@/store/modules/task'
-import { taskApi } from '@/api'
 import { formatDate } from '@/utils/date'
+import { useTask } from '@/composables/useTask'
+import { useRoute } from '@/composables/useRoute'
 
 const taskStore = useTaskStore()
+const { loading } = storeToRefs(taskStore)
+const { getTaskDetail, updateTask, deleteTask, addComment, getTaskComments } = useTask()
+const route = useRoute()
 const task = ref(null)
 const comments = ref([])
 const newComment = ref('')
@@ -112,20 +117,23 @@ const statusText = {
 }
 
 const priorityText = {
-  low: '低',
-  medium: '中',
-  high: '高'
+  1: '低',
+  2: '中',
+  3: '高'
+}
+
+// 格式化日期函数
+const formatTaskDate = (date) => {
+  if (!date) return '无截止日期'
+  return formatDate(date)
 }
 
 // 获取任务详情
 const fetchTaskDetail = async () => {
-  const pages = getCurrentPages()
-  const currentPage = pages[pages.length - 1]
-  const taskId = currentPage.options.id
+  const taskId = route.params.id
   
   try {
-    const res = await taskApi.getTaskDetail(taskId)
-    task.value = res
+    task.value = await getTaskDetail(taskId)
   } catch (error) {
     uni.showToast({
       title: '获取任务详情失败',
@@ -136,13 +144,10 @@ const fetchTaskDetail = async () => {
 
 // 获取任务评论
 const fetchComments = async () => {
-  const pages = getCurrentPages()
-  const currentPage = pages[pages.length - 1]
-  const taskId = currentPage.options.id
+  const taskId = route.params.id
   
   try {
-    const res = await taskApi.getTaskComments(taskId)
-    comments.value = res
+    comments.value = await getTaskComments(taskId)
   } catch (error) {
     uni.showToast({
       title: '获取评论失败',
@@ -156,7 +161,7 @@ const handleAddComment = async () => {
   if (!newComment.value.trim()) return
   
   try {
-    const res = await taskApi.addComment({
+    const res = await addComment({
       task: task.value.id,
       content: newComment.value
     })
@@ -180,11 +185,10 @@ const handleEdit = () => {
 // 完成任务
 const handleComplete = async () => {
   try {
-    await taskApi.updateTask(task.value.id, {
+    const updatedTask = await updateTask(task.value.id, {
       status: 'completed'
     })
-    task.value.status = 'completed'
-    taskStore.updateTask(task.value.id, { status: 'completed' })
+    task.value = updatedTask
     
     uni.showToast({
       title: '任务已完成',
@@ -206,8 +210,7 @@ const handleDelete = () => {
     success: async (res) => {
       if (res.confirm) {
         try {
-          await taskApi.deleteTask(task.value.id)
-          taskStore.deleteTask(task.value.id)
+          await deleteTask(task.value.id)
           
           uni.showToast({
             title: '删除成功',

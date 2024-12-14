@@ -35,7 +35,11 @@
         </view>
       </view>
       
-      <view class="comments">
+      <scroll-view 
+        class="comments" 
+        scroll-y
+        @scrolltolower="onLoadMoreComments"
+      >
         <text class="section-title">评论</text>
         <view v-if="comments.length" class="comment-list">
           <view v-for="comment in comments" :key="comment.id" class="comment-item">
@@ -43,8 +47,13 @@
             <text class="comment-time">{{ formatDate(comment.created_at) }}</text>
           </view>
         </view>
-        <view v-else class="no-comments">
-          暂无评论
+        
+        <view v-if="loading && hasMoreComments" class="loading-more">
+          加载中...
+        </view>
+        
+        <view v-if="!hasMoreComments && comments.length > 0" class="no-more">
+          没有更多评论了
         </view>
         
         <view class="comment-input">
@@ -62,7 +71,7 @@
             发送
           </button>
         </view>
-      </view>
+      </scroll-view>
     </view>
     
     <view v-else class="loading">
@@ -102,11 +111,11 @@ import { useTask } from '@/composables/useTask'
 import { useRoute } from '@/composables/useRoute'
 
 const taskStore = useTaskStore()
-const { loading } = storeToRefs(taskStore)
-const { getTaskDetail, updateTask, deleteTask, addComment, getTaskComments } = useTask()
+const { loading,comments } = storeToRefs(taskStore)
+const { getTaskDetail, updateTask, deleteTask, addComment, getTaskComments, loadMoreComments, hasMoreComments } = useTask()
 const route = useRoute()
 const task = ref(null)
-const comments = ref([])
+// const comments = ref(taskStore.comments)
 const newComment = ref('')
 
 // 状态和优先级文本映射
@@ -147,7 +156,7 @@ const fetchComments = async () => {
   const taskId = route.params.id
   
   try {
-    comments.value = await getTaskComments(taskId)
+    await getTaskComments(taskId)
   } catch (error) {
     uni.showToast({
       title: '获取评论失败',
@@ -165,7 +174,6 @@ const handleAddComment = async () => {
       task_pk: route.params.id,
       content: newComment.value
     })
-    comments.value.push(res)
     newComment.value = ''
   } catch (error) {
     uni.showToast({
@@ -233,6 +241,19 @@ const handleDelete = () => {
       }
     }
   })
+}
+
+// 加载更多评论
+const onLoadMoreComments = async () => {
+  if (!hasMoreComments.value || loading.value) return
+  try {
+    await loadMoreComments(route.params.id)
+  } catch (error) {
+    uni.showToast({
+      title: '加载更多失败',
+      icon: 'none'
+    })
+  }
 }
 
 onMounted(() => {

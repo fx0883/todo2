@@ -244,12 +244,30 @@ export function useTask() {
       loading.value = true
       clearError()
       const comment = await taskStore.addComment(commentData)
+      uni.showToast({
+        title: '评论成功',
+        icon: 'success'
+      })
       return comment
     } catch (e) {
       error.value = e.message || '添加评论失败'
       throw e
     } finally {
       loading.value = false
+    }
+  }
+
+  // 加载更多评论
+  const loadMoreComments = async (taskId) => {
+    if (!taskStore.hasMoreComments || loading.value) return
+    
+    try {
+      await taskStore.getTaskComments(taskId, {
+        page: taskStore.commentPage + 1
+      }, true)
+    } catch (e) {
+      error.value = e.message || '加载更多评论失败'
+      throw e
     }
   }
 
@@ -282,5 +300,8 @@ export function useTask() {
     refreshList,
     hasMore: computed(() => taskStore.hasMore),
     currentPage: computed(() => taskStore.currentPage),
+    loadMoreComments,
+    comments: computed(() => taskStore.comments),
+    hasMoreComments: computed(() => taskStore.hasMoreComments),
   }
 }

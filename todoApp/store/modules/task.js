@@ -22,6 +22,11 @@ export const useTaskStore = defineStore('task', () => {
   const hasMore = ref(true)
   const pageSize = ref(10)
 
+  // 评论相关状态
+  const comments = ref([])
+  const commentPage = ref(1)
+  const hasMoreComments = ref(true)
+
   // 公共排序方法
   const sortTasks = (taskList) => {
     return taskList.sort((a, b) => {
@@ -192,9 +197,33 @@ export const useTaskStore = defineStore('task', () => {
   const addComment = async ({ task_pk, content }) => {
     try {
       const response = await taskApi.addComment(task_pk, { content })
+      comments.value.unshift(response)
       return response
     } catch (error) {
       throw new Error(error.message || '添加评论失败')
+    }
+  }
+
+  // 获取评论列表
+  const getTaskComments = async (taskId, params = {}, append = false) => {
+    try {
+      const response = await taskApi.getTaskComments(taskId, {
+        page: params.page || commentPage.value,
+        ...params
+      })
+      
+      if (append) {
+        comments.value = [...comments.value, ...response.results]
+      } else {
+        comments.value = [...response.results]
+      }
+      
+      hasMoreComments.value = !!response.next
+      commentPage.value = params.page || commentPage.value
+      
+      return response
+    } catch (error) {
+      throw error
     }
   }
 
@@ -219,5 +248,9 @@ export const useTaskStore = defineStore('task', () => {
     reset,
     resetPagination,
     addComment,
+    comments,
+    hasMoreComments,
+    commentPage,
+    getTaskComments,
   }
 })

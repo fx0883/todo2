@@ -60,5 +60,16 @@ export default {
       task: taskId,
       ...data
     }
-  })
+  }),
+
+  // 添加评论相关的 API 方法
+  getTaskComments: (taskId, params = {}) => request({
+    url: `/tasks/tasks/${taskId}/comments/`,
+    method: 'GET',
+    params: {
+      page: params.page || 1,
+      page_size: params.pageSize || 10,
+      ...params
+    }
+  }),
 }

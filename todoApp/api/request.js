@@ -35,7 +35,7 @@ const refreshToken = async () => {
     }
 
     const response = await uni.request({
-      url: `${BASE_URL}/auth/token/refresh/`,
+      url: `${BASE_URL}/token/refresh/`,
       method: 'POST',
       data: {
         refresh: refreshToken

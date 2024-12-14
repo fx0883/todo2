@@ -162,7 +162,7 @@ const handleAddComment = async () => {
   
   try {
     const res = await addComment({
-      task: task.value.id,
+      task_pk: route.params.id,
       content: newComment.value
     })
     comments.value.push(res)

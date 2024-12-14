@@ -50,5 +50,12 @@ export default {
   deleteTask: (taskId) => request({
     url: `/tasks/tasks/${taskId}/`,
     method: 'DELETE'
+  }),
+
+  // 添加评论
+  addComment: (taskId, data) => request({
+    url: `/tasks/tasks/${taskId}/comments/`,
+    method: 'POST',
+    data
   })
 }

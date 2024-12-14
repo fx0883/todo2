@@ -188,6 +188,16 @@ export const useTaskStore = defineStore('task', () => {
     loading.value = false
   }
 
+  // 添加评论
+  const addComment = async ({ task_pk, content }) => {
+    try {
+      const response = await taskApi.addComment(task_pk, { content })
+      return response
+    } catch (error) {
+      throw new Error(error.message || '添加评论失败')
+    }
+  }
+
   return {
     // State
     tasks,
@@ -208,5 +218,6 @@ export const useTaskStore = defineStore('task', () => {
     batchUpdateTasks,
     reset,
     resetPagination,
+    addComment,
   }
 })

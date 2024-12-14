@@ -1,126 +1,156 @@
 <template>
   <view class="calendar-page">
-    <!-- 顶部导航栏 -->
-    <view class="calendar-header">
-      <view class="view-switcher">
-        <text 
-          v-for="type in viewTypes" 
-          :key="type.value"
-          :class="['view-type', { active: viewType === type.value }]"
-          @tap="changeViewType(type.value)"
-        >
-          {{ type.label }}
+    <!-- 顶部日期导航 -->
+    <view class="date-header">
+      <text class="date-text">{{ formatYearMonth(currentDate) }} ▼</text>
+      <view class="header-right">
+        <text class="today-btn" @tap="goToday">今天</text>
+        <text class="time-axis-btn" @tap="toggleTimeAxis">
+          时间轴
+          <text class="icon">🕒</text>
         </text>
       </view>
-      
-      <view class="date-navigator">
-        <text class="icon" @tap="navigateDate('prev')">←</text>
-        <text class="current-date">{{ formatDate(currentDate) }}</text>
-        <text class="icon" @tap="navigateDate('next')">→</text>
+    </view>
+
+    <!-- 日历组件 -->
+    <wu-calendar 
+      type="week" 
+      :insert="true"
+      slideSwitchMode="horizontal" 
+      @confirm="onConfirmCalendar" 
+      @change="onChangeCalendar"
+      :selected="[currentDate]"
+    />
+
+    <!-- 任务列表区域 -->
+    <view class="tasks-section">
+      <!-- 未完成任务 -->
+      <view class="task-group" v-if="unfinishedTasks.length">
+        <view class="group-header">
+          <text class="title">未完成</text>
+          <text class="count">{{ unfinishedTasks.length }}</text>
+        </view>
+        <view class="task-list">
+          <view 
+            v-for="task in unfinishedTasks" 
+            :key="task.id"
+            class="task-item"
+            @tap="navigateToDetail(task.id)"
+          >
+            <view class="task-icon">
+              <image :src="task.icon || '/static/icons/default-task.png'" mode="aspectFit"/>
+            </view>
+            <view class="task-content">
+              <text class="task-title">{{ task.title }}</text>
+              <text class="task-progress">{{ task.progress || '0/1次' }}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 已完成任务 -->
+      <view class="task-group" v-if="finishedTasks.length">
+        <view class="group-header">
+          <text class="title">已完成</text>
+          <text class="count">{{ finishedTasks.length }}</text>
+        </view>
+        <view class="task-list">
+          <view 
+            v-for="task in finishedTasks" 
+            :key="task.id"
+            class="task-item completed"
+            @tap="navigateToDetail(task.id)"
+          >
+            <view class="task-icon">
+              <image :src="task.icon || '/static/icons/default-task.png'" mode="aspectFit"/>
+            </view>
+            <view class="task-content">
+              <text class="task-title">{{ task.title }}</text>
+              <text class="task-progress">{{ task.progress }}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 空状态 -->
+      <view v-if="!unfinishedTasks.length && !finishedTasks.length" class="empty-state">
+        <image src="/static/images/empty-calendar.png" mode="aspectFit"/>
+        <text>暂无已完成计划</text>
+        <text class="sub-text">快来制定你的自律之路吧</text>
       </view>
     </view>
 
-    <!-- 日历主体 -->
-    <view class="calendar-body">
-      <calendar-view
-        :type="viewType"
-        :date="currentDate"
-        :tasks="tasks"
-        @date-click="onDateClick"
-        @task-drop="onTaskDrop"
-      />
-    </view>
-
-    <!-- 快速添加任务按钮 -->
-    <view class="quick-add-btn" @tap="showQuickAddModal">
+    <!-- 添加任务按钮 -->
+    <view class="add-btn" @tap="showQuickAddModal">
       <text class="icon">+</text>
     </view>
-
-    <!-- 快速添加任务弹窗 -->
-    <uni-popup ref="quickAddPopup" type="bottom">
-      <view class="quick-add-form">
-        <input 
-          v-model="newTask.title"
-          placeholder="输入任务标题"
-          @confirm="submitQuickAdd"
-        />
-        <button @tap="submitQuickAdd">添加</button>
-      </view>
-    </uni-popup>
   </view>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useCalendar } from '@/composables/useCalendar'
 
 const {
-  viewType,
   currentDate,
   tasks,
   loading,
   fetchCalendarTasks,
   updateTaskDate,
   quickAddTask,
-  changeViewType,
   changeDate
 } = useCalendar()
 
-const quickAddPopup = ref(null)
-const newTask = ref({ title: '', date: null })
+// 格式化年月
+const formatYearMonth = (date) => {
+  return `${date.getFullYear()}年${date.getMonth() + 1}月`
+}
 
-const viewTypes = [
-  { label: '月', value: 'month' },
-  { label: '周', value: 'week' },
-  { label: '日', value: 'day' }
-]
+// 跳转到今天
+const goToday = () => {
+  changeDate(new Date())
+}
 
-// 格式化日期显示
-const formatDate = (date) => {
-  return date.toLocaleDateString('zh-CN', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
+// 切换时间轴视图
+const toggleTimeAxis = () => {
+  // TODO: 实现时间轴视图切换
+}
+
+// 计算未完成任务
+const unfinishedTasks = computed(() => {
+  return tasks.value.filter(task => !task.completed)
+})
+
+// 计算已完成任务
+const finishedTasks = computed(() => {
+  return tasks.value.filter(task => task.completed)
+})
+
+// 日历确认事件
+const onConfirmCalendar = (e) => {
+  const date = new Date(e.fulldate)
+  changeDate(date)
+}
+
+// 日历变化事件
+const onChangeCalendar = (e) => {
+  const date = new Date(e.fulldate)
+  changeDate(date)
+}
+
+// 跳转到任务详情
+const navigateToDetail = (taskId) => {
+  uni.navigateTo({
+    url: `/pages/task/detail?id=${taskId}`
   })
 }
 
-// 日期导航
-const navigateDate = (direction) => {
-  const newDate = new Date(currentDate.value)
-  switch (viewType.value) {
-    case 'day':
-      newDate.setDate(newDate.getDate() + (direction === 'next' ? 1 : -1))
-      break
-    case 'week':
-      newDate.setDate(newDate.getDate() + (direction === 'next' ? 7 : -7))
-      break
-    case 'month':
-      newDate.setMonth(newDate.getMonth() + (direction === 'next' ? 1 : -1))
-      break
-  }
-  changeDate(newDate)
+// 显示快速添加任务弹窗
+const showQuickAddModal = () => {
+  // TODO: 实现快速添加任务弹窗
 }
 
-// 日期点击处理
-const onDateClick = (date) => {
-  newTask.value.date = date
-  quickAddPopup.value.open()
-}
-
-// 任务拖拽处理
-const onTaskDrop = async (taskId, newDate) => {
-  await updateTaskDate(taskId, newDate)
-}
-
-// 提交快速添加任务
-const submitQuickAdd = async () => {
-  if (!newTask.value.title || !newTask.value.date) return
-  
-  await quickAddTask(newTask.value.title, newTask.value.date)
-  newTask.value = { title: '', date: null }
-  quickAddPopup.value.close()
-}
-
+// 页面加载时获取今天的任务
 onMounted(() => {
   fetchCalendarTasks()
 })
@@ -128,75 +158,149 @@ onMounted(() => {
 
 <style lang="scss">
 .calendar-page {
-  height: 100vh;
+  min-height: 100vh;
+  background: #f5f5f5;
   display: flex;
   flex-direction: column;
-  
-  .calendar-header {
-    padding: 20rpx;
+
+  .date-header {
+    padding: 30rpx;
+    background: #fff;
     display: flex;
     justify-content: space-between;
     align-items: center;
     
-    .view-switcher {
-      display: flex;
-      gap: 20rpx;
-      
-      .view-type {
-        padding: 10rpx 20rpx;
-        border-radius: 8rpx;
-        
-        &.active {
-          background-color: #007AFF;
-          color: #fff;
-        }
-      }
+    .date-text {
+      font-size: 34rpx;
+      font-weight: bold;
+      color: #333;
     }
     
-    .date-navigator {
+    .header-right {
       display: flex;
       align-items: center;
       gap: 20rpx;
       
-      .icon {
-        padding: 10rpx;
-        cursor: pointer;
+      .today-btn,
+      .time-axis-btn {
+        padding: 10rpx 20rpx;
+        border-radius: 30rpx;
+        font-size: 28rpx;
+        color: #666;
+        background: #f5f5f5;
+        
+        .icon {
+          margin-left: 6rpx;
+        }
       }
     }
   }
-  
-  .calendar-body {
+
+  .tasks-section {
     flex: 1;
-    overflow: auto;
+    padding: 0 30rpx;
+    
+    .task-group {
+      margin-bottom: 40rpx;
+      
+      .group-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20rpx;
+        
+        .title {
+          font-size: 32rpx;
+          color: #333;
+          font-weight: bold;
+        }
+        
+        .count {
+          margin-left: 20rpx;
+          font-size: 28rpx;
+          color: #999;
+        }
+      }
+      
+      .task-list {
+        .task-item {
+          display: flex;
+          align-items: center;
+          padding: 20rpx;
+          background: #fff;
+          border-radius: 12rpx;
+          margin-bottom: 20rpx;
+          
+          .task-icon {
+            width: 80rpx;
+            height: 80rpx;
+            margin-right: 20rpx;
+            
+            image {
+              width: 100%;
+              height: 100%;
+            }
+          }
+          
+          .task-content {
+            flex: 1;
+            
+            .task-title {
+              font-size: 30rpx;
+              color: #333;
+              margin-bottom: 10rpx;
+            }
+            
+            .task-progress {
+              font-size: 26rpx;
+              color: #999;
+            }
+          }
+          
+          &.completed {
+            opacity: 0.6;
+          }
+        }
+      }
+    }
+    
+    .empty-state {
+      padding: 100rpx 0;
+      text-align: center;
+      
+      image {
+        width: 300rpx;
+        height: 300rpx;
+        margin-bottom: 30rpx;
+      }
+      
+      text {
+        display: block;
+        font-size: 32rpx;
+        color: #999;
+        margin-bottom: 10rpx;
+      }
+      
+      .sub-text {
+        font-size: 28rpx;
+        color: #ccc;
+      }
+    }
   }
-  
-  .quick-add-btn {
+
+  .add-btn {
     position: fixed;
     right: 40rpx;
     bottom: 40rpx;
     width: 100rpx;
     height: 100rpx;
     border-radius: 50%;
-    background-color: #007AFF;
+    background: #007AFF;
     color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 40rpx;
-    box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.15);
-  }
-  
-  .quick-add-form {
-    padding: 40rpx;
-    background-color: #fff;
-    border-radius: 20rpx 20rpx 0 0;
-    
-    input {
-      margin-bottom: 20rpx;
-      padding: 20rpx;
-      border: 2rpx solid #eee;
-      border-radius: 8rpx;
-    }
+    font-size: 50rpx;
+    box-shadow: 0 4rpx 12rpx rgba(0, 122, 255, 0.4);
   }
 }
 </style>

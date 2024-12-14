@@ -192,7 +192,8 @@ export const useTaskStore = defineStore('task', () => {
     // State
     tasks,
     loading,
-    
+    hasMore,
+	currentPage,
     // Getters
     completedTasks,
     pendingTasks,

@@ -197,7 +197,6 @@ const onRefresh = async () => {
 
 // 上拉加载更多
 const onLoadMore = async () => {
-  if (!hasMore.value || loading.value) return
   await loadMore()
 }
 

@@ -16,59 +16,53 @@ export const formatDate = (date, fmt = 'YYYY-MM-DD HH:mm:ss') => {
     console.error('Invalid date:', date)
     return ''
   }
-  
-  const o = {
-    'M+': date.getMonth() + 1,
-    'D+': date.getDate(),
-    'H+': date.getHours(),
-    'm+': date.getMinutes(),
-    's+': date.getSeconds(),
-    'q+': Math.floor((date.getMonth() + 3) / 3),
-    S: date.getMilliseconds()
+
+  const now = new Date()
+  const diff = now - date
+  const seconds = Math.floor(diff / 1000)
+  const minutes = Math.floor(seconds / 60)
+  const hours = Math.floor(minutes / 60)
+  const days = Math.floor(hours / 24)
+
+  // GitHub 风格的时间显示
+  if (seconds < 60) {
+    return '1分钟内'
   }
   
-  if (/(Y+)/.test(fmt)) {
-    fmt = fmt.replace(RegExp.$1, (date.getFullYear() + '').substr(4 - RegExp.$1.length))
+  if (minutes < 60) {
+    return `${minutes}分钟前`
   }
   
-  for (let k in o) {
-    if (new RegExp('(' + k + ')').test(fmt)) {
-      fmt = fmt.replace(
-        RegExp.$1,
-        RegExp.$1.length === 1 ? o[k] : ('00' + o[k]).substr(('' + o[k]).length)
-      )
-    }
+  if (hours < 24) {
+    return `${hours}小时前`
   }
   
-  return fmt
-}
-
-// 获取相对时间
-export const getRelativeTime = (timeStamp) => {
-  const minute = 1000 * 60
-  const hour = minute * 60
-  const day = hour * 24
-  const week = day * 7
-  const month = day * 30
-  const year = month * 12
-
-  const now = new Date().getTime()
-  const diffValue = now - new Date(timeStamp).getTime()
-
-  if (diffValue < 0) return '未来'
-
-  const yearC = diffValue / year
-  const monthC = diffValue / month
-  const weekC = diffValue / week
-  const dayC = diffValue / day
-  const hourC = diffValue / hour
-  const minC = diffValue / minute
-
-  if (yearC >= 1) return parseInt(yearC) + '年前'
-  if (monthC >= 1) return parseInt(monthC) + '月前'
-  if (weekC >= 1) return parseInt(weekC) + '周前'
-  if (dayC >= 1) return parseInt(dayC) + '天前'
-  if (hourC >= 1) return parseInt(hourC) + '小时前'
-  if (minC >= 1) return parseInt(minC) + '分钟前'
-  return '刚刚'
+  // 获取日期的年月日
+  const dateYear = date.getFullYear()
+  const dateMonth = date.getMonth()
+  const dateDay = date.getDate()
+  
+  // 获取当前的年月日
+  const nowYear = now.getFullYear()
+  const nowMonth = now.getMonth()
+  const nowDay = now.getDate()
+  
+  // 如果是昨天
+  if (days === 1) {
+    return '昨天'
+  }
+  
+  // 如果是前天
+  if (days === 2) {
+    return '前天'
+  }
+  
+  // 如果是今年
+  if (dateYear === nowYear) {
+    // 显示月份和日期
+    return `${dateMonth + 1}月${dateDay}日`
+  }
+  
+  // 不是今年，显示完整年月日
+  return `${dateYear}年${dateMonth + 1}月${dateDay}日`
 }

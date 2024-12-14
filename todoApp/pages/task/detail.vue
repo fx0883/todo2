@@ -185,9 +185,13 @@ const handleEdit = () => {
 // 完成任务
 const handleComplete = async () => {
   try {
-    const updatedTask = await updateTask(task.value.id, {
-      status: 'completed'
-    })
+    // 准备完整的更新数据
+    const updateData = {
+      ...task.value,  // 保留任务的所有现有数据
+      status: 'completed'  // 只更新状态
+    }
+    
+    const updatedTask = await updateTask(task.value.id, updateData)
     task.value = updatedTask
     
     uni.showToast({

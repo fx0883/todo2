@@ -390,6 +390,9 @@ onActivated(async () => {
     }
     
     .comments {
+      height: calc(100vh - 400rpx);
+      overflow-y: auto;
+      
       .comment-list {
         margin-bottom: 30rpx;
         

@@ -43,8 +43,9 @@ const refreshToken = async () => {
     })
 
     if (response.statusCode === 200) {
-      const { access } = response.data
+      const { access,refresh } = response.data
       uni.setStorageSync('accessToken', access)
+	  uni.setStorageSync('refreshToken', refresh)
       return access
     } else {
       throw new Error('Failed to refresh token')

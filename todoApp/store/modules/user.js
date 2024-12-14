@@ -18,7 +18,7 @@ export const useUserStore = defineStore('user', () => {
 
   // Actions
   const setToken = (accessToken, refreshToken) => {
-    uni.setStorageSync('accessToken', accessToken)
+    // uni.setStorageSync('accessToken', accessToken)
     uni.setStorageSync('refreshToken', refreshToken)
   }
 

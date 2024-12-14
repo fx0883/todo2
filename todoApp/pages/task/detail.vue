@@ -26,14 +26,7 @@
         <text class="content">{{ task.description || '暂无描述' }}</text>
       </view>
       
-      <view class="category-tags">
-        <view v-if="task.category" class="category">
-          {{ task.category.name }}
-        </view>
-        <view v-for="tag in task.tags" :key="tag.id" class="tag">
-          {{ tag.name }}
-        </view>
-      </view>
+
       
       <scroll-view 
         class="comments" 
@@ -54,6 +47,10 @@
         
         <view v-if="!hasMoreComments && comments.length > 0" class="no-more">
           没有更多评论了
+        </view>
+        
+        <view v-if="!comments.length && !loading" class="empty-comments">
+          暂无评论
         </view>
         
         <view class="comment-input">
@@ -448,6 +445,27 @@ onActivated(async () => {
             opacity: 0.6;
           }
         }
+      }
+      
+      .loading-more {
+        text-align: center;
+        padding: 20rpx;
+        color: #999;
+        font-size: 24rpx;
+      }
+      
+      .no-more {
+        text-align: center;
+        padding: 20rpx;
+        color: #999;
+        font-size: 24rpx;
+      }
+      
+      .empty-comments {
+        text-align: center;
+        padding: 40rpx;
+        color: #999;
+        font-size: 28rpx;
       }
     }
   }

@@ -10586,3 +10586,25 @@ Traceback (most recent call last):
 rest_framework.exceptions.ValidationError: {'title': [ErrorDetail(string='该字段是必填项。', code='required')]}
 
     
+ERROR 2024-12-14 13:19:09,260 utils 10252 25892 
+API Error Details:
+View: TaskCommentViewSet
+URL: /api/v1/tasks/tasks/27/comments/
+Method: POST
+User: fx0883
+Error Type: ValidationError
+Error Message: {'task': [ErrorDetail(string='该字段是必填项。', code='required')]}
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\drf_spectacular\drainage.py", line 207, in wrapped_method
+    return method(self, request, *args, **kwargs)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\mixins.py", line 18, in create
+    serializer.is_valid(raise_exception=True)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\serializers.py", line 235, in is_valid
+    raise ValidationError(self.errors)
+rest_framework.exceptions.ValidationError: {'task': [ErrorDetail(string='该字段是必填项。', code='required')]}
+
+    

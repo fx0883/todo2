@@ -56,6 +56,9 @@ export default {
   addComment: (taskId, data) => request({
     url: `/tasks/tasks/${taskId}/comments/`,
     method: 'POST',
-    data
+    data: {
+      task: taskId,
+      ...data
+    }
   })
 }

@@ -444,38 +444,29 @@ class UserViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-    @action(detail=False, methods=['GET'])
+    @action(detail=False, methods=['get'])
     def task_stats(self, request):
         """
-        获取当前用户的任务统计信息
-        
-        返回：
-        - total: 总任务数
-        - completed: 已完成任务数
-        - pending: 未完成任务数
-        - completion_rate: 完成率（百分比）
+        获取用户任务统计
         """
-        try:
-            # 获取用户的所有任务
-            total = Task.objects.filter(user=request.user).count()
-            completed = Task.objects.filter(user=request.user, status='completed').count()
-            pending = total - completed
-            
-            # 计算完成率
-            completion_rate = (completed / total * 100) if total > 0 else 0
-            
-            return Response({
-                'total': total,
-                'completed': completed,
-                'pending': pending,
-                'completion_rate': round(completion_rate, 2)  # 保留两位小数
-            })
-            
-        except Exception as e:
-            return Response(
-                {'error': f'获取统计信息失败: {str(e)}'}, 
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+        user = request.user
+        total_tasks = Task.objects.filter(user=user).count()
+        completed_tasks = Task.objects.filter(user=user, status='completed').count()
+        pending_tasks = Task.objects.filter(user=user, status='pending').count()
+        overdue_tasks = Task.objects.filter(
+            user=user,
+            status='pending',
+            due_date__lt=timezone.now()
+        ).count()
+         # 计算完成率
+        completion_rate = (completed_tasks / total_tasks * 100) if total_tasks > 0 else 0
+        return Response({
+            'total': total_tasks,
+            'completed': completed_tasks,
+            'pending': pending_tasks,
+            'overdue': overdue_tasks,
+            'completion_rate': completion_rate
+        })
 
 @extend_schema_view(
     list=extend_schema(tags=['用户配置']),

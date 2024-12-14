@@ -1,249 +1,201 @@
 <template>
-  <view class="calendar-container">
-    <!-- 日历组件 -->
-    <view class="calendar-wrapper">
-      <uni-calendar 
-        :selected="selected"
-        :showMonth="false"
-        @change="handleDateChange"
+  <view class="calendar-page">
+    <!-- 顶部导航栏 -->
+    <view class="calendar-header">
+      <view class="view-switcher">
+        <text 
+          v-for="type in viewTypes" 
+          :key="type.value"
+          :class="['view-type', { active: viewType === type.value }]"
+          @tap="changeViewType(type.value)"
+        >
+          {{ type.label }}
+        </text>
+      </view>
+      
+      <view class="date-navigator">
+        <text class="icon" @tap="navigateDate('prev')">←</text>
+        <text class="current-date">{{ formatDate(currentDate) }}</text>
+        <text class="icon" @tap="navigateDate('next')">→</text>
+      </view>
+    </view>
+
+    <!-- 日历主体 -->
+    <view class="calendar-body">
+      <calendar-view
+        :type="viewType"
+        :date="currentDate"
+        :tasks="tasks"
+        @date-click="onDateClick"
+        @task-drop="onTaskDrop"
       />
     </view>
-    
-    <!-- 当日任务列表 -->
-    <view class="tasks-wrapper">
-      <view class="date-header">
-        <text class="date">{{ formatDate(currentDate, 'MM月DD日') }}</text>
-        <text class="count">{{ dayTasks.length }}个任务</text>
-      </view>
-      
-      <view v-if="dayTasks.length" class="task-list">
-        <view 
-          v-for="task in dayTasks" 
-          :key="task.id" 
-          class="task-item"
-          @click="navigateToDetail(task.id)"
-        >
-          <view class="task-status">
-            <view 
-              class="status-dot"
-              :class="task.status"
-            ></view>
-          </view>
-          
-          <view class="task-content">
-            <text class="task-title">{{ task.title }}</text>
-            <view class="task-info">
-              <text class="time">{{ formatDate(task.due_date, 'HH:mm') }}</text>
-              <text 
-                class="priority"
-                :class="task.priority"
-              >
-                {{ priorityText[task.priority] }}
-              </text>
-            </view>
-          </view>
-        </view>
-      </view>
-      
-      <view v-else class="empty-tip">
-        <text>当日暂无任务</text>
-      </view>
+
+    <!-- 快速添加任务按钮 -->
+    <view class="quick-add-btn" @tap="showQuickAddModal">
+      <text class="icon">+</text>
     </view>
-    
-    <!-- 添加任务按钮 -->
-    <view class="add-task">
-      <button 
-        class="add-btn"
-        @click="handleAddTask"
-      >
-        添加任务
-      </button>
-    </view>
+
+    <!-- 快速添加任务弹窗 -->
+    <uni-popup ref="quickAddPopup" type="bottom">
+      <view class="quick-add-form">
+        <input 
+          v-model="newTask.title"
+          placeholder="输入任务标题"
+          @confirm="submitQuickAdd"
+        />
+        <button @tap="submitQuickAdd">添加</button>
+      </view>
+    </uni-popup>
   </view>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { useTaskStore } from '@/store/modules/task'
-import { formatDate } from '@/utils/date'
+import { ref, onMounted } from 'vue'
+import { useCalendar } from '@/composables/useCalendar'
 
-const taskStore = useTaskStore()
-const currentDate = ref(new Date())
-const selected = ref([])
+const {
+  viewType,
+  currentDate,
+  tasks,
+  loading,
+  fetchCalendarTasks,
+  updateTaskDate,
+  quickAddTask,
+  changeViewType,
+  changeDate
+} = useCalendar()
 
-// 优先级文本
-const priorityText = {
-  low: '低优先级',
-  medium: '中优先级',
-  high: '高优先级'
+const quickAddPopup = ref(null)
+const newTask = ref({ title: '', date: null })
+
+const viewTypes = [
+  { label: '月', value: 'month' },
+  { label: '周', value: 'week' },
+  { label: '日', value: 'day' }
+]
+
+// 格式化日期显示
+const formatDate = (date) => {
+  return date.toLocaleDateString('zh-CN', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  })
 }
 
-// 获取当日任务
-const dayTasks = computed(() => {
-  const date = formatDate(currentDate.value, 'YYYY-MM-DD')
-  return taskStore.tasks.filter(task => {
-    return formatDate(task.due_date, 'YYYY-MM-DD') === date
-  }).sort((a, b) => {
-    // 按时间排序
-    return new Date(a.due_date) - new Date(b.due_date)
-  })
+// 日期导航
+const navigateDate = (direction) => {
+  const newDate = new Date(currentDate.value)
+  switch (viewType.value) {
+    case 'day':
+      newDate.setDate(newDate.getDate() + (direction === 'next' ? 1 : -1))
+      break
+    case 'week':
+      newDate.setDate(newDate.getDate() + (direction === 'next' ? 7 : -7))
+      break
+    case 'month':
+      newDate.setMonth(newDate.getMonth() + (direction === 'next' ? 1 : -1))
+      break
+  }
+  changeDate(newDate)
+}
+
+// 日期点击处理
+const onDateClick = (date) => {
+  newTask.value.date = date
+  quickAddPopup.value.open()
+}
+
+// 任务拖拽处理
+const onTaskDrop = async (taskId, newDate) => {
+  await updateTaskDate(taskId, newDate)
+}
+
+// 提交快速添加任务
+const submitQuickAdd = async () => {
+  if (!newTask.value.title || !newTask.value.date) return
+  
+  await quickAddTask(newTask.value.title, newTask.value.date)
+  newTask.value = { title: '', date: null }
+  quickAddPopup.value.close()
+}
+
+onMounted(() => {
+  fetchCalendarTasks()
 })
-
-// 日期变更
-const handleDateChange = (e) => {
-  currentDate.value = new Date(e.fulldate)
-  selected.value = [e.fulldate]
-}
-
-// 跳转到任务详情
-const navigateToDetail = (taskId) => {
-  uni.navigateTo({
-    url: `/pages/task/detail?id=${taskId}`
-  })
-}
-
-// 添加任务
-const handleAddTask = () => {
-  uni.navigateTo({
-    url: `/pages/task/create?date=${formatDate(currentDate.value, 'YYYY-MM-DD')}`
-  })
-}
 </script>
 
 <style lang="scss">
-.calendar-container {
-  min-height: 100vh;
-  background-color: #f5f5f5;
+.calendar-page {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
   
-  .calendar-wrapper {
-    background-color: #fff;
+  .calendar-header {
     padding: 20rpx;
-    margin-bottom: 20rpx;
-  }
-  
-  .tasks-wrapper {
-    background-color: #fff;
-    padding: 30rpx;
-    min-height: 400rpx;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     
-    .date-header {
+    .view-switcher {
       display: flex;
-      justify-content: space-between;
+      gap: 20rpx;
+      
+      .view-type {
+        padding: 10rpx 20rpx;
+        border-radius: 8rpx;
+        
+        &.active {
+          background-color: #007AFF;
+          color: #fff;
+        }
+      }
+    }
+    
+    .date-navigator {
+      display: flex;
       align-items: center;
-      margin-bottom: 30rpx;
+      gap: 20rpx;
       
-      .date {
-        font-size: 32rpx;
-        font-weight: bold;
-        color: #333;
+      .icon {
+        padding: 10rpx;
+        cursor: pointer;
       }
-      
-      .count {
-        font-size: 28rpx;
-        color: #666;
-      }
-    }
-    
-    .task-list {
-      .task-item {
-        display: flex;
-        align-items: center;
-        padding: 20rpx 0;
-        border-bottom: 2rpx solid #f5f5f5;
-        
-        &:last-child {
-          border-bottom: none;
-        }
-        
-        .task-status {
-          margin-right: 20rpx;
-          
-          .status-dot {
-            width: 24rpx;
-            height: 24rpx;
-            border-radius: 50%;
-            
-            &.pending {
-              background-color: #1890ff;
-            }
-            
-            &.completed {
-              background-color: #52c41a;
-            }
-            
-            &.overdue {
-              background-color: #ff4d4f;
-            }
-          }
-        }
-        
-        .task-content {
-          flex: 1;
-          
-          .task-title {
-            font-size: 30rpx;
-            color: #333;
-            margin-bottom: 10rpx;
-          }
-          
-          .task-info {
-            display: flex;
-            align-items: center;
-            gap: 20rpx;
-            
-            .time {
-              font-size: 26rpx;
-              color: #666;
-            }
-            
-            .priority {
-              font-size: 24rpx;
-              padding: 4rpx 12rpx;
-              border-radius: 20rpx;
-              
-              &.high {
-                background-color: #fff1f0;
-                color: #ff4d4f;
-              }
-              
-              &.medium {
-                background-color: #fff7e6;
-                color: #faad14;
-              }
-              
-              &.low {
-                background-color: #f6ffed;
-                color: #52c41a;
-              }
-            }
-          }
-        }
-      }
-    }
-    
-    .empty-tip {
-      text-align: center;
-      padding: 60rpx 0;
-      color: #999;
-      font-size: 28rpx;
     }
   }
   
-  .add-task {
+  .calendar-body {
+    flex: 1;
+    overflow: auto;
+  }
+  
+  .quick-add-btn {
     position: fixed;
-    bottom: 120rpx;
-    left: 0;
-    right: 0;
-    padding: 0 30rpx;
+    right: 40rpx;
+    bottom: 40rpx;
+    width: 100rpx;
+    height: 100rpx;
+    border-radius: 50%;
+    background-color: #007AFF;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40rpx;
+    box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.15);
+  }
+  
+  .quick-add-form {
+    padding: 40rpx;
+    background-color: #fff;
+    border-radius: 20rpx 20rpx 0 0;
     
-    .add-btn {
-      width: 100%;
-      height: 90rpx;
-      line-height: 90rpx;
-      background-color: #007AFF;
-      color: #fff;
-      border-radius: 45rpx;
-      font-size: 32rpx;
+    input {
+      margin-bottom: 20rpx;
+      padding: 20rpx;
+      border: 2rpx solid #eee;
+      border-radius: 8rpx;
     }
   }
 }

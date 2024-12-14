@@ -72,4 +72,25 @@ export default {
       ...params
     }
   }),
+
+  // 获取日历视图任务
+  getCalendarTasks: (params) => request({
+    url: '/tasks/tasks/calendar/',
+    method: 'GET',
+    params
+  }),
+
+  // 更新任务日期
+  updateTaskDate: (taskId, date) => request({
+    url: `/tasks/tasks/${taskId}/update_date/`,
+    method: 'PATCH',
+    data: { due_date: date }
+  }),
+
+  // 快速创建任务
+  quickCreateTask: (data) => request({
+    url: '/tasks/tasks/quick_create/',
+    method: 'POST',
+    data
+  })
 }

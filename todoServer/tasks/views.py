@@ -3,10 +3,13 @@ from rest_framework import viewsets, status, filters
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
-from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiExample, OpenApiResponse
+from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiExample, OpenApiResponse, OpenApiParameter
 from .models import Category, Tag, Task, TaskComment
 from .serializers import CategorySerializer, TagSerializer, TaskSerializer, TaskCommentSerializer
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.decorators import action
+from django.utils import timezone
+from datetime import datetime, timedelta
 
 # 添加分页器类
 class TaskPagination(PageNumberPagination):
@@ -239,24 +242,84 @@ class TaskViewSet(viewsets.ModelViewSet):
     pagination_class = TaskPagination  # 添加分页器
 
     def get_queryset(self):
-        queryset = Task.objects.filter(user=self.request.user)
+        return Task.objects.filter(user=self.request.user)
+    
+    @extend_schema(
+        summary="获取日历视图任务",
+        parameters=[
+            OpenApiParameter(name='start_date', type=str, description='开始日期 (YYYY-MM-DD)'),
+            OpenApiParameter(name='end_date', type=str, description='结束日期 (YYYY-MM-DD)'),
+            OpenApiParameter(name='view_type', type=str, description='视图类型 (month/week/day)')
+        ],
+        tags=['任务管理']
+    )
+    @action(detail=False, methods=['get'])
+    def calendar(self, request):
+        """获取指定时间范围内的任务"""
+        start_date = request.query_params.get('start_date')
+        end_date = request.query_params.get('end_date')
+        view_type = request.query_params.get('view_type', 'month')
         
-        # Filter by tag
-        tag_id = self.request.query_params.get('tag', None)
-        if tag_id:
-            queryset = queryset.filter(tags__id=tag_id)
+        try:
+            start_date = datetime.strptime(start_date, '%Y-%m-%d')
+            end_date = datetime.strptime(end_date, '%Y-%m-%d')
+        except (ValueError, TypeError):
+            if view_type == 'day':
+                start_date = timezone.now().replace(hour=0, minute=0, second=0)
+                end_date = start_date + timedelta(days=1)
+            elif view_type == 'week':
+                start_date = timezone.now().replace(hour=0, minute=0, second=0) - timedelta(days=timezone.now().weekday())
+                end_date = start_date + timedelta(days=7)
+            else:  # month
+                today = timezone.now()
+                start_date = today.replace(day=1, hour=0, minute=0, second=0)
+                if today.month == 12:
+                    end_date = today.replace(year=today.year + 1, month=1, day=1)
+                else:
+                    end_date = today.replace(month=today.month + 1, day=1)
+
+        tasks = self.get_queryset().filter(
+            due_date__gte=start_date,
+            due_date__lt=end_date
+        ).order_by('due_date')
         
-        # Filter by due date range
-        start_date = self.request.query_params.get('start_date', None)
-        end_date = self.request.query_params.get('end_date', None)
-        if start_date and end_date:
-            queryset = queryset.filter(due_date__range=[start_date, end_date])
-        elif start_date:
-            queryset = queryset.filter(due_date__gte=start_date)
-        elif end_date:
-            queryset = queryset.filter(due_date__lte=end_date)
+        serializer = self.get_serializer(tasks, many=True)
+        return Response(serializer.data)
+
+    @extend_schema(
+        summary="更新任务日期",
+        tags=['任务管理']
+    )
+    @action(detail=True, methods=['patch'])
+    def update_date(self, request, pk=None):
+        """更新任务的日期（用于拖拽调整）"""
+        task = self.get_object()
+        new_date = request.data.get('due_date')
         
-        return queryset
+        try:
+            new_date = datetime.strptime(new_date, '%Y-%m-%d')
+            task.due_date = new_date
+            task.save()
+            serializer = self.get_serializer(task)
+            return Response(serializer.data)
+        except (ValueError, TypeError):
+            return Response(
+                {'error': '无效的日期格式，请使用 YYYY-MM-DD'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+    @extend_schema(
+        summary="快速创建任务",
+        tags=['任务管理']
+    )
+    @action(detail=False, methods=['post'])
+    def quick_create(self, request):
+        """快速创建任务（带有预设日期）"""
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(user=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)

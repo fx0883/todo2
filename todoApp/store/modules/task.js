@@ -27,6 +27,9 @@ export const useTaskStore = defineStore('task', () => {
   const commentPage = ref(1)
   const hasMoreComments = ref(true)
 
+  // 添加日历视图专用的状态
+  const calendarTasks = ref([])
+
   // 公共排序方法
   const sortTasks = (taskList) => {
     return taskList.sort((a, b) => {
@@ -227,6 +230,57 @@ export const useTaskStore = defineStore('task', () => {
     }
   }
 
+  // 获取日历视图任务
+  const fetchCalendarTasks = async (params) => {
+    loading.value = true
+    try {
+      const response = await taskApi.getCalendarTasks(params)
+      // 使用专门的状态存储日历任务
+      calendarTasks.value = response
+      return response
+    } catch (error) {
+      addErrorLog(error, { action: 'fetchCalendarTasks', params })
+      throw error
+    } finally {
+      loading.value = false
+    }
+  }
+
+  // 更新任务日期
+  const updateTaskDate = async (taskId, date) => {
+    loading.value = true
+    try {
+      const response = await taskApi.updateTaskDate(taskId, date)
+      // 更新日历任务状态
+      const index = calendarTasks.value.findIndex(t => t.id === taskId)
+      if (index !== -1) {
+        calendarTasks.value[index] = { ...calendarTasks.value[index], due_date: date }
+      }
+      return response
+    } catch (error) {
+      addErrorLog(error, { action: 'updateTaskDate', taskId, date })
+      throw error
+    } finally {
+      loading.value = false
+    }
+  }
+
+  // 快速创建任务
+  const quickCreateTask = async (taskData) => {
+    loading.value = true
+    try {
+      const response = await taskApi.quickCreateTask(taskData)
+      // 添加到日历任务列表
+      calendarTasks.value.push(response)
+      return response
+    } catch (error) {
+      addErrorLog(error, { action: 'quickCreateTask', taskData })
+      throw error
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     // State
     tasks,
@@ -252,5 +306,9 @@ export const useTaskStore = defineStore('task', () => {
     hasMoreComments,
     commentPage,
     getTaskComments,
+    fetchCalendarTasks,
+    updateTaskDate,
+    quickCreateTask,
+    calendarTasks
   }
 })

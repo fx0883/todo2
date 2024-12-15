@@ -16,16 +16,18 @@ export function useCalendar() {
     
     switch(viewType.value) {
       case 'day':
-        start.setHours(0, 0, 0, 0)
-        end.setDate(end.getDate() + 1)
+        // start.setHours(0, 0, 0, 0)
+        // end.setHours(23, 59, 59, 999)
         break
       case 'week':
         start.setDate(start.getDate() - start.getDay())
-        end.setDate(start.getDate() + 7)
+        end.setDate(start.getDate() + 6)
+        end.setHours(23, 59, 59, 999)
         break
       case 'month':
         start.setDate(1)
         end.setMonth(end.getMonth() + 1, 0)
+        end.setHours(23, 59, 59, 999)
         break
     }
     
@@ -39,8 +41,7 @@ export function useCalendar() {
       // 使用 store 的 action 获取数据
       await taskStore.fetchCalendarTasks({
         start_date: start.toISOString().split('T')[0],
-        end_date: end.toISOString().split('T')[0],
-        view_type: viewType.value
+        end_date: end.toISOString().split('T')[0]
       })
     } catch (err) {
       console.error('获取任务失败:', err)
@@ -83,7 +84,8 @@ export function useCalendar() {
   }
 
   // 切换日期
-  const changeDate = async (date) => {
+  const changeDate = async (date,type = 'day') => {
+	viewType.value = type
     currentDate.value = date
     await fetchCalendarTasks()
   }

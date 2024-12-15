@@ -30,16 +30,6 @@ export function formatDateTime(date, format = 'YYYY-MM-DD HH:mm:ss') {
 }
 
 /**
- * 格式化日期
- * @param {Date} date 日期对象
- * @param {string} format 格式化字符串
- * @returns {string} 格式化后的字符串
- */
-export function formatDate(date, format = 'YYYY-MM-DD') {
-  return formatDateTime(date, format)
-}
-
-/**
  * 获取相对时间描述
  * @param {Date|string} date 日期对象或日期字符串
  * @returns {string} 相对时间描述
@@ -88,28 +78,28 @@ export function isSameDay(date1, date2) {
  * 获取日期范围
  * @param {Date} date 日期
  * @param {string} type 类型：'day' | 'week' | 'month'
- * @returns {{startDate: Date, endDate: Date}} 日期范围
+ * @returns {{start: Date, end: Date}} 日期范围
  */
 export function getDateRange(date, type = 'day') {
-  const startDate = new Date(date)
-  const endDate = new Date(date)
+  const start = new Date(date)
+  const end = new Date(date)
 
   switch (type) {
     case 'day':
-      startDate.setHours(0, 0, 0, 0)
-      endDate.setHours(23, 59, 59, 999)
+      start.setHours(0, 0, 0, 0)
+      end.setHours(23, 59, 59, 999)
       break
     case 'week':
-      startDate.setDate(startDate.getDate() - startDate.getDay())
-      endDate.setDate(startDate.getDate() + 6)
-      endDate.setHours(23, 59, 59, 999)
+      start.setDate(start.getDate() - start.getDay())
+      end.setDate(start.getDate() + 6)
+      end.setHours(23, 59, 59, 999)
       break
     case 'month':
-      startDate.setDate(1)
-      endDate.setMonth(endDate.getMonth() + 1, 0)
-      endDate.setHours(23, 59, 59, 999)
+      start.setDate(1)
+      end.setMonth(end.getMonth() + 1, 0)
+      end.setHours(23, 59, 59, 999)
       break
   }
 
-  return { startDate, endDate }
+  return { start, end }
 }

@@ -74,11 +74,15 @@ export default {
   }),
 
   // 获取日历视图任务
-  getCalendarTasks: (params) => request({
-    url: '/tasks/tasks/calendar/',
-    method: 'GET',
-    params
-  }),
+  getCalendarTasks: (params) => {
+    const queryString = Object.entries(params)
+      .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+      .join('&')
+    return request({
+      url: `/tasks/tasks/calendar/?${queryString}`,
+      method: 'GET'
+    })
+  },
 
   // 更新任务日期
   updateTaskDate: (taskId, date) => request({

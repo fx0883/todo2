@@ -10,6 +10,7 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.decorators import action
 from django.utils import timezone
 from datetime import datetime, timedelta
+from django.db.models import Q
 
 # 添加分页器类
 class TaskPagination(PageNumberPagination):
@@ -248,58 +249,98 @@ class TaskViewSet(viewsets.ModelViewSet):
         summary="获取日历视图任务",
         parameters=[
             OpenApiParameter(name='start_date', type=str, description='开始日期 (YYYY-MM-DD)'),
-            OpenApiParameter(name='end_date', type=str, description='结束日期 (YYYY-MM-DD)'),
-            OpenApiParameter(name='view_type', type=str, description='视图类型 (month/week/day)')
+            OpenApiParameter(name='end_date', type=str, description='结束日期 (YYYY-MM-DD)')
         ],
         tags=['任务管理']
     )
     @action(detail=False, methods=['get'])
     def calendar(self, request):
-        """获取指定时间范围内的任务"""
+        """获取指定时间范围内的任务，包括没有截止日期的任务"""
         start_date = request.query_params.get('start_date')
         end_date = request.query_params.get('end_date')
-        view_type = request.query_params.get('view_type', 'month')
         
         try:
-            start_date = datetime.strptime(start_date, '%Y-%m-%d')
-            end_date = datetime.strptime(end_date, '%Y-%m-%d')
-        except (ValueError, TypeError):
-            if view_type == 'day':
-                start_date = timezone.now().replace(hour=0, minute=0, second=0)
-                end_date = start_date + timedelta(days=1)
-            elif view_type == 'week':
-                start_date = timezone.now().replace(hour=0, minute=0, second=0) - timedelta(days=timezone.now().weekday())
-                end_date = start_date + timedelta(days=7)
-            else:  # month
-                today = timezone.now()
-                start_date = today.replace(day=1, hour=0, minute=0, second=0)
-                if today.month == 12:
-                    end_date = today.replace(year=today.year + 1, month=1, day=1)
-                else:
-                    end_date = today.replace(month=today.month + 1, day=1)
+            if not start_date or not end_date:
+                # 如果没有提供日期，默认使用今天的日期
+                today = datetime.now().date()
+                start_date = end_date = today.strftime('%Y-%m-%d')
 
+            # 转换日期字符串为datetime对象，设置时间为当天开始和结束
+            start_datetime = datetime.strptime(f"{start_date} 00:00:00", '%Y-%m-%d %H:%M:%S')
+            end_datetime = datetime.strptime(f"{end_date} 23:59:59", '%Y-%m-%d %H:%M:%S')
+
+        except (ValueError, TypeError):
+            return Response(
+                {'error': '无效的日期格式，请使用 YYYY-MM-DD'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # 构建查询条件
+        # 1. 有截止日期的任务：两条线段相交
+        date_query = Q(
+            created_at__lte=end_datetime,    # created_at <= end_date 23:59:59
+            due_date__gte=start_datetime     # due_date >= start_date 00:00:00
+        )
+
+        # 2. 没有截止日期的任务：created_at开始的射线与查询线段相交
+        no_date_query = Q(
+            due_date__isnull=True,
+            created_at__lte=end_datetime
+        )
+        
+        # 获取任务并排序
         tasks = self.get_queryset().filter(
-            due_date__gte=start_date,
-            due_date__lt=end_date
-        ).order_by('due_date')
+            date_query | no_date_query
+        ).order_by(
+            '-is_important',
+            '-priority',
+            'due_date',
+            '-created_at'
+        )
         
         serializer = self.get_serializer(tasks, many=True)
         return Response(serializer.data)
 
     @extend_schema(
         summary="更新任务日期",
-        tags=['任务管理']
+        tags=['任务管理'],
+        request={
+            'application/json': {
+                'type': 'object',
+                'properties': {
+                    'due_date': {'type': 'string', 'format': 'date'},
+                    'keep_time': {'type': 'boolean', 'default': True}
+                }
+            }
+        }
     )
     @action(detail=True, methods=['patch'])
     def update_date(self, request, pk=None):
         """更新任务的日期（用于拖拽调整）"""
         task = self.get_object()
         new_date = request.data.get('due_date')
+        keep_time = request.data.get('keep_time', True)
         
         try:
+            # 解析新日期
             new_date = datetime.strptime(new_date, '%Y-%m-%d')
+            
+            # 如果需要保留原有时间
+            if keep_time and task.due_date:
+                new_date = new_date.replace(
+                    hour=task.due_date.hour,
+                    minute=task.due_date.minute,
+                    second=task.due_date.second
+                )
+            
+            # 确保日期是时区感知的
+            new_date = timezone.make_aware(new_date)
+            
+            # 更新任务
             task.due_date = new_date
+            task.updated_at = timezone.now()
             task.save()
+            
             serializer = self.get_serializer(task)
             return Response(serializer.data)
         except (ValueError, TypeError):
@@ -310,14 +351,31 @@ class TaskViewSet(viewsets.ModelViewSet):
 
     @extend_schema(
         summary="快速创建任务",
-        tags=['任务管理']
+        tags=['任务管理'],
+        request=TaskSerializer
     )
     @action(detail=False, methods=['post'])
     def quick_create(self, request):
         """快速创建任务（带有预设日期）"""
+        # 确保日期是时区感知的
+        due_date = request.data.get('due_date')
+        if due_date:
+            try:
+                date = datetime.strptime(due_date, '%Y-%m-%d')
+                request.data['due_date'] = timezone.make_aware(date).isoformat()
+            except (ValueError, TypeError):
+                return Response(
+                    {'error': '无效的日期格式，请使用 YYYY-MM-DD'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(user=request.user)
+            serializer.save(
+                user=request.user,
+                created_at=timezone.now(),
+                updated_at=timezone.now()
+            )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

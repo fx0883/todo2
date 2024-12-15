@@ -1,376 +1,355 @@
 <template>
-  <div class="calendar-page">
-    <div class="calendar-controls">
-      <div class="view-controls">
-        <a-radio-group v-model:value="viewType" button-style="solid">
-          <a-radio-button value="month">月</a-radio-button>
-          <a-radio-button value="week">周</a-radio-button>
-          <a-radio-button value="day">日</a-radio-button>
-        </a-radio-group>
-      </div>
-      <div class="filter-controls">
-        <a-select v-model:value="taskStatus" style="width: 120px">
-          <a-select-option value="all">全部任务</a-select-option>
-          <a-select-option value="completed">已完成</a-select-option>
-          <a-select-option value="pending">未完成</a-select-option>
-        </a-select>
-      </div>
-      <div class="date-controls">
-        <a-button @click="goToToday">今天</a-button>
-        <a-button-group>
-          <a-button @click="previousPeriod">
-            <template #icon><left-outlined /></template>
-          </a-button>
-          <a-button @click="nextPeriod">
-            <template #icon><right-outlined /></template>
-          </a-button>
-        </a-button-group>
-        <span class="current-date">{{ formatCurrentPeriod }}</span>
-      </div>
-    </div>
+  <view class="calendar-page">
 
-    <div class="calendar-content">
-      <div v-if="loading" class="loading-state">
-        <a-spin size="large" />
-      </div>
-      <template v-else>
-        <div v-if="tasks.length === 0" class="empty-state">
-          <a-empty :description="emptyStateMessage" />
-        </div>
-        <div v-else class="task-list">
-          <div v-for="task in tasks" :key="task.id" class="task-item" :class="{
-            'task-completed': task.completed,
-            'task-important': task.is_important,
-            'task-recurring': task.is_recurring_instance
-          }">
-            <div class="task-status">
-              <a-checkbox
-                :checked="task.completed"
-                @change="(e) => toggleTaskStatus(task, e.target.checked)"
-              />
-            </div>
-            <div class="task-content" @click="navigateToTask(task)">
-              <div class="task-title">
-                {{ task.title }}
-                <a-tag v-if="task.is_recurring_instance" color="blue">重复</a-tag>
-                <a-tag v-if="task.is_important" color="red">重要</a-tag>
-              </div>
-              <div class="task-meta">
-                <span class="task-due">
-                  {{ formatTaskDueDate(task.due_date) }}
-                </span>
-                <span v-if="task.category" class="task-category">
-                  <a-tag :color="task.category.color">{{ task.category.name }}</a-tag>
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </template>
-    </div>
 
-    <div class="calendar-stats">
-      <a-card title="任务统计" :loading="statsLoading">
-        <template v-if="!statsLoading">
-          <a-row :gutter="16">
-            <a-col :span="6">
-              <a-statistic
-                title="今日任务"
-                :value="statistics.today.total"
-                :suffix="`/ ${statistics.today.completed}`"
-              />
-            </a-col>
-            <a-col :span="6">
-              <a-statistic
-                title="本周任务"
-                :value="statistics.week.total"
-                :suffix="`/ ${statistics.week.completed}`"
-              />
-            </a-col>
-            <a-col :span="6">
-              <a-statistic
-                title="逾期任务"
-                :value="statistics.overdue"
-                :valueStyle="{ color: statistics.overdue > 0 ? '#cf1322' : '#3f8600' }"
-              />
-            </a-col>
-            <a-col :span="6">
-              <a-statistic
-                title="总计完成"
-                :value="statistics.all.completed"
-                :suffix="`/ ${statistics.all.total}`"
-              />
-            </a-col>
-          </a-row>
-        </template>
-      </a-card>
-    </div>
+    <!-- 日历组件 -->
+    <wu-calendar 
+      type="week" 
+      :insert="true"
+      slideSwitchMode="horizontal" 
+      @confirm="onConfirmCalendar" 
+      @change="onChangeCalendar"
+      :selected="[currentDate]"
+    />
 
-    <a-button
-      type="primary"
-      shape="circle"
-      size="large"
-      class="add-button"
-      @click="navigateToCreate"
-    >
-      <template #icon><plus-outlined /></template>
-    </a-button>
-  </div>
+    <!-- 任务列表区域 -->
+    <view class="tasks-section">
+      <!-- 未完成任务 -->
+      <view class="task-group" v-if="unfinishedTasks.length">
+        <view class="group-header">
+          <text class="title">待完成</text>
+          <text class="count">{{ unfinishedTasks.length }}</text>
+        </view>
+        <view class="task-list">
+          <view 
+            v-for="task in unfinishedTasks" 
+            :key="task.id"
+            class="task-item"
+            :class="{ 'is-important': task.is_important }"
+            @tap="navigateToDetail(task.id)"
+          >
+            <view class="task-checkbox" @tap.stop="toggleTaskStatus(task)">
+              <text class="checkbox" :class="{ 'checked': task.completed }"/>
+            </view>
+            <view class="task-content">
+              <view class="task-main">
+                <text class="task-title">{{ task.title }}</text>
+                <view class="task-meta" v-if="task.due_date || task.category">
+                  <text class="due-time" v-if="task.due_date">{{ formatTime(task.due_date) }}</text>
+                  <text class="category" v-if="task.category">{{ task.category.name }}</text>
+                </view>
+              </view>
+              <view class="task-priority" v-if="task.priority > 1">
+                <text class="priority-tag" :class="'p' + task.priority">P{{ task.priority }}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 已完成任务 -->
+      <view class="task-group completed" v-if="finishedTasks.length">
+        <view class="group-header">
+          <text class="title">已完成</text>
+          <text class="count">{{ finishedTasks.length }}</text>
+        </view>
+        <view class="task-list">
+          <view 
+            v-for="task in finishedTasks" 
+            :key="task.id"
+            class="task-item"
+            @tap="navigateToDetail(task.id)"
+          >
+            <view class="task-checkbox" @tap.stop="toggleTaskStatus(task)">
+              <text class="checkbox checked"/>
+            </view>
+            <view class="task-content">
+              <text class="task-title">{{ task.title }}</text>
+              <text class="complete-time" v-if="task.completed_at">{{ formatTime(task.completed_at) }}完成</text>
+            </view>
+          </view>
+        </view>
+      </view>
+
+      <!-- 空状态优化 -->
+      <view v-if="!unfinishedTasks.length && !finishedTasks.length" class="empty-state">
+        <image src="/static/images/empty-calendar.png" mode="aspectFit"/>
+        <text class="empty-text">{{ isToday.value ? '今天暂无计划' : '该日期暂无计划' }}</text>
+        <text class="sub-text">点击下方按钮添加任务</text>
+      </view>
+    </view>
+
+    <!-- 添加任务按钮 -->
+    <view class="add-btn" @tap="showQuickAddModal">
+      <text class="icon">+</text>
+    </view>
+  </view>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
-import { useRouter } from 'vue-router'
-import { message } from 'ant-design-vue'
-import { LeftOutlined, RightOutlined, PlusOutlined } from '@ant-design/icons-vue'
-import { formatDate, isSameDate, getDateRange } from '@/utils/dateTime'
-import { useTaskStore } from '@/stores/task'
+import { ref, computed, onMounted } from 'vue'
+import { useCalendar } from '@/composables/useCalendar'
+import { formatDateTime, isSameDay } from '@/utils/dateTime'
 
-const router = useRouter()
-const taskStore = useTaskStore()
+const {
+  currentDate,
+  tasks,
+  loading,
+  fetchCalendarTasks,
+  updateTaskDate,
+  quickAddTask,
+  changeDate,
+  updateTaskStatus
+} = useCalendar()
 
-// 状态
-const viewType = ref('month')
-const taskStatus = ref('all')
-const currentDate = ref(new Date())
-const loading = ref(false)
-const statsLoading = ref(false)
-const tasks = ref([])
-const statistics = ref({
-  today: { total: 0, completed: 0, pending: 0 },
-  week: { total: 0, completed: 0, pending: 0 },
-  overdue: 0,
-  all: { total: 0, completed: 0, pending: 0 }
+// 获取今天日期
+const today = new Date()
+
+// 计算未完成任务
+const unfinishedTasks = computed(() => {
+  return tasks.value.filter(task => !task.completed)
 })
 
-// 计算属性
-const formatCurrentPeriod = computed(() => {
-  const date = currentDate.value
-  if (viewType.value === 'month') {
-    return formatDate(date, 'YYYY年MM月')
-  } else if (viewType.value === 'week') {
-    const { startDate, endDate } = getDateRange(date, 'week')
-    return `${formatDate(startDate, 'MM.DD')} - ${formatDate(endDate, 'MM.DD')}`
-  } else {
-    return formatDate(date, 'YYYY年MM月DD日')
-  }
+// 计算已完成任务
+const finishedTasks = computed(() => {
+  return tasks.value.filter(task => task.completed)
 })
 
-const emptyStateMessage = computed(() => {
-  if (loading.value) return '加载中...'
-  if (isSameDate(currentDate.value, new Date())) {
-    return '今天没有任务'
-  }
-  return '当前日期没有任务'
+// 格式化时间
+const formatTime = (dateStr) => {
+  if (!dateStr) return ''
+  return formatDateTime(new Date(dateStr), 'HH:mm')
+}
+
+// 判断是否是今天
+const isToday = computed(() => {
+  return isSameDay(currentDate.value, today)
 })
 
-// 方法
-const loadTasks = async () => {
-  loading.value = true
+// 切换任务状态
+const toggleTaskStatus = async (task) => {
   try {
-    const { startDate, endDate } = getDateRange(currentDate.value, viewType.value)
-    const response = await taskStore.fetchCalendarTasks({
-      startDate: formatDate(startDate, 'YYYY-MM-DD'),
-      endDate: formatDate(endDate, 'YYYY-MM-DD'),
-      viewType: viewType.value,
-      status: taskStatus.value
+    await updateTaskStatus(task.id, !task.completed)
+    // 状态更新后会自动刷新任务列表
+  } catch (error) {
+    uni.showToast({
+      title: '更新任务状态失败',
+      icon: 'none'
     })
-    tasks.value = response
-  } catch (error) {
-    message.error('加载任务失败')
-  } finally {
-    loading.value = false
   }
 }
 
-const loadStatistics = async () => {
-  statsLoading.value = true
-  try {
-    statistics.value = await taskStore.fetchTaskStatistics()
-  } catch (error) {
-    message.error('加载统计信息失败')
-  } finally {
-    statsLoading.value = false
-  }
+// 日历确认事件
+const onConfirmCalendar = (e) => {
+  const selectedDate = new Date(e.fulldate)
+  changeDate(selectedDate)
 }
 
-const toggleTaskStatus = async (task, completed) => {
-  try {
-    await taskStore.toggleTaskStatus(task.id, completed)
-    await loadTasks()
-    await loadStatistics()
-    message.success(completed ? '任务已完成' : '任务已重新开始')
-  } catch (error) {
-    message.error('更新任务状态失败')
-  }
+// 日历变化事件
+const onChangeCalendar = (e) => {
+  const selectedDate = new Date(e.fulldate)
+  changeDate(selectedDate)
 }
 
-const navigateToTask = (task) => {
-  router.push(`/tasks/${task.id}`)
+// 跳转到任务详情
+const navigateToDetail = (taskId) => {
+  uni.navigateTo({
+    url: `/pages/task/detail?id=${taskId}`
+  })
 }
 
-const navigateToCreate = () => {
-  router.push('/tasks/create')
+// 显示快速添加任务弹窗
+const showQuickAddModal = () => {
+  uni.navigateTo({
+    url: '/pages/task/create'
+  })
 }
 
-const formatTaskDueDate = (date) => {
-  return formatDate(new Date(date), 'HH:mm')
-}
-
-const goToToday = () => {
-  currentDate.value = new Date()
-}
-
-const previousPeriod = () => {
-  const date = new Date(currentDate.value)
-  if (viewType.value === 'month') {
-    date.setMonth(date.getMonth() - 1)
-  } else if (viewType.value === 'week') {
-    date.setDate(date.getDate() - 7)
-  } else {
-    date.setDate(date.getDate() - 1)
-  }
-  currentDate.value = date
-}
-
-const nextPeriod = () => {
-  const date = new Date(currentDate.value)
-  if (viewType.value === 'month') {
-    date.setMonth(date.getMonth() + 1)
-  } else if (viewType.value === 'week') {
-    date.setDate(date.getDate() + 7)
-  } else {
-    date.setDate(date.getDate() + 1)
-  }
-  currentDate.value = date
-}
-
-// 监听器
-watch([viewType, taskStatus, currentDate], () => {
-  loadTasks()
-})
-
-// 生命周期
+// 页面加载时获取今天的任务
 onMounted(() => {
-  loadTasks()
-  loadStatistics()
+  // 设置当前日期为今天
+  changeDate(new Date())
 })
 </script>
 
-<style lang="less" scoped>
+<style lang="scss">
 .calendar-page {
-  padding: 24px;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.calendar-controls {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
+  min-height: 100vh;
+  background: #f8f9fa;
   
-  .date-controls {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+  .tasks-section {
+    padding: 20rpx;
+  }
+  
+  .task-group {
+    margin-bottom: 30rpx;
+    background: #fff;
+    border-radius: 12rpx;
+    box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.05);
     
-    .current-date {
-      font-size: 16px;
-      font-weight: 500;
-      min-width: 120px;
-      text-align: center;
+    &.completed {
+      opacity: 0.8;
+    }
+    
+    .group-header {
+      display: flex;
+      align-items: center;
+      padding: 20rpx;
+      border-bottom: 1rpx solid #eee;
+      
+      .title {
+        font-size: 28rpx;
+        font-weight: 500;
+        color: #333;
+      }
+      
+      .count {
+        margin-left: 12rpx;
+        font-size: 24rpx;
+        color: #999;
+      }
     }
   }
-}
-
-.calendar-content {
-  flex: 1;
-  overflow-y: auto;
-  background: #fff;
-  border-radius: 8px;
-  padding: 16px;
   
-  .loading-state {
+  .task-item {
     display: flex;
-    justify-content: center;
     align-items: center;
-    height: 200px;
+    padding: 24rpx 20rpx;
+    border-bottom: 1rpx solid #f5f5f5;
+    
+    &:last-child {
+      border-bottom: none;
+    }
+    
+    &.is-important {
+      background: rgba(255, 82, 82, 0.05);
+    }
+    
+    .task-checkbox {
+      margin-right: 16rpx;
+      
+      .checkbox {
+        display: block;
+        width: 36rpx;
+        height: 36rpx;
+        border: 2rpx solid #ddd;
+        border-radius: 50%;
+        
+        &.checked {
+          background: #4CAF50;
+          border-color: #4CAF50;
+          position: relative;
+          
+          &::after {
+            content: '';
+            position: absolute;
+            left: 12rpx;
+            top: 6rpx;
+            width: 8rpx;
+            height: 16rpx;
+            border: solid white;
+            border-width: 0 2rpx 2rpx 0;
+            transform: rotate(45deg);
+          }
+        }
+      }
+    }
+    
+    .task-content {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      
+      .task-main {
+        flex: 1;
+      }
+      
+      .task-title {
+        font-size: 28rpx;
+        color: #333;
+        margin-bottom: 8rpx;
+      }
+      
+      .task-meta {
+        display: flex;
+        align-items: center;
+        font-size: 24rpx;
+        color: #999;
+        
+        .due-time {
+          margin-right: 16rpx;
+        }
+        
+        .category {
+          background: #f5f5f5;
+          padding: 4rpx 12rpx;
+          border-radius: 20rpx;
+        }
+      }
+      
+      .priority-tag {
+        font-size: 22rpx;
+        padding: 4rpx 12rpx;
+        border-radius: 4rpx;
+        
+        &.p2 {
+          background: #FFF3E0;
+          color: #FF9800;
+        }
+        
+        &.p3 {
+          background: #FFEBEE;
+          color: #F44336;
+        }
+      }
+      
+      .complete-time {
+        font-size: 24rpx;
+        color: #999;
+      }
+    }
   }
   
   .empty-state {
-    padding: 48px 0;
-  }
-  
-  .task-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+    padding: 60rpx 0;
+    text-align: center;
     
-    .task-item {
-      display: flex;
-      align-items: flex-start;
-      padding: 12px;
-      border-radius: 6px;
-      background: #f5f5f5;
-      transition: all 0.3s;
-      
-      &:hover {
-        background: #e6f7ff;
-      }
-      
-      &.task-completed {
-        opacity: 0.6;
-        background: #f0f0f0;
-        
-        .task-title {
-          text-decoration: line-through;
-        }
-      }
-      
-      &.task-important {
-        border-left: 4px solid #ff4d4f;
-      }
-      
-      &.task-recurring {
-        border-right: 4px solid #1890ff;
-      }
-      
-      .task-status {
-        padding: 4px 8px;
-      }
-      
-      .task-content {
-        flex: 1;
-        cursor: pointer;
-        
-        .task-title {
-          font-size: 14px;
-          margin-bottom: 4px;
-        }
-        
-        .task-meta {
-          font-size: 12px;
-          color: rgba(0, 0, 0, 0.45);
-          display: flex;
-          gap: 8px;
-        }
-      }
+    image {
+      width: 240rpx;
+      height: 240rpx;
+      margin-bottom: 20rpx;
+    }
+    
+    .empty-text {
+      font-size: 28rpx;
+      color: #666;
+      margin-bottom: 12rpx;
+    }
+    
+    .sub-text {
+      font-size: 24rpx;
+      color: #999;
     }
   }
-}
-
-.calendar-stats {
-  margin-top: auto;
-}
-
-.add-button {
-  position: fixed;
-  right: 24px;
-  bottom: 24px;
-  width: 48px;
-  height: 48px;
+  
+  .add-btn {
+    position: fixed;
+    right: 40rpx;
+    bottom: 40rpx;
+    width: 100rpx;
+    height: 100rpx;
+    background: #2196F3;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4rpx 12rpx rgba(33, 150, 243, 0.3);
+    
+    .icon {
+      color: #fff;
+      font-size: 48rpx;
+    }
+  }
 }
 </style>

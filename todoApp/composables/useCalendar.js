@@ -88,6 +88,21 @@ export function useCalendar() {
     await fetchCalendarTasks()
   }
 
+  // 更新任务状态
+  const updateTaskStatus = async (taskId, completed) => {
+    try {
+      await taskStore.updateTask(taskId, {
+        completed,
+        completed_at: completed ? new Date().toISOString() : null
+      })
+      // 更新后重新获取日历数据
+      await fetchCalendarTasks()
+    } catch (err) {
+      console.error('更新任务状态失败:', err)
+      throw err
+    }
+  }
+
   return {
     viewType,
     currentDate,
@@ -99,6 +114,7 @@ export function useCalendar() {
     updateTaskDate,
     quickAddTask,
     changeViewType,
-    changeDate
+    changeDate,
+    updateTaskStatus
   }
 } 

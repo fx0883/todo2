@@ -21,11 +21,13 @@ export function useCalendar() {
         break
       case 'week':
         start.setDate(start.getDate() - start.getDay())
+        start.setHours(0, 0, 0, 0)
         end.setDate(start.getDate() + 6)
         end.setHours(23, 59, 59, 999)
         break
       case 'month':
         start.setDate(1)
+        start.setHours(0, 0, 0, 0)
         end.setMonth(end.getMonth() + 1, 0)
         end.setHours(23, 59, 59, 999)
         break
@@ -85,7 +87,7 @@ export function useCalendar() {
 
   // 切换日期
   const changeDate = async (date,type = 'day') => {
-	viewType.value = type
+    viewType.value = type
     currentDate.value = date
     await fetchCalendarTasks()
   }

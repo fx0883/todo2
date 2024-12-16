@@ -75,7 +75,7 @@
       <view v-if="!unfinishedTasks.length && !finishedTasks.length" class="empty-state">
         <image src="/static/images/empty-calendar.png" mode="aspectFit"/>
         <text class="empty-text">{{ isToday.value ? '今天暂无计划' : '该日期暂无计划' }}</text>
-        <text class="sub-text">点击下方按钮添加任务</text>
+        <!-- <text class="sub-text">点击下方按钮添加任务</text> -->
       </view>
     </view>
 
@@ -87,7 +87,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onActivated } from 'vue'
 import { useCalendar } from '@/composables/useCalendar'
 import { formatDateTime, isSameDay } from '@/utils/dateTime'
 
@@ -142,12 +142,14 @@ const toggleTaskStatus = async (task) => {
 // 日历确认事件
 const onConfirmCalendar = (e) => {
   const selectedDate = new Date(e.fulldate)
+  // currentDate.value = selectedDate;
   changeDate(selectedDate)
 }
 
 // 日历变化事件
 const onChangeCalendar = (e) => {
   const selectedDate = new Date(e.fulldate)
+  // currentDate.value = selectedDate;
   changeDate(selectedDate)
 }
 
@@ -165,10 +167,16 @@ const showQuickAddModal = () => {
   })
 }
 
+// let curDate = ref(new Date())
+
 // 页面加载时获取今天的任务
 onMounted(() => {
   // 设置当前日期为今天
-  changeDate(new Date())
+  changeDate(new Date(new Date().getTime()))
+})
+
+onActivated(() => {
+  changeDate(new Date(currentDate.value))
 })
 </script>
 
@@ -336,19 +344,26 @@ onMounted(() => {
   .add-btn {
     position: fixed;
     right: 40rpx;
-    bottom: 40rpx;
-    width: 100rpx;
-    height: 100rpx;
-    background: #2196F3;
+    bottom: calc(140rpx + env(safe-area-inset-bottom));
+    width: 96rpx;
+    height: 96rpx;
+    background-color: #262626;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4rpx 12rpx rgba(33, 150, 243, 0.3);
+    box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.15);
+    transition: transform 0.2s;
+    z-index: 100;
     
-    .icon {
-      color: #fff;
+    &:active {
+      transform: scale(0.95);
+    }
+    
+    text {
+      color: #ffffff;
       font-size: 48rpx;
+      font-weight: 300;
     }
   }
 }

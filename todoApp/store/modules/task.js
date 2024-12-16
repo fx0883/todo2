@@ -281,12 +281,67 @@ export const useTaskStore = defineStore('task', () => {
     }
   }
 
+  // 添加统计相关的状态
+  const monthStats = ref({
+    total: 0,
+    completed: 0,
+    pending: 0,
+    overdue: 0
+  })
+  const categoryStats = ref([])
+  const dailyTrend = ref([])
+
+  // 获取月度统计数据
+  const fetchMonthStats = async (month) => {
+    loading.value = true
+    try {
+      const response = await taskApi.getMonthStats(month)
+      monthStats.value = response
+      return response
+    } catch (error) {
+      addErrorLog(error, { action: 'fetchMonthStats', params: { month } })
+      throw error
+    } finally {
+      loading.value = false
+    }
+  }
+
+  // 获取分类统计数据
+  const fetchCategoryStats = async (month) => {
+    loading.value = true
+    try {
+      const response = await taskApi.getCategoryStats(month)
+      categoryStats.value = response
+      return response
+    } catch (error) {
+      addErrorLog(error, { action: 'fetchCategoryStats', params: { month } })
+      throw error
+    } finally {
+      loading.value = false
+    }
+  }
+
+  // 获取每日完成趋势
+  const fetchDailyTrend = async (month) => {
+    loading.value = true
+    try {
+      const response = await taskApi.getDailyTrend(month)
+      dailyTrend.value = response
+      return response
+    } catch (error) {
+      addErrorLog(error, { action: 'fetchDailyTrend', params: { month } })
+      throw error
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     // State
     tasks,
     loading,
     hasMore,
-	currentPage,
+    currentPage,
     // Getters
     completedTasks,
     pendingTasks,
@@ -309,6 +364,12 @@ export const useTaskStore = defineStore('task', () => {
     fetchCalendarTasks,
     updateTaskDate,
     quickCreateTask,
-    calendarTasks
+    calendarTasks,
+    monthStats,
+    categoryStats,
+    dailyTrend,
+    fetchMonthStats,
+    fetchCategoryStats,
+    fetchDailyTrend
   }
 })

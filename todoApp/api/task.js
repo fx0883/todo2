@@ -96,5 +96,29 @@ export default {
     url: '/tasks/tasks/quick_create/',
     method: 'POST',
     data
-  })
+  }),
+
+  // 获取月度统计数据
+  getMonthStats: (month) => {
+    return request({
+      url: `/tasks/tasks/month_stats/${month}/`,
+      method: 'GET'
+    })
+  },
+
+  // 获取分类统计数据
+  getCategoryStats: (month) => {
+    return request({
+      url: `/tasks/tasks/category_stats/${month}/`,
+      method: 'GET'
+    })
+  },
+
+  // 获取每日完成趋势
+  getDailyTrend: (month) => {
+    return request({
+      url: `/tasks/tasks/daily_trend/${month}/`,
+      method: 'GET'
+    })
+  },
 }

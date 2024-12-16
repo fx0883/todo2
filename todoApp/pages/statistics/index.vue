@@ -1,94 +1,78 @@
 <template>
-  <view class="statistics-container">
-    <!-- 总览卡片 -->
-    <view class="overview-card">
-      <view class="card-header">
-        <text class="title">任务总览</text>
-        <picker 
-          mode="date" 
-          fields="month" 
-          :value="currentMonth" 
+  <view class="statistics-page">
+    <!-- 顶部月份选择和总览 -->
+    <view class="header-section">
+      <view class="month-selector">
+        <text class="section-title">统计月份</text>
+        <picker
+          mode="date"
+          fields="month"
+          :value="currentMonth"
           @change="handleMonthChange"
         >
-          <text class="month">{{ currentMonth }}</text>
+          <view class="picker-text">{{ formatMonth }}</view>
         </picker>
       </view>
-      
-      <view class="stats-grid">
-        <view class="stats-item">
-          <text class="number">{{ stats.total }}</text>
-          <text class="label">总任务</text>
-        </view>
-        <view class="stats-item">
-          <text class="number">{{ stats.completed }}</text>
-          <text class="label">已完成</text>
-        </view>
-        <view class="stats-item">
-          <text class="number">{{ stats.pending }}</text>
-          <text class="label">进行中</text>
-        </view>
-        <view class="stats-item">
-          <text class="number">{{ stats.overdue }}</text>
-          <text class="label">已逾期</text>
-        </view>
+    </view>
+
+    <!-- 统计卡片 -->
+    <view class="stats-grid">
+      <view class="stat-card">
+        <text class="stat-value">{{ monthStats.total }}</text>
+        <text class="stat-label">总任务数</text>
       </view>
-      
-      <view class="completion-rate">
-        <text class="rate-text">完成率</text>
-        <progress 
-          :percent="completionRate" 
-          stroke-width="12" 
-          color="#007AFF"
-          backgroundColor="#f5f5f5"
-        />
-        <text class="rate-number">{{ completionRate }}%</text>
+      <view class="stat-card completed">
+        <text class="stat-value">{{ monthStats.completed }}</text>
+        <text class="stat-label">已完成</text>
+      </view>
+      <view class="stat-card pending">
+        <text class="stat-value">{{ monthStats.pending }}</text>
+        <text class="stat-label">进行中</text>
+      </view>
+      <view class="stat-card overdue">
+        <text class="stat-value">{{ monthStats.overdue }}</text>
+        <text class="stat-label">已逾期</text>
       </view>
     </view>
-    
-    <!-- 分类统计 -->
-    <view class="category-stats">
-      <view class="section-header">
-        <text class="title">分类统计</text>
-      </view>
-      
-      <view class="category-list">
-        <view 
-          v-for="category in categoryStats" 
-          :key="category.id" 
-          class="category-item"
-        >
-          <view class="category-info">
-            <view 
-              class="category-color"
-              :style="{ backgroundColor: category.color }"
-            ></view>
-            <text class="category-name">{{ category.name }}</text>
-            <text class="task-count">{{ category.count }}个任务</text>
+
+    <!-- 任务完成情况分析 -->
+    <view class="analysis-section">
+      <text class="section-title">任务完成情况分析</text>
+      <view class="completion-analysis">
+        <view class="progress-section">
+          <progress
+            :percent="completionRate"
+            stroke-width="12"
+            :color="progressColor"
+            class="progress"
+          />
+          <text class="progress-text">任务完成率: {{ completionRate }}%</text>
+        </view>
+        <view class="stats-details">
+          <view class="detail-item">
+            <text class="detail-label">按时完成率：</text>
+            <text class="detail-value">{{ onTimeRate }}%</text>
           </view>
-          
-          <view class="category-progress">
-            <progress 
-              :percent="category.completionRate" 
-              stroke-width="8" 
-              :color="category.color"
-              backgroundColor="#f5f5f5"
-            />
-            <text class="progress-text">{{ category.completionRate }}%</text>
+          <view class="detail-item">
+            <text class="detail-label">平均完成时间：</text>
+            <text class="detail-value">{{ avgCompletionDays }}天</text>
           </view>
         </view>
       </view>
     </view>
-    
-    <!-- 每日完成趋势 -->
-    <view class="daily-trend">
-      <view class="section-header">
-        <text class="title">每日完成趋势</text>
+
+    <!-- 分类统计和趋势图表 -->
+    <view class="charts-section">
+      <view class="chart-card">
+        <text class="section-title">任务分类分布</text>
+        <view class="chart-wrapper">
+          <VChart class="chart" :option="categoryChartOption" autoresize />
+        </view>
       </view>
-      
-      <view class="trend-chart">
-        <!-- 这里可以使用图表组件，如 uCharts 或 F2 -->
-        <view class="chart-placeholder">
-          <text>图表区域</text>
+      <view class="chart-card">
+        <text class="section-title">每日任务趋势</text>
+        <view class="chart-wrapper">
+          <VChart class="chart" :option="trendChartOption" autoresize />
         </view>
       </view>
     </view>
@@ -98,258 +82,326 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useTaskStore } from '@/store/modules/task'
-import { formatDate } from '@/utils/date'
+import VChart from 'vue-echarts'
+import * as echarts from 'echarts/core'
+import { CanvasRenderer } from 'echarts/renderers'
+import { PieChart, LineChart } from 'echarts/charts'
+import {
+  TitleComponent,
+  TooltipComponent,
+  LegendComponent,
+  GridComponent
+} from 'echarts/components'
+
+// 注册必需的组件
+echarts.use([
+  CanvasRenderer,
+  PieChart,
+  LineChart,
+  TitleComponent,
+  TooltipComponent,
+  LegendComponent,
+  GridComponent
+])
 
 const taskStore = useTaskStore()
-const currentMonth = ref(formatDate(new Date(), 'YYYY-MM'))
+const currentMonth = ref(new Date().toISOString().slice(0, 7)) // YYYY-MM
 
-// 统计数据
-const stats = ref({
-  total: 0,
-  completed: 0,
-  pending: 0,
-  overdue: 0
+// 格式化显示月份
+const formatMonth = computed(() => {
+  const [year, month] = currentMonth.value.split('-')
+  return `${year}年${month}月`
 })
 
-// 分类统计
-const categoryStats = ref([])
+// 从 store 获取数据
+const monthStats = computed(() => taskStore.monthStats || {})
+const categoryStats = computed(() => taskStore.categoryStats || [])
+const dailyTrend = computed(() => taskStore.dailyTrend || [])
 
-// 计算完成率
+// 计算任务完成率
 const completionRate = computed(() => {
-  if (stats.value.total === 0) return 0
-  return Math.round((stats.value.completed / stats.value.total) * 100)
+  if (!monthStats.value.total) return 0
+  return Math.round((monthStats.value.completed / monthStats.value.total) * 100)
 })
 
-// 获取月度统计数据
-const fetchMonthStats = async (month) => {
-  try {
-    // 这里应该调用后端API获取数据
-    // 临时使用模拟数据
-    stats.value = {
-      total: 50,
-      completed: 35,
-      pending: 10,
-      overdue: 5
-    }
-  } catch (error) {
-    console.error('获取统计数据失败:', error)
-  }
+// 进度条颜色
+const progressColor = computed(() => {
+  const rate = completionRate.value
+  if (rate >= 80) return '#07c160'
+  if (rate >= 60) return '#ff9900'
+  return '#ff0000'
+})
+
+// 模拟数据 - 实际项目中应从后端获取
+const onTimeRate = computed(() => 85)
+const avgCompletionDays = computed(() => 2.5)
+
+// 获取统计数据
+const fetchStatistics = async () => {
+  await Promise.all([
+    taskStore.fetchMonthStats(currentMonth.value),
+    taskStore.fetchCategoryStats(currentMonth.value),
+    taskStore.fetchDailyTrend(currentMonth.value)
+  ])
 }
 
-// 获取分类统计数据
-const fetchCategoryStats = async (month) => {
-  try {
-    // 这里应该调用后端API获取数据
-    // 临时使用模拟数据
-    categoryStats.value = [
-      {
-        id: 1,
-        name: '工作',
-        color: '#1890ff',
-        count: 20,
-        completionRate: 80
-      },
-      {
-        id: 2,
-        name: '学习',
-        color: '#52c41a',
-        count: 15,
-        completionRate: 60
-      },
-      {
-        id: 3,
-        name: '生活',
-        color: '#faad14',
-        count: 10,
-        completionRate: 90
-      }
-    ]
-  } catch (error) {
-    console.error('获取分类统计失败:', error)
-  }
-}
-
-// 月份变更
+// 监听月份变化
 const handleMonthChange = (e) => {
-  currentMonth.value = e.detail.value
-  fetchMonthStats(currentMonth.value)
-  fetchCategoryStats(currentMonth.value)
+  const date = new Date(e.detail.value)
+  currentMonth.value = date.toISOString().slice(0, 7)
+  fetchStatistics()
 }
 
+// 分类统计图表配置
+const categoryChartOption = computed(() => ({
+  tooltip: {
+    trigger: 'item',
+    formatter: '{b}: {c} ({d}%)'
+  },
+  legend: {
+    orient: 'vertical',
+    left: 'left',
+    top: 'middle'
+  },
+  series: [
+    {
+      type: 'pie',
+      radius: ['40%', '70%'],
+      avoidLabelOverlap: false,
+      itemStyle: {
+        borderRadius: 10,
+        borderColor: '#fff',
+        borderWidth: 2
+      },
+      label: {
+        show: true,
+        position: 'outside',
+        formatter: '{b}: {c}'
+      },
+      emphasis: {
+        label: {
+          show: true,
+          fontSize: '16',
+          fontWeight: 'bold'
+        }
+      },
+      data: categoryStats.value
+    }
+  ]
+}))
+
+// 每日趋势图表配置
+const trendChartOption = computed(() => ({
+  tooltip: {
+    trigger: 'axis',
+    formatter: '{b}<br />任务数: {c}'
+  },
+  grid: {
+    left: '3%',
+    right: '4%',
+    bottom: '3%',
+    containLabel: true
+  },
+  xAxis: {
+    type: 'category',
+    data: dailyTrend.value.map(item => item.date),
+    axisLabel: {
+      rotate: 45
+    }
+  },
+  yAxis: {
+    type: 'value',
+    name: '任务数',
+    nameLocation: 'middle',
+    nameGap: 40
+  },
+  series: [
+    {
+      data: dailyTrend.value.map(item => item.count),
+      type: 'line',
+      smooth: true,
+      symbolSize: 8,
+      itemStyle: {
+        color: '#409EFF'
+      },
+      areaStyle: {
+        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+          {
+            offset: 0,
+            color: 'rgba(64,158,255,0.3)'
+          },
+          {
+            offset: 1,
+            color: 'rgba(64,158,255,0.1)'
+          }
+        ])
+      }
+    }
+  ]
+}))
+
+// 组件挂载时获取数据
 onMounted(() => {
-  fetchMonthStats(currentMonth.value)
-  fetchCategoryStats(currentMonth.value)
+  fetchStatistics()
 })
 </script>
 
-<style lang="scss">
-.statistics-container {
+<style scoped>
+.statistics-page {
+  padding: 20px;
+  background-color: #f5f7fa;
   min-height: 100vh;
-  background-color: #f5f5f5;
-  padding: 30rpx;
-  
-  .overview-card {
-    background-color: #fff;
-    border-radius: 12rpx;
-    padding: 30rpx;
-    margin-bottom: 30rpx;
-    
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 30rpx;
-      
-      .title {
-        font-size: 32rpx;
-        font-weight: bold;
-        color: #333;
-      }
-      
-      .month {
-        font-size: 28rpx;
-        color: #666;
-      }
-    }
-    
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 20rpx;
-      margin-bottom: 30rpx;
-      
-      .stats-item {
-        text-align: center;
-        
-        .number {
-          display: block;
-          font-size: 36rpx;
-          font-weight: bold;
-          color: #333;
-          margin-bottom: 10rpx;
-        }
-        
-        .label {
-          font-size: 24rpx;
-          color: #666;
-        }
-      }
-    }
-    
-    .completion-rate {
-      .rate-text {
-        font-size: 28rpx;
-        color: #666;
-        margin-bottom: 10rpx;
-      }
-      
-      .rate-number {
-        font-size: 28rpx;
-        color: #333;
-        margin-left: 20rpx;
-      }
-    }
-  }
-  
-  .category-stats {
-    background-color: #fff;
-    border-radius: 12rpx;
-    padding: 30rpx;
-    margin-bottom: 30rpx;
-    
-    .section-header {
-      margin-bottom: 30rpx;
-      
-      .title {
-        font-size: 32rpx;
-        font-weight: bold;
-        color: #333;
-      }
-    }
-    
-    .category-list {
-      .category-item {
-        margin-bottom: 30rpx;
-        
-        &:last-child {
-          margin-bottom: 0;
-        }
-        
-        .category-info {
-          display: flex;
-          align-items: center;
-          margin-bottom: 10rpx;
-          
-          .category-color {
-            width: 24rpx;
-            height: 24rpx;
-            border-radius: 50%;
-            margin-right: 10rpx;
-          }
-          
-          .category-name {
-            font-size: 28rpx;
-            color: #333;
-            margin-right: 20rpx;
-          }
-          
-          .task-count {
-            font-size: 26rpx;
-            color: #666;
-          }
-        }
-        
-        .category-progress {
-          display: flex;
-          align-items: center;
-          
-          progress {
-            flex: 1;
-            margin-right: 20rpx;
-          }
-          
-          .progress-text {
-            font-size: 26rpx;
-            color: #333;
-            width: 80rpx;
-          }
-        }
-      }
-    }
-  }
-  
-  .daily-trend {
-    background-color: #fff;
-    border-radius: 12rpx;
-    padding: 30rpx;
-    
-    .section-header {
-      margin-bottom: 30rpx;
-      
-      .title {
-        font-size: 32rpx;
-        font-weight: bold;
-        color: #333;
-      }
-    }
-    
-    .trend-chart {
-      height: 400rpx;
-      
-      .chart-placeholder {
-        height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background-color: #f5f5f5;
-        border-radius: 12rpx;
-        
-        text {
-          font-size: 28rpx;
-          color: #999;
-        }
-      }
-    }
-  }
+}
+
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.month-selector {
+  display: flex;
+  align-items: center;
+}
+
+.month-selector .section-title {
+  margin-right: 10px;
+}
+
+.month-selector .picker-text {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.stat-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card .stat-value {
+  font-size: 24px;
+  font-weight: bold;
+  color: #303133;
+}
+
+.stat-card .stat-label {
+  font-size: 14px;
+  color: #909399;
+  margin-top: 10px;
+}
+
+.stat-card.completed .stat-value {
+  color: #67C23A;
+}
+
+.stat-card.pending .stat-value {
+  color: #E6A23C;
+}
+
+.stat-card.overdue .stat-value {
+  color: #F56C6C;
+}
+
+.analysis-section {
+  margin-top: 20px;
+}
+
+.analysis-section .section-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #303133;
+  margin-bottom: 10px;
+}
+
+.completion-analysis {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.progress-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.progress-section .progress {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+}
+
+.progress-section .progress-text {
+  font-size: 14px;
+  color: #606266;
+  margin-top: 10px;
+}
+
+.stats-details {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.stats-details .detail-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.stats-details .detail-item .detail-label {
+  font-size: 14px;
+  color: #606266;
+  margin-right: 10px;
+}
+
+.stats-details .detail-item .detail-value {
+  font-size: 14px;
+  font-weight: bold;
+  color: #303133;
+}
+
+.charts-section {
+  margin-top: 20px;
+}
+
+.chart-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.chart-card .section-title {
+  font-size: 18px;
+  font-weight: bold;
+  color: #303133;
+  margin-bottom: 10px;
+}
+
+.chart-wrapper {
+  width: 100%;
+  height: 400px;
+}
+
+.chart {
+  width: 100%;
+  height: 100%;
 }
 </style>

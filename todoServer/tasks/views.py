@@ -4,6 +4,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiExample, OpenApiResponse, OpenApiParameter
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 from .models import Category, Tag, Task, TaskComment
 from .serializers import CategorySerializer, TagSerializer, TaskSerializer, TaskCommentSerializer
 from rest_framework.pagination import PageNumberPagination
@@ -11,6 +13,7 @@ from rest_framework.decorators import action
 from django.utils import timezone
 from datetime import datetime, timedelta
 from django.db.models import Q
+from rest_framework.views import APIView
 
 # 添加分页器类
 class TaskPagination(PageNumberPagination):
@@ -430,3 +433,211 @@ class TaskCommentViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+
+class MonthStatsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_description="获取指定月份的任务统计数据",
+        manual_parameters=[
+            openapi.Parameter(
+                'month',
+                openapi.IN_PATH,
+                description="月份，格式：YYYY-MM，例如：2023-12",
+                type=openapi.TYPE_STRING,
+                required=True
+            )
+        ],
+        responses={
+            200: openapi.Response(
+                description="成功",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'total': openapi.Schema(type=openapi.TYPE_INTEGER, description='总任务数'),
+                        'completed': openapi.Schema(type=openapi.TYPE_INTEGER, description='已完成任务数'),
+                        'pending': openapi.Schema(type=openapi.TYPE_INTEGER, description='进行中任务数'),
+                        'overdue': openapi.Schema(type=openapi.TYPE_INTEGER, description='已逾期任务数')
+                    }
+                )
+            ),
+            400: "参数错误：month参数格式错误",
+            500: "服务器错误"
+        }
+    )
+    def get(self, request, month):
+        """获取月度统计数据"""
+        try:
+            # 解析月份参数 (格式: YYYY-MM)
+            year, month = map(int, month.split('-'))
+            start_date = datetime(year, month, 1)
+            if month == 12:
+                end_date = datetime(year + 1, 1, 1)
+            else:
+                end_date = datetime(year, month + 1, 1)
+
+            # 获取用户在指定月份的所有任务
+            tasks = Task.objects.filter(
+                user=request.user,
+                created_at__gte=start_date,
+                created_at__lt=end_date
+            )
+
+            # 统计数据
+            total = tasks.count()
+            completed = tasks.filter(status='completed').count()
+            pending = tasks.filter(status='pending').count()
+            overdue = tasks.filter(
+                status='pending',
+                due_date__lt=timezone.now()
+            ).count()
+
+            return Response({
+                'total': total,
+                'completed': completed,
+                'pending': pending,
+                'overdue': overdue
+            })
+        except ValueError:
+            return Response({'error': 'Invalid month format'}, status=400)
+        except Exception as e:
+            return Response({'error': str(e)}, status=500)
+
+
+class CategoryStatsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_description="获取指定月份的任务分类统计数据",
+        manual_parameters=[
+            openapi.Parameter(
+                'month',
+                openapi.IN_PATH,
+                description="月份，格式：YYYY-MM，例如：2023-12",
+                type=openapi.TYPE_STRING,
+                required=True
+            )
+        ],
+        responses={
+            200: openapi.Response(
+                description="成功",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Schema(
+                        type=openapi.TYPE_OBJECT,
+                        properties={
+                            'name': openapi.Schema(type=openapi.TYPE_STRING, description='分类名称'),
+                            'value': openapi.Schema(type=openapi.TYPE_INTEGER, description='任务数量')
+                        }
+                    )
+                )
+            ),
+            400: "参数错误：month参数格式错误",
+            500: "服务器错误"
+        }
+    )
+    def get(self, request, month):
+        """获取分类统计数据"""
+        try:
+            # 解析月份参数 (格式: YYYY-MM)
+            year, month = map(int, month.split('-'))
+            start_date = datetime(year, month, 1)
+            if month == 12:
+                end_date = datetime(year + 1, 1, 1)
+            else:
+                end_date = datetime(year, month + 1, 1)
+
+            # 获取每个分类的任务数量
+            categories = Category.objects.filter(user=request.user)
+            stats = []
+            
+            for category in categories:
+                task_count = Task.objects.filter(
+                    user=request.user,
+                    category=category,
+                    created_at__gte=start_date,
+                    created_at__lt=end_date
+                ).count()
+                
+                if task_count > 0:  # 只返回有任务的分类
+                    stats.append({
+                        'name': category.name,
+                        'value': task_count  # 使用 value 而不是 count，以符合 ECharts 数据格式
+                    })
+
+            return Response(stats)
+        except ValueError:
+            return Response({'error': 'Invalid month format'}, status=400)
+        except Exception as e:
+            return Response({'error': str(e)}, status=500)
+
+
+class DailyTrendView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_description="获取指定月份的每日任务完成趋势",
+        manual_parameters=[
+            openapi.Parameter(
+                'month',
+                openapi.IN_PATH,
+                description="月份，格式：YYYY-MM，例如：2023-12",
+                type=openapi.TYPE_STRING,
+                required=True
+            )
+        ],
+        responses={
+            200: openapi.Response(
+                description="成功",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Schema(
+                        type=openapi.TYPE_OBJECT,
+                        properties={
+                            'date': openapi.Schema(type=openapi.TYPE_STRING, description='日期，格式：YYYY-MM-DD'),
+                            'count': openapi.Schema(type=openapi.TYPE_INTEGER, description='完成的任务数量')
+                        }
+                    )
+                )
+            ),
+            400: "参数错误：month参数格式错误",
+            500: "服务器错误"
+        }
+    )
+    def get(self, request, month):
+        """获取每日完成趋势数据"""
+        try:
+            # 解析月份参数 (格式: YYYY-MM)
+            year, month = map(int, month.split('-'))
+            start_date = datetime(year, month, 1)
+            if month == 12:
+                end_date = datetime(year + 1, 1, 1)
+            else:
+                end_date = datetime(year, month + 1, 1)
+
+            # 获取每天完成的任务数量
+            daily_stats = []
+            current_date = start_date
+            
+            while current_date < end_date:
+                next_date = current_date + timedelta(days=1)
+                completed_count = Task.objects.filter(
+                    user=request.user,
+                    status='completed',
+                    completed_at__gte=current_date,
+                    completed_at__lt=next_date
+                ).count()
+                
+                daily_stats.append({
+                    'date': current_date.strftime('%Y-%m-%d'),
+                    'count': completed_count
+                })
+                
+                current_date = next_date
+
+            return Response(daily_stats)
+        except ValueError:
+            return Response({'error': 'Invalid month format'}, status=400)
+        except Exception as e:
+            return Response({'error': str(e)}, status=500)

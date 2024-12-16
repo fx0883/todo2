@@ -13,9 +13,6 @@ export const useTaskStore = defineStore('task', () => {
 
   // 状态
   const rawTasks = ref([])
-
-
-  // 状态
   const loading = ref(false)
   const currentPage = ref(1)
   const totalCount = ref(0)
@@ -29,6 +26,9 @@ export const useTaskStore = defineStore('task', () => {
 
   // 添加日历视图专用的状态
   const calendarTasks = ref([])
+
+  // 添加优先级统计的状态管理
+  const priorityStats = ref(null)
 
   // 公共排序方法
   const sortTasks = (taskList) => {
@@ -336,12 +336,25 @@ export const useTaskStore = defineStore('task', () => {
     }
   }
 
+  // 获取优先级统计数据
+  const fetchPriorityStats = async (month) => {
+    try {
+      const response = await taskApi.getPriorityStats(month)
+      priorityStats.value = response
+      return response
+    } catch (error) {
+      console.error('获取优先级统计失败:', error)
+      throw error
+    }
+  }
+
   return {
     // State
     tasks,
     loading,
     hasMore,
     currentPage,
+    priorityStats,
     // Getters
     completedTasks,
     pendingTasks,
@@ -370,6 +383,7 @@ export const useTaskStore = defineStore('task', () => {
     dailyTrend,
     fetchMonthStats,
     fetchCategoryStats,
-    fetchDailyTrend
+    fetchDailyTrend,
+    fetchPriorityStats
   }
 })

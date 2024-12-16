@@ -641,3 +641,73 @@ class DailyTrendView(APIView):
             return Response({'error': 'Invalid month format'}, status=400)
         except Exception as e:
             return Response({'error': str(e)}, status=500)
+
+
+class PriorityStatsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_description="获取指定月份的任务优先级分布统计",
+        manual_parameters=[
+            openapi.Parameter(
+                'month',
+                openapi.IN_PATH,
+                description="月份，格式：YYYY-MM，例如：2023-12",
+                type=openapi.TYPE_STRING,
+                required=True
+            )
+        ],
+        responses={
+            200: openapi.Response(
+                description="成功",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'high': openapi.Schema(type=openapi.TYPE_INTEGER, description='高优先级任务数量'),
+                        'medium': openapi.Schema(type=openapi.TYPE_INTEGER, description='中优先级任务数量'),
+                        'low': openapi.Schema(type=openapi.TYPE_INTEGER, description='低优先级任务数量')
+                    }
+                )
+            ),
+            400: "参数错误：month参数格式错误",
+            500: "服务器错误"
+        }
+    )
+    def get(self, request, month):
+        """获取优先级分布统计数据"""
+        try:
+            # 解析月份参数 (格式: YYYY-MM)
+            year, month = map(int, month.split('-'))
+            start_date = datetime(year, month, 1)
+            if month == 12:
+                end_date = datetime(year + 1, 1, 1)
+            else:
+                end_date = datetime(year, month + 1, 1)
+
+            # 获取每个优先级的任务数量
+            stats = {
+                'high': Task.objects.filter(
+                    user=request.user,
+                    priority=3,  # 高优先级
+                    created_at__gte=start_date,
+                    created_at__lt=end_date
+                ).count(),
+                'medium': Task.objects.filter(
+                    user=request.user,
+                    priority=2,  # 中优先级
+                    created_at__gte=start_date,
+                    created_at__lt=end_date
+                ).count(),
+                'low': Task.objects.filter(
+                    user=request.user,
+                    priority=1,  # 低优先级
+                    created_at__gte=start_date,
+                    created_at__lt=end_date
+                ).count()
+            }
+
+            return Response(stats)
+        except ValueError:
+            return Response({'error': 'Invalid month format'}, status=400)
+        except Exception as e:
+            return Response({'error': str(e)}, status=500)

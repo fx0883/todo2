@@ -21,4 +21,5 @@ urlpatterns = [
     path('tasks/month_stats/<str:month>/', views.MonthStatsView.as_view(), name='month-stats'),
     path('tasks/category_stats/<str:month>/', views.CategoryStatsView.as_view(), name='category-stats'),
     path('tasks/daily_trend/<str:month>/', views.DailyTrendView.as_view(), name='daily-trend'),
+    path('tasks/priority_stats/<str:month>/', views.PriorityStatsView.as_view(), name='priority-stats'),
 ]

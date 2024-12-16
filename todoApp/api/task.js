@@ -121,4 +121,12 @@ export default {
       method: 'GET'
     })
   },
+
+  // 获取优先级分布统计
+  getPriorityStats: (month) => {
+    return request({
+      url: `/tasks/tasks/priority_stats/${month}/`,
+      method: 'GET'
+    })
+  },
 }

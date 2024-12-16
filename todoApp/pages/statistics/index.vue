@@ -117,7 +117,14 @@ const formatMonth = computed(() => {
 // 从 store 获取数据
 const monthStats = computed(() => taskStore.monthStats || {})
 const categoryStats = computed(() => taskStore.categoryStats || [])
-const dailyTrend = computed(() => taskStore.dailyTrend || [])
+const priorityStats = computed(() => taskStore.priorityStats || { high: 0, medium: 0, low: 0 })
+
+// 优先级分布统计数据转换
+const priorityChartData = computed(() => [
+  { name: '高优先级', value: priorityStats.value.high },
+  { name: '中优先级', value: priorityStats.value.medium },
+  { name: '低优先级', value: priorityStats.value.low }
+])
 
 // 计算任务完成率
 const completionRate = computed(() => {
@@ -142,7 +149,7 @@ const fetchStatistics = async () => {
   await Promise.all([
     taskStore.fetchMonthStats(currentMonth.value),
     taskStore.fetchCategoryStats(currentMonth.value),
-    taskStore.fetchDailyTrend(currentMonth.value)
+    taskStore.fetchPriorityStats(currentMonth.value)
   ])
 }
 
@@ -201,20 +208,7 @@ const categoryChartOption = computed(() => ({
   ]
 }))
 
-// 优先级分布统计（替代每日趋势）
-const priorityStats = computed(() => {
-  const stats = {
-    high: monthStats.value.high || 0,
-    medium: monthStats.value.medium || 0,
-    low: monthStats.value.low || 0
-  }
-  return [
-    { name: '高优先级', value: stats.high },
-    { name: '中优先级', value: stats.medium },
-    { name: '低优先级', value: stats.low }
-  ]
-})
-
+// 优先级分布统计
 const trendChartOption = computed(() => ({
   tooltip: {
     trigger: 'item',
@@ -246,7 +240,7 @@ const trendChartOption = computed(() => ({
           fontWeight: 'bold'
         }
       },
-      data: priorityStats.value.map(item => ({
+      data: priorityChartData.value.map(item => ({
         name: item.name,
         value: item.value,
         itemStyle: {

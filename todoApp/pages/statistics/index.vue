@@ -70,7 +70,7 @@
         </view>
       </view>
       <view class="chart-card">
-        <text class="section-title">每日任务趋势</text>
+        <text class="section-title">优先级分布统计</text>
         <view class="chart-wrapper">
           <VChart class="chart" :option="trendChartOption" autoresize />
         </view>
@@ -85,7 +85,7 @@ import { useTaskStore } from '@/store/modules/task'
 import VChart from 'vue-echarts'
 import * as echarts from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
-import { PieChart, LineChart } from 'echarts/charts'
+import { PieChart, LineChart, BarChart } from 'echarts/charts'
 import {
   TitleComponent,
   TooltipComponent,
@@ -98,6 +98,7 @@ echarts.use([
   CanvasRenderer,
   PieChart,
   LineChart,
+  BarChart,
   TitleComponent,
   TooltipComponent,
   LegendComponent,
@@ -152,16 +153,76 @@ const handleMonthChange = (e) => {
   fetchStatistics()
 }
 
-// 分类统计图表配置
+// 分类统计图表配置（改为横向柱状图）
 const categoryChartOption = computed(() => ({
+  tooltip: {
+    trigger: 'axis',
+    axisPointer: {
+      type: 'shadow'
+    }
+  },
+  grid: {
+    left: '3%',
+    right: '4%',
+    bottom: '3%',
+    containLabel: true
+  },
+  xAxis: {
+    type: 'value',
+    name: '任务数',
+  },
+  yAxis: {
+    type: 'category',
+    data: categoryStats.value.map(item => item.name),
+    axisLabel: {
+      interval: 0,
+      rotate: 0
+    }
+  },
+  series: [
+    {
+      type: 'bar',
+      data: categoryStats.value.map(item => ({
+        value: item.value,
+        itemStyle: {
+          color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+            { offset: 0, color: '#83bff6' },
+            { offset: 0.5, color: '#188df0' },
+            { offset: 1, color: '#188df0' }
+          ])
+        }
+      })),
+      label: {
+        show: true,
+        position: 'right',
+        formatter: '{c}'
+      }
+    }
+  ]
+}))
+
+// 优先级分布统计（替代每日趋势）
+const priorityStats = computed(() => {
+  const stats = {
+    high: monthStats.value.high || 0,
+    medium: monthStats.value.medium || 0,
+    low: monthStats.value.low || 0
+  }
+  return [
+    { name: '高优先级', value: stats.high },
+    { name: '中优先级', value: stats.medium },
+    { name: '低优先级', value: stats.low }
+  ]
+})
+
+const trendChartOption = computed(() => ({
   tooltip: {
     trigger: 'item',
     formatter: '{b}: {c} ({d}%)'
   },
   legend: {
-    orient: 'vertical',
-    left: 'left',
-    top: 'middle'
+    orient: 'horizontal',
+    bottom: 'bottom'
   },
   series: [
     {
@@ -175,8 +236,8 @@ const categoryChartOption = computed(() => ({
       },
       label: {
         show: true,
-        position: 'outside',
-        formatter: '{b}: {c}'
+        position: 'inside',
+        formatter: '{d}%'
       },
       emphasis: {
         label: {
@@ -185,57 +246,14 @@ const categoryChartOption = computed(() => ({
           fontWeight: 'bold'
         }
       },
-      data: categoryStats.value
-    }
-  ]
-}))
-
-// 每日趋势图表配置
-const trendChartOption = computed(() => ({
-  tooltip: {
-    trigger: 'axis',
-    formatter: '{b}<br />任务数: {c}'
-  },
-  grid: {
-    left: '3%',
-    right: '4%',
-    bottom: '3%',
-    containLabel: true
-  },
-  xAxis: {
-    type: 'category',
-    data: dailyTrend.value.map(item => item.date),
-    axisLabel: {
-      rotate: 45
-    }
-  },
-  yAxis: {
-    type: 'value',
-    name: '任务数',
-    nameLocation: 'middle',
-    nameGap: 40
-  },
-  series: [
-    {
-      data: dailyTrend.value.map(item => item.count),
-      type: 'line',
-      smooth: true,
-      symbolSize: 8,
-      itemStyle: {
-        color: '#409EFF'
-      },
-      areaStyle: {
-        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-          {
-            offset: 0,
-            color: 'rgba(64,158,255,0.3)'
-          },
-          {
-            offset: 1,
-            color: 'rgba(64,158,255,0.1)'
-          }
-        ])
-      }
+      data: priorityStats.value.map(item => ({
+        name: item.name,
+        value: item.value,
+        itemStyle: {
+          color: item.name === '高优先级' ? '#F56C6C' :
+                item.name === '中优先级' ? '#E6A23C' : '#67C23A'
+        }
+      }))
     }
   ]
 }))

@@ -27,7 +27,7 @@
         <text class="label">待完成</text>
       </view>
       <view class="stats-card">
-        <text class="number">{{ stats.completion_rate || 0 }}%</text>
+        <text class="number">{{ (stats.completion_rate || 0).toFixed(2) }}%</text>
         <text class="label">完成率</text>
       </view>
     </view>

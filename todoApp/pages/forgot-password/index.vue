@@ -1,251 +1,206 @@
 <template>
-  <view class="forgot-password-container">
-    <view class="logo">
-      <image src="/static/logo.png" mode="aspectFit"></image>
+  <view class="forgot-password">
+    <view class="form-group">
+      <text class="label">邮箱地址</text>
+      <input
+        v-model="form.email"
+        class="input"
+        type="text"
+        placeholder="请输入邮箱地址"
+      />
     </view>
-    
-    <view class="form-container">
-      <view class="form-item">
-        <text class="label">邮箱</text>
-        <input 
-          class="input" 
-          type="text" 
-          v-model="form.email" 
-          placeholder="请输入注册邮箱"
-          @input="validateEmail"
+
+    <view class="form-group">
+      <text class="label">新密码</text>
+      <input
+        v-model="form.new_password"
+        class="input"
+        type="password"
+        placeholder="请输入新密码"
+      />
+    </view>
+
+    <view class="form-group">
+      <text class="label">确认密码</text>
+      <input
+        v-model="form.confirm_password"
+        class="input"
+        type="password"
+        placeholder="请再次输入新密码"
+      />
+    </view>
+
+    <view class="form-group">
+      <text class="label">验证码</text>
+      <view class="code-input">
+        <input
+          v-model="form.code"
+          class="input"
+          type="text"
+          placeholder="请输入验证码"
         />
-        <text v-if="errors.email" class="error-text">{{ errors.email }}</text>
-      </view>
-      
-      <view class="form-item">
-        <text class="label">新密码</text>
-        <input 
-          class="input" 
-          type="password" 
-          v-model="form.password" 
-          placeholder="请输入新密码"
-          password
-          @input="validatePassword"
-        />
-        <text v-if="errors.password" class="error-text">{{ errors.password }}</text>
-      </view>
-      
-      <view class="form-item">
-        <text class="label">确认密码</text>
-        <input 
-          class="input" 
-          type="password" 
-          v-model="form.confirmPassword" 
-          placeholder="请再次输入新密码"
-          password
-          @input="validateConfirmPassword"
-        />
-        <text v-if="errors.confirmPassword" class="error-text">{{ errors.confirmPassword }}</text>
-      </view>
-      
-      <button 
-        class="submit-btn" 
-        :disabled="!isValid || loading"
-        :loading="loading"
-        @click="handleResetPassword"
-      >
-        重置密码
-      </button>
-      
-      <view class="actions">
-        <text @click="navigateToLogin" class="link-text">返回登录</text>
+        <button 
+          class="code-btn" 
+          :disabled="cooldown > 0 || isRequesting"
+          @tap="handleSendCode"
+        >
+          {{ cooldown > 0 ? `${cooldown}s` : (isRequesting ? '发送中...' : '获取验证码') }}
+        </button>
       </view>
     </view>
+
+    <button 
+      class="submit-btn" 
+      @tap="handleSubmit"
+      :disabled="isConfirming"
+    >
+      {{ isConfirming ? '提交中...' : '重置密码' }}
+    </button>
   </view>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
-import { useAuth } from '@/composables'
+import { ref } from 'vue'
+import { usePassword } from '@/composables/usePassword'
 
-const { resetPassword } = useAuth()
-
-const loading = ref(false)
+const { requestPasswordReset, confirmPasswordReset, isRequesting, isConfirming, closePage } = usePassword()
+const cooldown = ref(0)
 const form = ref({
   email: '',
-  password: '',
-  confirmPassword: ''
+  new_password: '',
+  confirm_password: '',
+  code: ''
 })
 
-const errors = ref({
-  email: '',
-  password: '',
-  confirmPassword: ''
-})
+// 发送验证码
+const handleSendCode = async () => {
+  if (cooldown.value > 0) return
 
-// 表单验证
-const validateEmail = () => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  if (!form.value.email) {
-    errors.value.email = '请输入邮箱'
-  } else if (!emailRegex.test(form.value.email)) {
-    errors.value.email = '请输入有效的邮箱地址'
-  } else {
-    errors.value.email = ''
+  const success = await requestPasswordReset(form.value.email)
+  if (success) {
+    // 开始倒计时
+    cooldown.value = 60
+    const timer = setInterval(() => {
+      cooldown.value--
+      if (cooldown.value <= 0) {
+        clearInterval(timer)
+      }
+    }, 1000)
   }
 }
 
-const validatePassword = () => {
-  if (!form.value.password) {
-    errors.value.password = '请输入新密码'
-  } else if (form.value.password.length < 6) {
-    errors.value.password = '密码长度至少为6位'
-  } else {
-    errors.value.password = ''
-  }
-  validateConfirmPassword()
-}
-
-const validateConfirmPassword = () => {
-  if (!form.value.confirmPassword) {
-    errors.value.confirmPassword = '请确认新密码'
-  } else if (form.value.confirmPassword !== form.value.password) {
-    errors.value.confirmPassword = '两次输入的密码不一致'
-  } else {
-    errors.value.confirmPassword = ''
-  }
-}
-
-const isValid = computed(() => {
-  return form.value.email && 
-         form.value.password && 
-         form.value.confirmPassword && 
-         form.value.password === form.value.confirmPassword &&
-         !errors.value.email &&
-         !errors.value.password &&
-         !errors.value.confirmPassword
-})
-
-// 重置密码
-const handleResetPassword = async () => {
-  if (!isValid.value || loading.value) return
-  
-  validateEmail()
-  validatePassword()
-  validateConfirmPassword()
-  
-  if (!isValid.value) return
-  
-  loading.value = true
-  try {
-    await resetPassword({
-      email: form.value.email,
-      password: form.value.password
-    })
-    
+// 提交修改
+const handleSubmit = async () => {
+  if (!form.value.new_password) {
     uni.showToast({
-      title: '密码重置成功',
-      icon: 'success'
-    })
-    
-    setTimeout(() => {
-      navigateToLogin()
-    }, 1500)
-  } catch (error) {
-    uni.showToast({
-      title: error.message || '密码重置失败',
+      title: '请输入新密码',
       icon: 'none'
     })
-  } finally {
-    loading.value = false
+    return
   }
-}
 
-// 页面跳转
-const navigateToLogin = () => {
-  uni.navigateTo({
-    url: '/pages/login/index'
+  if (!form.value.confirm_password) {
+    uni.showToast({
+      title: '请确认新密码',
+      icon: 'none'
+    })
+    return
+  }
+
+  if (form.value.new_password !== form.value.confirm_password) {
+    uni.showToast({
+      title: '两次输入的密码不一致',
+      icon: 'none'
+    })
+    return
+  }
+
+  if (!form.value.code) {
+    uni.showToast({
+      title: '请输入验证码',
+      icon: 'none'
+    })
+    return
+  }
+
+  await confirmPasswordReset({
+    token: form.value.code,
+    new_password: form.value.new_password,
+    confirm_password: form.value.confirm_password
   })
 }
 </script>
 
 <style lang="scss">
-.forgot-password-container {
-  min-height: 100vh;
-  padding: 40rpx;
-  background-color: #f5f5f5;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  
-  .logo {
-    margin: 60rpx 0;
-    width: 200rpx;
-    height: 200rpx;
-    
-    image {
-      width: 100%;
-      height: 100%;
+.forgot-password {
+  padding: 30rpx;
+
+  .form-group {
+    margin-bottom: 30rpx;
+
+    .label {
+      display: block;
+      margin-bottom: 10rpx;
+      font-size: 28rpx;
+      color: #333;
     }
-  }
-  
-  .form-container {
-    width: 100%;
-    max-width: 600rpx;
-    padding: 40rpx;
-    background-color: #fff;
-    border-radius: 20rpx;
-    box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.1);
-    
-    .form-item {
-      margin-bottom: 30rpx;
-      
-      .label {
-        display: block;
-        margin-bottom: 10rpx;
-        font-size: 28rpx;
-        color: #333;
-      }
-      
+
+    .input {
+      width: 100%;
+      height: 80rpx;
+      padding: 0 20rpx;
+      border: 1px solid #eee;
+      border-radius: 8rpx;
+      font-size: 28rpx;
+    }
+
+    .code-input {
+      display: flex;
+      align-items: center;
+      gap: 20rpx;
+
       .input {
-        width: 100%;
+        flex: 1;
+      }
+
+      .code-btn {
+        width: 200rpx;
         height: 80rpx;
-        padding: 0 20rpx;
-        border: 2rpx solid #ddd;
-        border-radius: 8rpx;
+        line-height: 80rpx;
         font-size: 28rpx;
-        
-        &:focus {
-          border-color: #007AFF;
+        background: #007AFF;
+        color: #fff;
+        border-radius: 8rpx;
+
+        &:active {
+          opacity: 0.8;
+        }
+
+        &[disabled] {
+          opacity: 0.6;
+          background: #ccc;
         }
       }
-      
-      .error-text {
-        display: block;
-        margin-top: 10rpx;
-        font-size: 24rpx;
-        color: #ff4d4f;
-      }
     }
-    
-    .submit-btn {
-      width: 100%;
-      height: 88rpx;
-      margin-top: 40rpx;
-      background-color: #007AFF;
-      color: #fff;
-      border-radius: 8rpx;
-      font-size: 32rpx;
-      
-      &:disabled {
-        background-color: #ccc;
-      }
+  }
+
+  .submit-btn {
+    width: 100%;
+    height: 88rpx;
+    line-height: 88rpx;
+    background: #007AFF;
+    color: #fff;
+    border-radius: 44rpx;
+    font-size: 32rpx;
+    margin-top: 60rpx;
+
+    &:active {
+      opacity: 0.8;
     }
-    
-    .actions {
-      margin-top: 30rpx;
-      text-align: center;
-      
-      .link-text {
-        font-size: 28rpx;
-        color: #007AFF;
-        text-decoration: underline;
-      }
+
+    &[disabled] {
+      opacity: 0.6;
+      background: #ccc;
     }
   }
 }

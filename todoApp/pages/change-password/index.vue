@@ -1,42 +1,47 @@
 <template>
-  <view class="change-password-container">
+  <view class="change-password">
     <view class="form-group">
-      <input 
-        class="input" 
-        type="password" 
-        v-model="formData.token" 
-        placeholder="请输入验证码"
-      />
-      <button 
-        class="send-code-btn" 
-        :disabled="cooldown > 0" 
-        @click="handleSendCode"
-      >
-        {{ cooldown > 0 ? `${cooldown}s` : '获取验证码' }}
-      </button>
-    </view>
-    
-    <view class="form-group">
-      <input 
-        class="input" 
-        type="password" 
-        v-model="formData.new_password" 
+      <text class="label">新密码</text>
+      <input
+        v-model="form.new_password"
+        class="input"
+        type="password"
         placeholder="请输入新密码"
       />
     </view>
-    
+
     <view class="form-group">
-      <input 
-        class="input" 
-        type="password" 
-        v-model="formData.confirm_password" 
-        placeholder="请确认新密码"
+      <text class="label">确认密码</text>
+      <input
+        v-model="form.confirm_password"
+        class="input"
+        type="password"
+        placeholder="请再次输入新密码"
       />
     </view>
-    
+
+    <view class="form-group">
+      <text class="label">验证码</text>
+      <view class="code-input">
+        <input
+          v-model="form.code"
+          class="input"
+          type="text"
+          placeholder="请输入验证码"
+        />
+        <button 
+          class="code-btn" 
+          :disabled="cooldown > 0 || isRequesting"
+          @tap="handleSendCode"
+        >
+          {{ cooldown > 0 ? `${cooldown}s` : (isRequesting ? '发送中...' : '获取验证码') }}
+        </button>
+      </view>
+    </view>
+
     <button 
       class="submit-btn" 
-      @click="handleSubmit"
+      @tap="handleSubmit"
     >
       确认修改
     </button>
@@ -45,20 +50,22 @@
 
 <script setup>
 import { ref } from 'vue'
-import { useUserStore } from '@/store/modules/user'
+import { usePassword } from '@/composables/usePassword'
 
-const userStore = useUserStore()
+const { requestPasswordReset, confirmPasswordReset, isRequesting, isConfirming } = usePassword()
 const cooldown = ref(0)
-const formData = ref({
-  token: '',
+const form = ref({
   new_password: '',
-  confirm_password: ''
+  confirm_password: '',
+  code: ''
 })
 
 // 发送验证码
 const handleSendCode = async () => {
+  if (cooldown.value > 0) return
+
   try {
-    await userStore.requestPasswordReset()
+    await requestPasswordReset()
     // 开始倒计时
     cooldown.value = 60
     const timer = setInterval(() => {
@@ -68,97 +75,127 @@ const handleSendCode = async () => {
       }
     }, 1000)
   } catch (error) {
-    uni.showToast({
-      title: error.message || '发送验证码失败',
-      icon: 'none'
-    })
+    console.error('发送验证码失败:', error)
   }
 }
 
-// 提交修改密码
+// 提交修改
 const handleSubmit = async () => {
-  try {
-    if (!formData.value.token) {
-      throw new Error('请输入验证码')
-    }
-    if (!formData.value.new_password) {
-      throw new Error('请输入新密码')
-    }
-    if (!formData.value.confirm_password) {
-      throw new Error('请确认新密码')
-    }
-    if (formData.value.new_password !== formData.value.confirm_password) {
-      throw new Error('两次输入的密码不一致')
-    }
-    
-    await userStore.confirmPasswordReset(formData.value)
+  if (!form.value.new_password) {
     uni.showToast({
-      title: '密码修改成功',
-      icon: 'success'
-    })
-    // 返回上一页
-    setTimeout(() => {
-      uni.navigateBack()
-    }, 1500)
-  } catch (error) {
-    uni.showToast({
-      title: error.message || '修改密码失败',
+      title: '请输入新密码',
       icon: 'none'
     })
+    return
+  }
+
+  if (!form.value.confirm_password) {
+    uni.showToast({
+      title: '请确认新密码',
+      icon: 'none'
+    })
+    return
+  }
+
+  if (form.value.new_password !== form.value.confirm_password) {
+    uni.showToast({
+      title: '两次输入的密码不一致',
+      icon: 'none'
+    })
+    return
+  }
+
+  if (!form.value.code) {
+    uni.showToast({
+      title: '请输入验证码',
+      icon: 'none'
+    })
+    return
+  }
+
+  const success = await confirmPasswordReset({
+    token: form.value.code,
+    new_password: form.value.new_password,
+    confirm_password: form.value.confirm_password
+  })
+
+  if (success) {
+    // 重置表单
+    form.value = {
+      new_password: '',
+      confirm_password: '',
+      code: ''
+    }
   }
 }
 </script>
 
 <style lang="scss">
-.change-password-container {
+.change-password {
   padding: 30rpx;
-  
+
   .form-group {
-    position: relative;
     margin-bottom: 30rpx;
-    
+
+    .label {
+      display: block;
+      margin-bottom: 10rpx;
+      font-size: 28rpx;
+      color: #333;
+    }
+
     .input {
       width: 100%;
-      height: 90rpx;
-      padding: 0 30rpx;
-      background-color: #fff;
-      border-radius: 45rpx;
+      height: 80rpx;
+      padding: 0 20rpx;
+      border: 1px solid #eee;
+      border-radius: 8rpx;
       font-size: 28rpx;
-      
-      &.with-button {
-        padding-right: 200rpx;
-      }
     }
-    
-    .send-code-btn {
-      position: absolute;
-      right: 10rpx;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 180rpx;
-      height: 70rpx;
-      line-height: 70rpx;
-      background-color: #409EFF;
-      color: #fff;
-      border-radius: 35rpx;
-      font-size: 24rpx;
-      text-align: center;
-      
-      &:disabled {
-        background-color: #ccc;
+
+    .code-input {
+      display: flex;
+      align-items: center;
+      gap: 20rpx;
+
+      .input {
+        flex: 1;
+      }
+
+      .code-btn {
+        width: 200rpx;
+        height: 80rpx;
+        line-height: 80rpx;
+        font-size: 28rpx;
+        background: #007AFF;
+        color: #fff;
+        border-radius: 8rpx;
+
+        &:active {
+          opacity: 0.8;
+        }
+
+        &[disabled] {
+          opacity: 0.6;
+          background: #ccc;
+        }
       }
     }
   }
-  
+
   .submit-btn {
     width: 100%;
-    height: 90rpx;
-    line-height: 90rpx;
-    background-color: #409EFF;
+    height: 88rpx;
+    line-height: 88rpx;
+    background: #007AFF;
     color: #fff;
-    border-radius: 45rpx;
+    border-radius: 44rpx;
     font-size: 32rpx;
     margin-top: 60rpx;
+
+    &:active {
+      opacity: 0.8;
+    }
   }
 }
 </style>

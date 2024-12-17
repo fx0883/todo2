@@ -40,22 +40,18 @@
       <text class="section-title">任务完成情况分析</text>
       <view class="completion-analysis">
         <view class="progress-section">
-          <progress
-            :percent="completionRate"
-            stroke-width="12"
-            :color="progressColor"
-            class="progress"
-          />
-          <text class="progress-text">任务完成率: {{ completionRate }}%</text>
-        </view>
-        <view class="stats-details">
-          <view class="detail-item">
-            <text class="detail-label">按时完成率：</text>
-            <text class="detail-value">{{ onTimeRate }}%</text>
+          <view class="progress-bar-container">
+            <progress
+              :percent="completionRate"
+              stroke-width="12"
+              :color="progressColor"
+              class="progress"
+            />
           </view>
-          <view class="detail-item">
-            <text class="detail-label">平均完成时间：</text>
-            <text class="detail-value">{{ avgCompletionDays }}天</text>
+          <view class="stats-row">
+            <text class="stat-item">按时完成率：{{ onTimeRate }}%</text>
+            <text class="stat-item">任务完成率：{{ completionRate }}%</text>
+            <text class="stat-item">平均完成时间：{{ avgCompletionDays }}天</text>
           </view>
         </view>
       </view>
@@ -64,9 +60,26 @@
     <!-- 分类统计和趋势图表 -->
     <view class="charts-section">
       <view class="chart-card">
-        <text class="section-title">任务分类分布</text>
-        <view class="chart-wrapper">
-          <VChart class="chart" :option="categoryChartOption" autoresize />
+        <text class="section-title text-center">任务分类分布</text>
+        <view class="category-list">
+          <view 
+            v-for="(category, index) in categoryStats" 
+            :key="category.name"
+            class="category-item"
+          >
+            <text class="category-name">{{ category.name }}</text>
+            <view class="progress-container">
+              <view 
+                class="progress-bar" 
+                :style="{ 
+                  width: `${(category.value / maxTaskCount) * 100}%`,
+                  backgroundColor: categoryColors[index % categoryColors.length]
+                }"
+              >
+                <text class="progress-text">{{ category.value }}</text>
+              </view>
+            </view>
+          </view>
         </view>
       </view>
       <view class="chart-card">
@@ -160,53 +173,28 @@ const handleMonthChange = (e) => {
   fetchStatistics()
 }
 
-// 分类统计图表配置（改为横向柱状图）
-const categoryChartOption = computed(() => ({
-  tooltip: {
-    trigger: 'axis',
-    axisPointer: {
-      type: 'shadow'
-    }
-  },
-  grid: {
-    left: '3%',
-    right: '4%',
-    bottom: '3%',
-    containLabel: true
-  },
-  xAxis: {
-    type: 'value',
-    name: '任务数',
-  },
-  yAxis: {
-    type: 'category',
-    data: categoryStats.value.map(item => item.name),
-    axisLabel: {
-      interval: 0,
-      rotate: 0
-    }
-  },
-  series: [
-    {
-      type: 'bar',
-      data: categoryStats.value.map(item => ({
-        value: item.value,
-        itemStyle: {
-          color: new echarts.graphic.LinearGradient(0, 0, 1, 0, [
-            { offset: 0, color: '#83bff6' },
-            { offset: 0.5, color: '#188df0' },
-            { offset: 1, color: '#188df0' }
-          ])
-        }
-      })),
-      label: {
-        show: true,
-        position: 'right',
-        formatter: '{c}'
-      }
-    }
-  ]
-}))
+// 分类颜色数组
+const categoryColors = [
+  '#409EFF', // 蓝色
+  '#67C23A', // 绿色
+  '#E6A23C', // 橙色
+  '#F56C6C', // 红色
+  '#909399', // 灰色
+  '#9B59B6', // 紫色
+  '#3498DB', // 浅蓝
+  '#1ABC9C', // 青绿
+  '#D35400', // 深橙
+  '#2C3E50'  // 深灰
+]
+
+// 计算最大任务数量
+const maxTaskCount = computed(() => {
+  if (!categoryStats.value || categoryStats.value.length === 0) return 0
+  return Math.max(...categoryStats.value.map(item => item.value))
+})
+
+// 移除不需要的图表配置
+const categoryChartOption = computed(() => ({}))
 
 // 优先级分布统计
 const trendChartOption = computed(() => ({
@@ -329,71 +317,53 @@ onMounted(() => {
 
 .analysis-section {
   margin-top: 20px;
-}
-
-.analysis-section .section-title {
-  font-size: 18px;
-  font-weight: bold;
-  color: #303133;
-  margin-bottom: 10px;
+  background: #fff;
+  border-radius: 8px;
+  padding: 15px;
 }
 
 .completion-analysis {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  margin-top: 15px;
 }
 
 .progress-section {
+  width: 100%;
+}
+
+.progress-bar-container {
+  width: 100%;
+  margin-bottom: 15px;
+}
+
+.progress {
+  width: 100% !important;
+}
+
+.stats-row {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.progress-section .progress {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-}
-
-.progress-section .progress-text {
-  font-size: 14px;
-  color: #606266;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
   margin-top: 10px;
 }
 
-.stats-details {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-}
-
-.stats-details .detail-item {
-  display: flex;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.stats-details .detail-item .detail-label {
+.stat-item {
   font-size: 14px;
   color: #606266;
-  margin-right: 10px;
-}
-
-.stats-details .detail-item .detail-value {
-  font-size: 14px;
-  font-weight: bold;
-  color: #303133;
+  flex: 1;
+  min-width: 120px;
+  text-align: center;
 }
 
 .charts-section {
   margin-top: 20px;
+ 
 }
 
 .chart-card {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: self-start;
   padding: 20px;
   border: 1px solid #ddd;
   border-radius: 10px;
@@ -407,6 +377,11 @@ onMounted(() => {
   margin-bottom: 10px;
 }
 
+.chart-card .section-title.text-center {
+  text-align: center;
+  display: block;
+}
+
 .chart-wrapper {
   width: 100%;
   height: 400px;
@@ -415,5 +390,49 @@ onMounted(() => {
 .chart {
   width: 100%;
   height: 100%;
+}
+
+.category-list {
+  margin-top: 15px;
+  padding: 0 15px;
+}
+
+.category-item {
+  padding: 10px 0;
+  border-bottom: 1px solid #ebeef5;
+}
+
+.category-name {
+  font-size: 14px;
+  color: #303133;
+  margin-bottom: 8px;
+  display: block;
+  text-align: left;
+}
+
+.progress-container {
+  height: 24px;
+  background-color: #f5f7fa;
+  border-radius: 12px;
+  overflow: hidden;
+  position: relative;
+}
+
+.progress-bar {
+  height: 100%;
+  border-radius: 12px;
+  transition: width 0.3s ease;
+  position: relative;
+  min-width: 30px; /* 确保即使数值很小也能显示文字 */
+}
+
+.progress-text {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #ffffff;
+  font-size: 12px;
+  text-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
 }
 </style>

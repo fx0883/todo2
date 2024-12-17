@@ -563,24 +563,78 @@ class UserDeviceViewSet(viewsets.ModelViewSet):
 
 @extend_schema_view(
     list=extend_schema(
-        summary="获取用户反馈列表",
-        tags=['用户反馈']
-    ),
-    create=extend_schema(
-        summary="创建用户反馈",
+        summary="获取反馈列表",
         tags=['用户反馈']
     ),
     retrieve=extend_schema(
-        summary="获取用户反馈详情",
+        summary="获取反馈详情",
         tags=['用户反馈']
+    ),
+    create=extend_schema(
+        summary="创建反馈",
+        tags=['用户反馈'],
+        request=UserFeedbackSerializer,
+        responses={201: UserFeedbackSerializer}
     )
 )
 class UserFeedbackViewSet(viewsets.ModelViewSet):
+    """用户反馈视图集"""
     serializer_class = UserFeedbackSerializer
     permission_classes = [permissions.IsAuthenticated]
-    
+
     def get_queryset(self):
-        return UserFeedback.objects.filter(user=self.request.user)
-    
+        """获取当前用户的反馈列表"""
+        return UserFeedback.objects.filter(user=self.request.user).order_by('-created_at')
+
     def perform_create(self, serializer):
+        """创建反馈时自动关联当前用户"""
         serializer.save(user=self.request.user)
+
+    @extend_schema(
+        summary="更新反馈状态",
+        tags=['用户反馈'],
+        request={"type": "object", "properties": {"status": {"type": "string", "enum": ["pending", "in_progress", "resolved", "closed"]}}},
+        responses={200: UserFeedbackSerializer}
+    )
+    @action(detail=True, methods=['patch'])
+    def update_status(self, request, pk=None):
+        """更新反馈状态"""
+        feedback = self.get_object()
+        status = request.data.get('status')
+
+        if not status or status not in ['pending', 'in_progress', 'resolved', 'closed']:
+            return Response(
+                {'error': '无效的状态值'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        feedback.status = status
+        feedback.save()
+
+        serializer = self.get_serializer(feedback)
+        return Response(serializer.data)
+
+    @extend_schema(
+        summary="添加回复",
+        tags=['用户反馈'],
+        request={"type": "object", "properties": {"response": {"type": "string"}}},
+        responses={200: UserFeedbackSerializer}
+    )
+    @action(detail=True, methods=['post'])
+    def add_response(self, request, pk=None):
+        """添加回复"""
+        feedback = self.get_object()
+        response = request.data.get('response')
+
+        if not response:
+            return Response(
+                {'error': '回复内容不能为空'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        feedback.response = response
+        feedback.status = 'resolved'  # 添加回复时自动将状态设为已解决
+        feedback.save()
+
+        serializer = self.get_serializer(feedback)
+        return Response(serializer.data)

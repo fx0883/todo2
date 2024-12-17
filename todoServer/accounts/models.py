@@ -19,6 +19,7 @@ class User(AbstractUser):
     自定义用户模型
     """
     phone = models.CharField(_('手机号'), max_length=11, unique=True, null=True, blank=True)
+    nickname = models.CharField(_('昵称'), max_length=50, null=True, blank=True)
     wechat_id = models.CharField(_('微信ID'), max_length=100, unique=True, null=True, blank=True)
     avatar = models.ImageField(
         _('头像'),
@@ -107,6 +108,7 @@ class UserFeedback(models.Model):
     type = models.CharField(_('反馈类型'), max_length=20)  # bug, feature_request, complaint, other
     title = models.CharField(_('标题'), max_length=200)
     content = models.TextField(_('内容'))
+    contact_info = models.CharField(_('联系方式'), max_length=100, null=True, blank=True)
     status = models.CharField(_('状态'), max_length=20, default='pending')  # pending, in_progress, resolved, closed
     response = models.TextField(_('回复'), null=True, blank=True)
     created_at = models.DateTimeField(_('创建时间'), auto_now_add=True)

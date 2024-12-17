@@ -49,12 +49,14 @@
           <text class="menu-label">意见反馈</text>
           <text class="arrow">></text>
         </view>
-        <view class="menu-item" @click="handleAbout">
-          <text class="menu-label">关于</text>
-          <text class="arrow">></text>
-        </view>
+
         <view class="menu-item" @click="handlePrivacy">
           <text class="menu-label">隐私政策</text>
+          <text class="arrow">></text>
+        </view>
+
+        <view class="menu-item" @click="handleAbout">
+          <text class="menu-label">关于</text>
           <text class="arrow">></text>
         </view>
       </view>

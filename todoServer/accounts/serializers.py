@@ -14,7 +14,8 @@ from django.conf import settings
                 'first_name': 'John',
                 'last_name': 'Doe',
                 'is_active': True,
-                'avatar': 'http://example.com/media/avatars/user.jpg'
+                'avatar': 'http://example.com/media/avatars/user.jpg',
+                'nickname': 'johndoe_nickname'
             }
         )
     ]
@@ -24,7 +25,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'is_active', 'avatar')
+        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'is_active', 'avatar', 'nickname')
         read_only_fields = ('id', 'is_active')
 
     def get_avatar(self, obj):
@@ -156,5 +157,5 @@ class UserFeedbackSerializer(serializers.ModelSerializer):
     """用户反馈序列化器"""
     class Meta:
         model = UserFeedback
-        fields = ('id', 'type', 'title', 'content', 'status', 'response', 'created_at', 'updated_at')
+        fields = ('id', 'type', 'title', 'content', 'contact_info', 'status', 'response', 'created_at', 'updated_at')
         read_only_fields = ('id', 'status', 'response', 'created_at', 'updated_at')

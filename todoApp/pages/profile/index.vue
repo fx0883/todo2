@@ -38,10 +38,6 @@
           <text class="menu-label">分类管理</text>
           <text class="arrow">></text>
         </view>
-        <view class="menu-item" @click="navigateTo('/pages/tag/index')">
-          <text class="menu-label">标签管理</text>
-          <text class="arrow">></text>
-        </view>
       </view>
       
       <view class="menu-group">
@@ -55,6 +51,10 @@
         </view>
         <view class="menu-item" @click="handleAbout">
           <text class="menu-label">关于</text>
+          <text class="arrow">></text>
+        </view>
+        <view class="menu-item" @click="handlePrivacy">
+          <text class="menu-label">隐私政策</text>
           <text class="arrow">></text>
         </view>
       </view>
@@ -140,6 +140,13 @@ const handleAbout = () => {
   })
 }
 
+// 隐私政策
+const handlePrivacy = () => {
+  uni.navigateTo({
+    url: '/pages/privacy/index'
+  })
+}
+
 // 退出登录
 const handleLogout = async () => {
   try {
@@ -151,8 +158,6 @@ const handleLogout = async () => {
     console.error('退出登录失败:', error)
   }
 }
-
-
 
 // 页面显示时刷新数据
 onActivated (async () => {

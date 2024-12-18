@@ -1,5 +1,5 @@
 <template>
-  <view class="category-container">
+  <view class="category-container" ref="categoryPage">
     <!-- 加载状态 -->
     <uni-load-more v-if="loading" status="loading" />
     
@@ -28,22 +28,12 @@
           </button>
           <button 
             class="delete-btn"
-            @click="handleDelete(category.id)"
+            @click="handleDelete(category)"
           >
             删除
           </button>
         </view>
       </view>
-    </view>
-    
-    <!-- 添加按钮 -->
-    <view class="add-category">
-      <button 
-        class="add-btn"
-        @click="handleAdd"
-      >
-        添加分类
-      </button>
     </view>
     
     <!-- 编辑弹窗 -->
@@ -97,65 +87,98 @@
   </view>
 </template>
 
+<script>
+export default {
+  onNavigationBarButtonTap() {
+    console.log('选项式 API - onNavigationBarButtonTap 被调用')
+    if (this.handleAdd) {
+      console.log('调用 handleAdd')
+      this.handleAdd()
+    } else {
+      console.log('handleAdd 不存在')
+    }
+  }
+}
+</script>
+
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, getCurrentInstance } from 'vue'
 import { useCategory } from '@/composables/useCategory'
+import { onReady } from '@dcloudio/uni-app'
 
 // 使用 composables
 const {
   loading,
-  error,
   categories,
+  fetchCategories,
   createCategory,
   updateCategory,
-  deleteCategory,
-  fetchCategories
+  deleteCategory
 } = useCategory()
 
-// 状态
-const editPopup = ref(null)
-const deletePopup = ref(null)
-const editingCategory = ref(null)
-const deletingCategoryId = ref(null)
+// 表单数据
 const formData = ref({
   name: '',
-  color: '#2196F3' // 使用默认颜色
+  color: '#2196F3'
 })
 
-// 初始化数据
-const initData = async () => {
-  try {
-    await fetchCategories()
-  } catch (e) {
-    uni.showToast({
-      title: e.message || '获取分类失败',
-      icon: 'none'
-    })
-  }
+// 编辑状态
+const editingCategory = ref(null)
+const editPopup = ref(null)
+const deletePopup = ref(null)
+
+// 获取分类列表
+onMounted(async () => {
+  await fetchCategories()
+})
+
+// 导航栏按钮点击处理
+const onNavigationBarButtonTap = () => {
+  console.log('组合式 API - onNavigationBarButtonTap 被调用')
+  handleAdd()
 }
 
 // 添加分类
 const handleAdd = () => {
+  console.log('handleAdd 被调用')
   editingCategory.value = null
-  formData.value = {
-    name: '',
-    color: '#2196F3'
-  }
+  formData.value.name = ''
   editPopup.value?.open()
+}
+
+// 获取当前组件实例
+const instance = getCurrentInstance()
+if (instance) {
+  // 将 handleAdd 方法添加到组件实例上
+  instance.proxy.handleAdd = handleAdd
 }
 
 // 编辑分类
 const handleEdit = (category) => {
+  console.log('handleEdit 被调用')
   editingCategory.value = category
-  formData.value = {
-    name: category.name,
-    color: category.color
-  }
+  formData.value.name = category.name
   editPopup.value?.open()
+}
+
+// 删除分类
+const handleDelete = (category) => {
+  console.log('handleDelete 被调用')
+  editingCategory.value = category
+  deletePopup.value?.open()
+}
+
+// 取消编辑
+const handleCancel = () => {
+  console.log('handleCancel 被调用')
+  editPopup.value?.close()
+  editingCategory.value = null
+  formData.value.name = ''
 }
 
 // 保存分类
 const handleSave = async (name) => {
+  console.log('handleSave 被调用')
   if (!name.trim()) {
     uni.showToast({
       title: '分类名称不能为空',
@@ -165,57 +188,55 @@ const handleSave = async (name) => {
   }
 
   try {
-    const categoryData = {
-      name: name.trim(),
-      color: formData.value.color
-    }
-
     if (editingCategory.value) {
-      await updateCategory(editingCategory.value.id, categoryData)
+      await updateCategory({
+        id: editingCategory.value.id,
+        name: name.trim(),
+        color: formData.value.color
+      })
     } else {
-      await createCategory(categoryData)
+      await createCategory({
+        name: name.trim(),
+        color: formData.value.color
+      })
     }
-
+    
     editPopup.value?.close()
-    await initData()
+    editingCategory.value = null
+    formData.value.name = ''
+    
+    await fetchCategories()
     
     uni.showToast({
-      title: editingCategory.value ? '更新成功' : '创建成功',
+      title: editingCategory.value ? '修改成功' : '添加成功',
       icon: 'success'
     })
-  } catch (e) {
+  } catch (error) {
     uni.showToast({
-      title: e.message || '保存失败',
+      title: error.message || '操作失败',
       icon: 'none'
     })
   }
 }
 
-// 取消编辑
-const handleCancel = () => {
-  editPopup.value?.close()
-}
-
-// 删除分类
-const handleDelete = (categoryId) => {
-  deletingCategoryId.value = categoryId
-  deletePopup.value?.open()
-}
-
 // 确认删除
 const confirmDelete = async () => {
+  console.log('confirmDelete 被调用')
+  if (!editingCategory.value) return
+  
   try {
-    await deleteCategory(deletingCategoryId.value)
+    await deleteCategory(editingCategory.value.id)
     deletePopup.value?.close()
-    await initData()
+    editingCategory.value = null
+    await fetchCategories()
     
     uni.showToast({
       title: '删除成功',
       icon: 'success'
     })
-  } catch (e) {
+  } catch (error) {
     uni.showToast({
-      title: e.message || '删除失败',
+      title: error.message || '删除失败',
       icon: 'none'
     })
   }
@@ -223,13 +244,10 @@ const confirmDelete = async () => {
 
 // 取消删除
 const cancelDelete = () => {
+  console.log('cancelDelete 被调用')
   deletePopup.value?.close()
-  deletingCategoryId.value = null
+  editingCategory.value = null
 }
-
-onMounted(() => {
-  initData()
-})
 </script>
 
 <style lang="scss">
@@ -292,23 +310,6 @@ onMounted(() => {
           }
         }
       }
-    }
-  }
-  
-  .add-category {
-    position: fixed;
-    bottom: 40rpx;
-    left: 0;
-    right: 0;
-    display: flex;
-    justify-content: center;
-    
-    .add-btn {
-      background-color: #2196F3;
-      color: #fff;
-      padding: 20rpx 60rpx;
-      border-radius: 30rpx;
-      font-size: 28rpx;
     }
   }
 }

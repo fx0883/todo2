@@ -78,7 +78,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onActivated } from 'vue'
 import { useTaskStore } from '@/store/modules/task'
 import taskApi from '@/api/task'
 import categoryApi from '@/api/category'
@@ -199,6 +199,13 @@ const addTask = async (task) => {
 onMounted(() => {
   fetchCategories()
 })
+
+
+onActivated(() => {
+  fetchCategories()
+})
+
+
 </script>
 
 <style lang="scss">

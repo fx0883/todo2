@@ -47,35 +47,71 @@
     </view>
     
     <!-- 编辑弹窗 -->
-    <uni-popup ref="popup" type="dialog">
-      <uni-popup-dialog
-        :title="editingCategory ? '编辑分类' : '新建分类'"
-        :before-close="true"
-        @confirm="handleSave"
-        @close="handleCancel"
-      >
-        <uni-forms :model="formData">
-          <uni-forms-item label="名称" required>
-            <uni-easyinput
-              v-model="formData.name"
-              placeholder="请输入分类名称"
-            />
-          </uni-forms-item>
-          <uni-forms-item label="颜色">
-            <uni-easyinput
-              v-model="formData.color"
-              placeholder="请选择颜色"
-            />
-          </uni-forms-item>
-        </uni-forms>
-      </uni-popup-dialog>
+    <uni-popup ref="editPopup" type="center">
+      <view class="dialog-content">
+        <text class="dialog-title">{{ editingCategory ? '编辑分类' : '新建分类' }}</text>
+        <input 
+          class="dialog-input"
+          type="text"
+          v-model="formData.name"
+          placeholder="请输入分类名称"
+        />
+        <view class="dialog-buttons">
+          <button 
+            class="dialog-button cancel"
+            @click="handleCancel"
+          >
+            取消
+          </button>
+          <button 
+            class="dialog-button confirm"
+            @click="handleSave"
+          >
+            确定
+          </button>
+        </view>
+      </view>
+    </uni-popup>
+
+    <!-- 删除确认弹窗 -->
+    <uni-popup ref="deletePopup" type="center">
+      <view class="dialog-content">
+        <text class="dialog-title">删除确认</text>
+        <text class="dialog-message">确定要删除这个分类吗？该分类下的任务将变为无分类。</text>
+        <view class="dialog-buttons">
+          <button 
+            class="dialog-button cancel"
+            @click="cancelDelete"
+          >
+            取消
+          </button>
+          <button 
+            class="dialog-button confirm"
+            @click="confirmDelete"
+          >
+            确定
+          </button>
+        </view>
+      </view>
     </uni-popup>
   </view>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, defineOptions } from 'vue'
 import { useCategory } from '@/composables/useCategory'
+
+// 导入 uni-ui 组件
+import uniPopup from '@dcloudio/uni-ui/lib/uni-popup/uni-popup.vue'
+import uniLoadMore from '@dcloudio/uni-ui/lib/uni-load-more/uni-load-more.vue'
+
+// 定义组件
+defineOptions({
+  components: {
+    uniPopup,
+    uniLoadMore
+  }
+})
 
 // 使用 composables
 const {
@@ -89,11 +125,13 @@ const {
 } = useCategory()
 
 // 状态
-const popup = ref(null)
+const editPopup = ref(null)
+const deletePopup = ref(null)
 const editingCategory = ref(null)
+const deletingCategoryId = ref(null)
 const formData = ref({
   name: '',
-  color: '#000000'
+  color: '#2196F3' // 使用默认颜色
 })
 
 // 初始化数据
@@ -113,9 +151,9 @@ const handleAdd = () => {
   editingCategory.value = null
   formData.value = {
     name: '',
-    color: '#000000'
+    color: '#2196F3'
   }
-  popup.value?.open('center')
+  editPopup.value?.open()
 }
 
 // 编辑分类
@@ -125,19 +163,38 @@ const handleEdit = (category) => {
     name: category.name,
     color: category.color
   }
-  popup.value?.open('center')
+  editPopup.value?.open()
 }
 
 // 保存分类
 const handleSave = async () => {
+  if (!formData.value.name.trim()) {
+    uni.showToast({
+      title: '分类名称不能为空',
+      icon: 'none'
+    })
+    return
+  }
+
   try {
-    if (editingCategory.value) {
-      await updateCategory(editingCategory.value.id, formData.value)
-    } else {
-      await createCategory(formData.value)
+    const categoryData = {
+      name: formData.value.name.trim(),
+      color: formData.value.color
     }
-    popup.value?.close()
+
+    if (editingCategory.value) {
+      await updateCategory(editingCategory.value.id, categoryData)
+    } else {
+      await createCategory(categoryData)
+    }
+
+    editPopup.value?.close()
     await initData()
+    
+    uni.showToast({
+      title: editingCategory.value ? '更新成功' : '创建成功',
+      icon: 'success'
+    })
   } catch (e) {
     uni.showToast({
       title: e.message || '保存失败',
@@ -146,16 +203,28 @@ const handleSave = async () => {
   }
 }
 
+// 取消编辑
+const handleCancel = () => {
+  editPopup.value?.close()
+}
+
 // 删除分类
-const handleDelete = async (categoryId) => {
+const handleDelete = (categoryId) => {
+  deletingCategoryId.value = categoryId
+  deletePopup.value?.open()
+}
+
+// 确认删除
+const confirmDelete = async () => {
   try {
-    await uni.showModal({
-      title: '确认删除',
-      content: '确定要删除这个分类吗？'
-    })
-    
-    await deleteCategory(categoryId)
+    await deleteCategory(deletingCategoryId.value)
+    deletePopup.value?.close()
     await initData()
+    
+    uni.showToast({
+      title: '删除成功',
+      icon: 'success'
+    })
   } catch (e) {
     uni.showToast({
       title: e.message || '删除失败',
@@ -164,9 +233,10 @@ const handleDelete = async (categoryId) => {
   }
 }
 
-// 取消编辑
-const handleCancel = () => {
-  popup.value?.close()
+// 取消删除
+const cancelDelete = () => {
+  deletePopup.value?.close()
+  deletingCategoryId.value = null
 }
 
 onMounted(() => {
@@ -176,39 +246,41 @@ onMounted(() => {
 
 <style lang="scss">
 .category-container {
-  min-height: 100vh;
-  background-color: #f5f5f5;
-  padding: 30rpx;
+  padding: 20rpx;
   
   .category-list {
+    margin-bottom: 20rpx;
+    
     .category-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background-color: #fff;
-      padding: 30rpx;
+      padding: 20rpx;
       margin-bottom: 20rpx;
-      border-radius: 12rpx;
+      background-color: #fff;
+      border-radius: 10rpx;
+      box-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.1);
       
       .category-info {
         display: flex;
         align-items: center;
-        gap: 20rpx;
         
         .category-color {
-          width: 32rpx;
-          height: 32rpx;
+          width: 30rpx;
+          height: 30rpx;
           border-radius: 50%;
+          margin-right: 20rpx;
         }
         
         .category-name {
-          font-size: 32rpx;
+          font-size: 28rpx;
           color: #333;
         }
         
         .task-count {
-          font-size: 28rpx;
+          font-size: 24rpx;
           color: #999;
+          margin-left: 10rpx;
         }
       }
       
@@ -217,18 +289,17 @@ onMounted(() => {
         gap: 20rpx;
         
         button {
-          min-width: 120rpx;
-          height: 60rpx;
-          line-height: 60rpx;
-          font-size: 28rpx;
+          font-size: 24rpx;
+          padding: 10rpx 20rpx;
+          border-radius: 6rpx;
           
           &.edit-btn {
-            background-color: #1890ff;
+            background-color: #4CAF50;
             color: #fff;
           }
           
           &.delete-btn {
-            background-color: #ff4d4f;
+            background-color: #f44336;
             color: #fff;
           }
         }
@@ -238,19 +309,80 @@ onMounted(() => {
   
   .add-category {
     position: fixed;
-    bottom: 120rpx;
+    bottom: 40rpx;
     left: 0;
     right: 0;
-    padding: 0 30rpx;
+    display: flex;
+    justify-content: center;
     
     .add-btn {
-      width: 100%;
-      height: 90rpx;
-      line-height: 90rpx;
-      background-color: #007AFF;
+      background-color: #2196F3;
       color: #fff;
-      border-radius: 45rpx;
-      font-size: 32rpx;
+      padding: 20rpx 60rpx;
+      border-radius: 30rpx;
+      font-size: 28rpx;
+    }
+  }
+}
+
+.dialog-content {
+  background-color: #fff;
+  border-radius: 16rpx;
+  padding: 30rpx;
+  width: 560rpx;
+  box-sizing: border-box;
+  
+  .dialog-title {
+    display: block;
+    font-size: 32rpx;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 30rpx;
+    color: #333;
+  }
+  
+  .dialog-message {
+    display: block;
+    font-size: 28rpx;
+    color: #666;
+    text-align: center;
+    margin-bottom: 30rpx;
+  }
+  
+  .dialog-input {
+    width: 100%;
+    height: 80rpx;
+    border: 1px solid #ddd;
+    border-radius: 8rpx;
+    padding: 0 20rpx;
+    font-size: 28rpx;
+    margin-bottom: 30rpx;
+    box-sizing: border-box;
+  }
+  
+  .dialog-buttons {
+    display: flex;
+    justify-content: space-between;
+    gap: 20rpx;
+    
+    .dialog-button {
+      flex: 1;
+      height: 80rpx;
+      line-height: 80rpx;
+      font-size: 28rpx;
+      border-radius: 8rpx;
+      margin: 0;
+      padding: 0;
+      
+      &.cancel {
+        background-color: #f5f5f5;
+        color: #666;
+      }
+      
+      &.confirm {
+        background-color: #2196F3;
+        color: #fff;
+      }
     }
   }
 }

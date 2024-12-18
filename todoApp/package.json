@@ -3,6 +3,7 @@
     "sharp": "^0.33.5"
   },
   "dependencies": {
+    "@dcloudio/uni-ui": "^1.5.7",
     "echarts": "^5.5.1",
     "vue-echarts": "^7.0.3"
   }

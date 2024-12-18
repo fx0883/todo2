@@ -81,49 +81,63 @@ const addToQueue = (options) => {
 const handleError = (error) => {
   // 网络错误
   if (!error.statusCode) {
+    const message = '网络连接失败'
     uni.showToast({
-      title: '网络连接失败',
+      title: message,
       icon: 'none'
     })
-    return Promise.reject(new Error('Network Error'))
+    return Promise.reject(new Error(message))
   }
 
   // HTTP 错误
-  switch (error.statusCode) {
-    case 400:
-      uni.showToast({
-        title: error.data?.message || '请求参数错误',
-        icon: 'none'
-      })
-      break
-    case 401:
-      // 401 错误已在请求拦截器中处理
-      break
-    case 403:
-      uni.showToast({
-        title: '没有权限进行此操作',
-        icon: 'none'
-      })
-      break
-    case 404:
-      uni.showToast({
-        title: '请求的资源不存在',
-        icon: 'none'
-      })
-      break
-    case 500:
-      uni.showToast({
-        title: '服务器内部错误',
-        icon: 'none'
-      })
-      break
-    default:
-      uni.showToast({
-        title: error.data?.message || '请求失败',
-        icon: 'none'
-      })
+  let message = ''
+  if (error.statusCode === 400) {
+    // 如果后端返回了 error_message，直接使用
+    if (error.data?.error_message) {
+      message = error.data.error_message
+    }
+    // 否则尝试获取其他错误信息
+    else if (error.data) {
+      const details = error.data
+      // 如果是对象，获取第一个错误消息
+      if (typeof details === 'object' && !Array.isArray(details)) {
+        const firstError = Object.values(details)[0]
+        if (Array.isArray(firstError)) {
+          message = firstError[0]
+        } else {
+          message = firstError
+        }
+      } else {
+        message = error.data?.detail || error.data?.message || '请求参数错误'
+      }
+    }
+  } else {
+    switch (error.statusCode) {
+      case 401:
+        // 401 错误已在请求拦截器中处理
+        break
+      case 403:
+        message = '没有权限进行此操作'
+        break
+      case 404:
+        message = '请求的资源不存在'
+        break
+      case 500:
+        message = '服务器内部错误'
+        break
+      default:
+        message = error.data?.detail || error.data?.message || '请求失败'
+    }
   }
 
+  if (message) {
+    uni.showToast({
+      title: message,
+      icon: 'none'
+    })
+  }
+
+  error.message = message
   return Promise.reject(error)
 }
 

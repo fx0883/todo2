@@ -4334,3 +4334,492 @@ Traceback (most recent call last):
 rest_framework_simplejwt.exceptions.InvalidToken: {'detail': ErrorDetail(string='此令牌对任何类型的令牌无效', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 'token_type': ErrorDetail(string='access', code='token_not_valid'), 'message': ErrorDetail(string='令牌无效或已过期', code='token_not_valid')}]}
 
     
+ERROR 2024-12-18 13:00:35,422 utils 8792 15640 
+API Error Details:
+View: UserViewSet
+URL: /api/v1/accounts/users/task_stats/
+Method: GET
+User: AnonymousUser
+Error Type: InvalidToken
+Error Message: {'detail': ErrorDetail(string='此令牌对任何类型的令牌无效', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 'token_type': ErrorDetail(string='access', code='token_not_valid'), 'message': ErrorDetail(string='令牌无效或已过期', code='token_not_valid')}]}
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 414, in initial
+    self.perform_authentication(request)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 324, in perform_authentication
+    request.user
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\request.py", line 227, in user
+    self._authenticate()
+    ~~~~~~~~~~~~~~~~~~^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\request.py", line 380, in _authenticate
+    user_auth_tuple = authenticator.authenticate(self)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework_simplejwt\authentication.py", line 49, in authenticate
+    validated_token = self.get_validated_token(raw_token)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework_simplejwt\authentication.py", line 113, in get_validated_token
+    raise InvalidToken(
+    ...<4 lines>...
+    )
+rest_framework_simplejwt.exceptions.InvalidToken: {'detail': ErrorDetail(string='此令牌对任何类型的令牌无效', code='token_not_valid'), 'code': ErrorDetail(string='token_not_valid', code='token_not_valid'), 'messages': [{'token_class': ErrorDetail(string='AccessToken', code='token_not_valid'), 'token_type': ErrorDetail(string='access', code='token_not_valid'), 'message': ErrorDetail(string='令牌无效或已过期', code='token_not_valid')}]}
+
+    
+ERROR 2024-12-18 13:43:30,545 utils 8792 20172 
+API Error Details:
+View: CategoryViewSet
+URL: /api/v1/tasks/categories/
+Method: GET
+User: AnonymousUser
+Error Type: NotAuthenticated
+Error Message: 身份认证信息未提供。
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 497, in dispatch
+    self.initial(request, *args, **kwargs)
+    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 415, in initial
+    self.check_permissions(request)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 333, in check_permissions
+    self.permission_denied(
+    ~~~~~~~~~~~~~~~~~~~~~~^
+        request,
+        ^^^^^^^^
+        message=getattr(permission, 'message', None),
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        code=getattr(permission, 'code', None)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 174, in permission_denied
+    raise exceptions.NotAuthenticated()
+rest_framework.exceptions.NotAuthenticated: 身份认证信息未提供。
+
+    
+ERROR 2024-12-18 13:46:48,075 utils 8792 6668 
+API Error Details:
+View: UserViewSet
+URL: /api/v1/accounts/users/register/
+Method: POST
+User: AnonymousUser
+Error Type: ValidationError
+Error Message: {'username': [ErrorDetail(string='已存在一位使用该名字的用户。', code='unique')]}
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\django\utils\decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "E:\Github\todo2\todoServer\accounts\views.py", line 230, in register
+    serializer.is_valid(raise_exception=True)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\serializers.py", line 235, in is_valid
+    raise ValidationError(self.errors)
+rest_framework.exceptions.ValidationError: {'username': [ErrorDetail(string='已存在一位使用该名字的用户。', code='unique')]}
+
+    
+ERROR 2024-12-18 14:02:47,506 utils 8068 12628 
+API Error Details:
+View: UserViewSet
+URL: /api/v1/accounts/users/register/
+Method: POST
+User: AnonymousUser
+Error Type: ValidationError
+Error Message: {'email': [ErrorDetail(string='邮箱已被使用', code='invalid')]}
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\django\utils\decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "E:\Github\todo2\todoServer\accounts\views.py", line 230, in register
+    serializer.is_valid(raise_exception=True)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\serializers.py", line 235, in is_valid
+    raise ValidationError(self.errors)
+rest_framework.exceptions.ValidationError: {'email': [ErrorDetail(string='邮箱已被使用', code='invalid')]}
+
+    
+ERROR 2024-12-18 14:03:12,614 utils 8068 12628 
+API Error Details:
+View: UserViewSet
+URL: /api/v1/accounts/users/register/
+Method: POST
+User: AnonymousUser
+Error Type: ValidationError
+Error Message: {'username': [ErrorDetail(string='已存在一位使用该名字的用户。', code='unique')]}
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\django\utils\decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "E:\Github\todo2\todoServer\accounts\views.py", line 230, in register
+    serializer.is_valid(raise_exception=True)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\serializers.py", line 235, in is_valid
+    raise ValidationError(self.errors)
+rest_framework.exceptions.ValidationError: {'username': [ErrorDetail(string='已存在一位使用该名字的用户。', code='unique')]}
+
+    
+ERROR 2024-12-18 14:06:10,846 utils 15464 11224 
+API Error Details:
+View: UserViewSet
+URL: /api/v1/accounts/users/register/
+Method: POST
+User: AnonymousUser
+Error Type: ValidationError
+Error Message: {'username': [ErrorDetail(string='已存在一位使用该名字的用户。', code='unique')]}
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\django\utils\decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "E:\Github\todo2\todoServer\accounts\views.py", line 230, in register
+    serializer.is_valid(raise_exception=True)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\serializers.py", line 235, in is_valid
+    raise ValidationError(self.errors)
+rest_framework.exceptions.ValidationError: {'username': [ErrorDetail(string='已存在一位使用该名字的用户。', code='unique')]}
+
+    
+ERROR 2024-12-18 14:07:16,090 utils 13712 10208 
+API Error Details:
+View: UserViewSet
+URL: /api/v1/accounts/users/register/
+Method: POST
+User: AnonymousUser
+Error Type: ValidationError
+Error Message: {'username': [ErrorDetail(string='已存在一位使用该名字的用户。', code='unique')]}
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\django\utils\decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "E:\Github\todo2\todoServer\accounts\views.py", line 230, in register
+    serializer.is_valid(raise_exception=True)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\serializers.py", line 235, in is_valid
+    raise ValidationError(self.errors)
+rest_framework.exceptions.ValidationError: {'username': [ErrorDetail(string='已存在一位使用该名字的用户。', code='unique')]}
+
+    
+ERROR 2024-12-18 14:07:17,750 utils 13712 10208 
+API Error Details:
+View: UserViewSet
+URL: /api/v1/accounts/users/register/
+Method: POST
+User: AnonymousUser
+Error Type: ValidationError
+Error Message: {'username': [ErrorDetail(string='已存在一位使用该名字的用户。', code='unique')]}
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\django\utils\decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "E:\Github\todo2\todoServer\accounts\views.py", line 230, in register
+    serializer.is_valid(raise_exception=True)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\serializers.py", line 235, in is_valid
+    raise ValidationError(self.errors)
+rest_framework.exceptions.ValidationError: {'username': [ErrorDetail(string='已存在一位使用该名字的用户。', code='unique')]}
+
+    
+ERROR 2024-12-18 14:07:18,223 utils 13712 10208 
+API Error Details:
+View: UserViewSet
+URL: /api/v1/accounts/users/register/
+Method: POST
+User: AnonymousUser
+Error Type: ValidationError
+Error Message: {'username': [ErrorDetail(string='已存在一位使用该名字的用户。', code='unique')]}
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\django\utils\decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "E:\Github\todo2\todoServer\accounts\views.py", line 230, in register
+    serializer.is_valid(raise_exception=True)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\serializers.py", line 235, in is_valid
+    raise ValidationError(self.errors)
+rest_framework.exceptions.ValidationError: {'username': [ErrorDetail(string='已存在一位使用该名字的用户。', code='unique')]}
+
+    
+ERROR 2024-12-18 14:07:18,617 utils 13712 10208 
+API Error Details:
+View: UserViewSet
+URL: /api/v1/accounts/users/register/
+Method: POST
+User: AnonymousUser
+Error Type: ValidationError
+Error Message: {'username': [ErrorDetail(string='已存在一位使用该名字的用户。', code='unique')]}
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\django\utils\decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "E:\Github\todo2\todoServer\accounts\views.py", line 230, in register
+    serializer.is_valid(raise_exception=True)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\serializers.py", line 235, in is_valid
+    raise ValidationError(self.errors)
+rest_framework.exceptions.ValidationError: {'username': [ErrorDetail(string='已存在一位使用该名字的用户。', code='unique')]}
+
+    
+ERROR 2024-12-18 14:07:19,062 utils 13712 10208 
+API Error Details:
+View: UserViewSet
+URL: /api/v1/accounts/users/register/
+Method: POST
+User: AnonymousUser
+Error Type: ValidationError
+Error Message: {'username': [ErrorDetail(string='已存在一位使用该名字的用户。', code='unique')]}
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\django\utils\decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "E:\Github\todo2\todoServer\accounts\views.py", line 230, in register
+    serializer.is_valid(raise_exception=True)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\serializers.py", line 235, in is_valid
+    raise ValidationError(self.errors)
+rest_framework.exceptions.ValidationError: {'username': [ErrorDetail(string='已存在一位使用该名字的用户。', code='unique')]}
+
+    
+ERROR 2024-12-18 14:07:19,744 utils 13712 10208 
+API Error Details:
+View: UserViewSet
+URL: /api/v1/accounts/users/register/
+Method: POST
+User: AnonymousUser
+Error Type: ValidationError
+Error Message: {'username': [ErrorDetail(string='已存在一位使用该名字的用户。', code='unique')]}
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\django\utils\decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "E:\Github\todo2\todoServer\accounts\views.py", line 230, in register
+    serializer.is_valid(raise_exception=True)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\serializers.py", line 235, in is_valid
+    raise ValidationError(self.errors)
+rest_framework.exceptions.ValidationError: {'username': [ErrorDetail(string='已存在一位使用该名字的用户。', code='unique')]}
+
+    
+ERROR 2024-12-18 14:07:20,208 utils 13712 10208 
+API Error Details:
+View: UserViewSet
+URL: /api/v1/accounts/users/register/
+Method: POST
+User: AnonymousUser
+Error Type: ValidationError
+Error Message: {'username': [ErrorDetail(string='已存在一位使用该名字的用户。', code='unique')]}
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\django\utils\decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "E:\Github\todo2\todoServer\accounts\views.py", line 230, in register
+    serializer.is_valid(raise_exception=True)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\serializers.py", line 235, in is_valid
+    raise ValidationError(self.errors)
+rest_framework.exceptions.ValidationError: {'username': [ErrorDetail(string='已存在一位使用该名字的用户。', code='unique')]}
+
+    
+ERROR 2024-12-18 14:07:23,323 utils 13712 9284 
+API Error Details:
+View: UserViewSet
+URL: /api/v1/accounts/users/register/
+Method: GET
+User: AnonymousUser
+Error Type: MethodNotAllowed
+Error Message: 方法 “GET” 不被允许。
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 167, in http_method_not_allowed
+    raise exceptions.MethodNotAllowed(request.method)
+rest_framework.exceptions.MethodNotAllowed: 方法 “GET” 不被允许。
+
+    
+ERROR 2024-12-18 14:07:31,306 utils 13712 10208 
+API Error Details:
+View: UserViewSet
+URL: /api/v1/accounts/users/register/
+Method: POST
+User: AnonymousUser
+Error Type: ValidationError
+Error Message: {'username': [ErrorDetail(string='已存在一位使用该名字的用户。', code='unique')]}
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\django\utils\decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "E:\Github\todo2\todoServer\accounts\views.py", line 230, in register
+    serializer.is_valid(raise_exception=True)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\serializers.py", line 235, in is_valid
+    raise ValidationError(self.errors)
+rest_framework.exceptions.ValidationError: {'username': [ErrorDetail(string='已存在一位使用该名字的用户。', code='unique')]}
+
+    
+ERROR 2024-12-18 14:07:32,057 utils 13712 10208 
+API Error Details:
+View: UserViewSet
+URL: /api/v1/accounts/users/register/
+Method: POST
+User: AnonymousUser
+Error Type: ValidationError
+Error Message: {'username': [ErrorDetail(string='已存在一位使用该名字的用户。', code='unique')]}
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\django\utils\decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "E:\Github\todo2\todoServer\accounts\views.py", line 230, in register
+    serializer.is_valid(raise_exception=True)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\serializers.py", line 235, in is_valid
+    raise ValidationError(self.errors)
+rest_framework.exceptions.ValidationError: {'username': [ErrorDetail(string='已存在一位使用该名字的用户。', code='unique')]}
+
+    
+ERROR 2024-12-18 14:07:32,594 utils 13712 10208 
+API Error Details:
+View: UserViewSet
+URL: /api/v1/accounts/users/register/
+Method: POST
+User: AnonymousUser
+Error Type: ValidationError
+Error Message: {'username': [ErrorDetail(string='已存在一位使用该名字的用户。', code='unique')]}
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\django\utils\decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "E:\Github\todo2\todoServer\accounts\views.py", line 230, in register
+    serializer.is_valid(raise_exception=True)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\serializers.py", line 235, in is_valid
+    raise ValidationError(self.errors)
+rest_framework.exceptions.ValidationError: {'username': [ErrorDetail(string='已存在一位使用该名字的用户。', code='unique')]}
+
+    
+ERROR 2024-12-18 14:07:32,926 utils 13712 10208 
+API Error Details:
+View: UserViewSet
+URL: /api/v1/accounts/users/register/
+Method: POST
+User: AnonymousUser
+Error Type: ValidationError
+Error Message: {'username': [ErrorDetail(string='已存在一位使用该名字的用户。', code='unique')]}
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\django\utils\decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "E:\Github\todo2\todoServer\accounts\views.py", line 230, in register
+    serializer.is_valid(raise_exception=True)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\serializers.py", line 235, in is_valid
+    raise ValidationError(self.errors)
+rest_framework.exceptions.ValidationError: {'username': [ErrorDetail(string='已存在一位使用该名字的用户。', code='unique')]}
+
+    
+ERROR 2024-12-18 14:09:26,006 utils 2052 15576 
+API Error Details:
+View: UserViewSet
+URL: /api/v1/accounts/users/register/
+Method: POST
+User: AnonymousUser
+Error Type: ValidationError
+Error Message: {'username': [ErrorDetail(string='已存在一位使用该名字的用户。', code='unique')]}
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\django\utils\decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "E:\Github\todo2\todoServer\accounts\views.py", line 230, in register
+    serializer.is_valid(raise_exception=True)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\serializers.py", line 235, in is_valid
+    raise ValidationError(self.errors)
+rest_framework.exceptions.ValidationError: {'username': [ErrorDetail(string='已存在一位使用该名字的用户。', code='unique')]}
+
+    
+ERROR 2024-12-18 14:09:46,579 utils 19948 1936 
+API Error Details:
+View: UserViewSet
+URL: /api/v1/accounts/users/register/
+Method: POST
+User: AnonymousUser
+Error Type: ValidationError
+Error Message: {'username': [ErrorDetail(string='已存在一位使用该名字的用户。', code='unique')]}
+Stack Trace:
+Traceback (most recent call last):
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\django\utils\decorators.py", line 48, in _wrapper
+    return bound_method(*args, **kwargs)
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\django\views\decorators\csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "E:\Github\todo2\todoServer\accounts\views.py", line 230, in register
+    serializer.is_valid(raise_exception=True)
+    ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Github\todo2\todoServer\venv\Lib\site-packages\rest_framework\serializers.py", line 235, in is_valid
+    raise ValidationError(self.errors)
+rest_framework.exceptions.ValidationError: {'username': [ErrorDetail(string='已存在一位使用该名字的用户。', code='unique')]}
+
+    

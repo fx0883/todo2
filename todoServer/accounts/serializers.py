@@ -2,6 +2,7 @@ from rest_framework import serializers
 from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
 from .models import User, UserProfile, UserDevice, VerificationCode, UserFeedback
 from django.conf import settings
+from rest_framework.validators import UniqueValidator
 
 @extend_schema_serializer(
     examples=[
@@ -100,6 +101,22 @@ class UserDeviceSerializer(serializers.ModelSerializer):
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
     confirm_password = serializers.CharField(write_only=True)
+    email = serializers.EmailField(
+        validators=[
+            UniqueValidator(
+                queryset=User.objects.all(),
+                message='该邮箱已被注册'
+            )
+        ]
+    )
+    username = serializers.CharField(
+        validators=[
+            UniqueValidator(
+                queryset=User.objects.all(),
+                message='该用户名已被注册'
+            )
+        ]
+    )
 
     class Meta:
         model = User
@@ -107,7 +124,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         if data['password'] != data['confirm_password']:
-            raise serializers.ValidationError("Passwords don't match")
+            raise serializers.ValidationError("密码不匹配")
         return data
 
     def create(self, validated_data):

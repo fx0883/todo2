@@ -24,8 +24,29 @@ import os
 import uuid
 from rest_framework.parsers import MultiPartParser
 from django.db.models import Count, Q
+from rest_framework.exceptions import ValidationError
+from rest_framework.views import exception_handler
 
 User = get_user_model()
+
+def custom_exception_handler(exc, context):
+    response = exception_handler(exc, context)
+    
+    if response is not None:
+        if isinstance(exc, ValidationError):
+            # 如果是验证错误，获取第一个错误信息
+            if isinstance(exc.detail, dict):
+                first_error = next(iter(exc.detail.values()))[0]
+            elif isinstance(exc.detail, list):
+                first_error = exc.detail[0]
+            else:
+                first_error = str(exc.detail)
+                
+            response.data = {
+                'error_message': first_error
+            }
+    
+    return response
 
 @method_decorator(csrf_exempt, name='dispatch')
 @extend_schema_view(

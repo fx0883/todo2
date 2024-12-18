@@ -54,7 +54,7 @@
         <text class="error" v-if="passwordMismatch">两次输入的密码不一致</text>
       </view>
 
-      <view class="error-message" v-if="error">
+      <view class="error-message" >
         {{ error }}
       </view>
       
@@ -122,25 +122,29 @@ const handleRegister = async () => {
   if (!isValid.value || loading.value) return
 
   try {
-    await register({
+    const success = await register({
       username: form.value.username.trim(),
       email: form.value.email.trim(),
       password: form.value.password,
       confirm_password: form.value.confirmPassword
     })
     
-    uni.showToast({
-      title: '注册成功',
-      icon: 'success'
-    })
-    
-    // 跳转到登录页
-    setTimeout(() => {
-      navigateToLogin()
-    }, 1500)
+    if (success) {
+      uni.showToast({
+        title: '注册成功',
+        icon: 'success'
+      })
+      
+      // 只有在注册成功时才跳转到登录页
+      setTimeout(() => {
+        navigateToLogin()
+      }, 1500)
+    }
+	else{
+		console.log(error.value)
+	}
   } catch (err) {
-    // 错误已经在 useAuth 中处理
-    console.error('Registration failed:', err)
+    // error 已经在 useAuth 中被设置
   }
 }
 

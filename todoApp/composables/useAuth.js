@@ -82,10 +82,9 @@ export function useAuth() {
 		error.value = null
 		try {
 			const response = await userApi.register(userData)
-			await userStore.setUserAndToken(response.user, response.token)
 			return true
 		} catch (err) {
-			error.value = err.message || '注册失败'
+			error.value = err.data.error_message
 			return false
 		} finally {
 			loading.value = false

@@ -179,6 +179,7 @@ User = get_user_model()
                             'total': 10,
                             'completed': 5,
                             'pending': 5,
+                            'overdue': 5,
                             'completion_rate': 50.0  # 完成率（百分比）
                         }
                     )
@@ -444,41 +445,110 @@ class UserViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
+    @extend_schema(
+        summary="获取用户任务统计",
+        tags=['任务管理']
+    )
     @action(detail=False, methods=['get'])
     def task_stats(self, request):
-        """
-        获取用户任务统计
-        """
+        """获取任务统计信息"""
         user = request.user
+        
+        # 获取所有任务总数
         total_tasks = Task.objects.filter(user=user).count()
-        completed_tasks = Task.objects.filter(user=user, status='completed').count()
-        pending_tasks = Task.objects.filter(user=user, status='pending').count()
+        
+        # 获取已完成任务数
+        completed_tasks = Task.objects.filter(
+            user=user,
+            status='completed'
+        ).count()
+        
+        # 获取待办任务数
+        pending_tasks = Task.objects.filter(
+            user=user,
+            status='pending'
+        ).count()
+        
+        # 获取已逾期任务数
         overdue_tasks = Task.objects.filter(
             user=user,
             status='pending',
             due_date__lt=timezone.now()
         ).count()
-         # 计算完成率
-        completion_rate = (completed_tasks / total_tasks * 100) if total_tasks > 0 else 0
+        
         return Response({
             'total': total_tasks,
             'completed': completed_tasks,
             'pending': pending_tasks,
-            'overdue': overdue_tasks,
-            'completion_rate': completion_rate
+            'overdue': overdue_tasks
         })
 
 @extend_schema_view(
-    list=extend_schema(tags=['用户配置']),
-    create=extend_schema(tags=['用户配置']),
-    retrieve=extend_schema(tags=['用户配置']),
-    update=extend_schema(tags=['用户配置']),
-    partial_update=extend_schema(tags=['用户配置']),
-    destroy=extend_schema(tags=['用户配置']),
+    list=extend_schema(
+        summary="获取用户配置列表",
+        tags=['用户配置']
+    ),
+    create=extend_schema(
+        summary="创建用户配置",
+        tags=['用户配置']
+    ),
+    retrieve=extend_schema(
+        summary="获取用户配置详情",
+        tags=['用户配置']
+    ),
+    update=extend_schema(
+        summary="更新用户配置",
+        tags=['用户配置']
+    ),
+    partial_update=extend_schema(
+        summary="部分更新用户配置",
+        tags=['用户配置']
+    ),
+    destroy=extend_schema(
+        summary="删除用户配置",
+        tags=['用户配置']
+    )
 )
 class UserProfileViewSet(viewsets.ModelViewSet):
     queryset = UserProfile.objects.all()
     serializer_class = UserProfileSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return self.queryset.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+@extend_schema_view(
+    list=extend_schema(
+        summary="获取设备列表",
+        tags=['用户设备']
+    ),
+    create=extend_schema(
+        summary="创建设备",
+        tags=['用户设备']
+    ),
+    retrieve=extend_schema(
+        summary="获取设备详情",
+        tags=['用户设备']
+    ),
+    update=extend_schema(
+        summary="更新设备",
+        tags=['用户设备']
+    ),
+    partial_update=extend_schema(
+        summary="部分更新设备",
+        tags=['用户设备']
+    ),
+    destroy=extend_schema(
+        summary="删除设备",
+        tags=['用户设备']
+    )
+)
+class UserDeviceViewSet(viewsets.ModelViewSet):
+    queryset = UserDevice.objects.all()
+    serializer_class = UserDeviceSerializer
     permission_classes = [permissions.IsAuthenticated]
     tags = ['用户管理']
 
@@ -488,69 +558,46 @@ class UserProfileViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
-@extend_schema_view(
-    list=extend_schema(tags=['用户设备']),
-    create=extend_schema(tags=['用户设备']),
-    retrieve=extend_schema(tags=['用户设备']),
-    update=extend_schema(tags=['用户设备']),
-    partial_update=extend_schema(tags=['用户设备']),
-    destroy=extend_schema(tags=['用户设备']),
-)
-class UserDeviceViewSet(viewsets.ModelViewSet):
-    queryset = UserDevice.objects.all()
-    serializer_class = UserDeviceSerializer
-    permission_classes = [permissions.IsAuthenticated]
-    
-    def get_queryset(self):
-        return self.queryset.filter(user=self.request.user)
-    
-    def perform_create(self, serializer):
-        # 检查是否已存在相同设备
-        device_id = serializer.validated_data.get('device_id')
-        existing_device = UserDevice.objects.filter(
-            user=self.request.user,
-            device_id=device_id
-        ).first()
-        
-        if existing_device:
-            # 更新现有设备
-            existing_device.device_name = serializer.validated_data.get('device_name')
-            existing_device.device_type = serializer.validated_data.get('device_type')
-            existing_device.last_sync_time = timezone.now()
-            existing_device.is_active = True
-            existing_device.save()
-        else:
-            # 创建新设备
-            serializer.save(
-                user=self.request.user,
-                last_sync_time=timezone.now()
-            )
-    
+    @extend_schema(
+        summary="同步设备数据",
+        tags=['用户设备']
+    )
     @action(detail=True, methods=['post'])
     def sync(self, request, pk=None):
         """
         同步设备数据
         """
         device = self.get_object()
+        
+        # 获取最后同步时间之后的更新
+        last_sync = device.last_sync_time or device.created_at
+        updates = {
+            'tasks': Task.objects.filter(
+                user=request.user,
+                updated_at__gt=last_sync
+            ),
+            'notifications': Notification.objects.filter(
+                user=request.user,
+                created_at__gt=last_sync
+            )
+        }
+        
+        # 更新设备的最后同步时间
         device.last_sync_time = timezone.now()
         device.save()
         
-        # 获取上次同步后的数据
-        last_sync = device.last_sync_time
-        updates = {
-            'tasks': Task.objects.filter(user=request.user, updated_at__gt=last_sync),
-            'notifications': Notification.objects.filter(user=request.user, created_at__gt=last_sync)
-        }
-        
         return Response({
             'message': '同步成功',
-            'last_sync_time': device.last_sync_time,
             'updates': {
                 'tasks_count': updates['tasks'].count(),
                 'notifications_count': updates['notifications'].count()
             }
         })
-    
+
+    @extend_schema(
+        summary="停用设备",
+        tags=['用户设备']
+    )
     @action(detail=True, methods=['post'])
     def deactivate(self, request, pk=None):
         """
@@ -566,15 +613,25 @@ class UserDeviceViewSet(viewsets.ModelViewSet):
         summary="获取反馈列表",
         tags=['用户反馈']
     ),
+    create=extend_schema(
+        summary="创建反馈",
+        tags=['用户反馈']
+    ),
     retrieve=extend_schema(
         summary="获取反馈详情",
         tags=['用户反馈']
     ),
-    create=extend_schema(
-        summary="创建反馈",
-        tags=['用户反馈'],
-        request=UserFeedbackSerializer,
-        responses={201: UserFeedbackSerializer}
+    update=extend_schema(
+        summary="更新反馈",
+        tags=['用户反馈']
+    ),
+    partial_update=extend_schema(
+        summary="部分更新反馈",
+        tags=['用户反馈']
+    ),
+    destroy=extend_schema(
+        summary="删除反馈",
+        tags=['用户反馈']
     )
 )
 class UserFeedbackViewSet(viewsets.ModelViewSet):
@@ -591,18 +648,18 @@ class UserFeedbackViewSet(viewsets.ModelViewSet):
         serializer.save(user=self.request.user)
 
     @extend_schema(
+        request={"type": "object", "properties": {"status": {"type": "string", "enum": ["pending", "resolved", "closed"]}}},
+        responses={200: {"type": "object", "properties": {"message": {"type": "string"}}}},
         summary="更新反馈状态",
-        tags=['用户反馈'],
-        request={"type": "object", "properties": {"status": {"type": "string", "enum": ["pending", "in_progress", "resolved", "closed"]}}},
-        responses={200: UserFeedbackSerializer}
+        tags=['用户反馈']
     )
-    @action(detail=True, methods=['patch'])
+    @action(detail=True, methods=['POST'])
     def update_status(self, request, pk=None):
         """更新反馈状态"""
         feedback = self.get_object()
         status = request.data.get('status')
 
-        if not status or status not in ['pending', 'in_progress', 'resolved', 'closed']:
+        if not status or status not in ['pending', 'resolved', 'closed']:
             return Response(
                 {'error': '无效的状态值'},
                 status=status.HTTP_400_BAD_REQUEST
@@ -611,8 +668,7 @@ class UserFeedbackViewSet(viewsets.ModelViewSet):
         feedback.status = status
         feedback.save()
 
-        serializer = self.get_serializer(feedback)
-        return Response(serializer.data)
+        return Response({'message': '状态已更新'})
 
     @extend_schema(
         summary="添加回复",

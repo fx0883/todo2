@@ -115,7 +115,7 @@ const handleAdd = () => {
     name: '',
     color: '#000000'
   }
-  popup.value.open()
+  popup.value?.open('center')
 }
 
 // 编辑分类
@@ -125,7 +125,7 @@ const handleEdit = (category) => {
     name: category.name,
     color: category.color
   }
-  popup.value.open()
+  popup.value?.open('center')
 }
 
 // 保存分类
@@ -136,7 +136,7 @@ const handleSave = async () => {
     } else {
       await createCategory(formData.value)
     }
-    popup.value.close()
+    popup.value?.close()
     await initData()
   } catch (e) {
     uni.showToast({
@@ -166,7 +166,7 @@ const handleDelete = async (categoryId) => {
 
 // 取消编辑
 const handleCancel = () => {
-  popup.value.close()
+  popup.value?.close()
 }
 
 onMounted(() => {

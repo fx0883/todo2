@@ -20,11 +20,7 @@ from rest_framework.documentation import include_docs_urls
 from django.conf import settings
 from django.conf.urls.static import static
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-    TokenVerifyView,
-)
+from .views import CustomTokenObtainPairView, CustomTokenRefreshView, CustomTokenVerifyView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -40,9 +36,9 @@ urlpatterns = [
     path('api/v1/notifications/', include('notifications.urls')),
     
     # JWT Token URLs
-    path('api/v1/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/v1/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('api/v1/token/verify/', TokenVerifyView.as_view(), name='token_verify'),
+    path('api/v1/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/v1/token/refresh/', CustomTokenRefreshView.as_view(), name='token_refresh'),
+    path('api/v1/token/verify/', CustomTokenVerifyView.as_view(), name='token_verify'),
     
     # Authentication
     path('api/v1/auth/', include('rest_framework.urls')),

@@ -93,7 +93,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onActivated } from 'vue'
 import { useTaskStore } from '@/store/modules/task'
 import VChart from 'vue-echarts'
 import * as echarts from 'echarts/core'
@@ -242,6 +242,11 @@ const trendChartOption = computed(() => ({
 
 // 组件挂载时获取数据
 onMounted(() => {
+  fetchStatistics()
+})
+
+
+onActivated(() => {
   fetchStatistics()
 })
 </script>

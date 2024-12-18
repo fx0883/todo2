@@ -56,7 +56,6 @@ class Task(models.Model):
 
     STATUS_CHOICES = [
         ('pending', _('待处理')),
-        ('in_progress', _('进行中')),
         ('completed', _('已完成')),
         ('archived', _('已归档')),
     ]

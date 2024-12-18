@@ -4,8 +4,6 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiExample, OpenApiResponse, OpenApiParameter
-from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
 from .models import Category, Tag, Task, TaskComment
 from .serializers import CategorySerializer, TagSerializer, TaskSerializer, TaskCommentSerializer
 from rest_framework.pagination import PageNumberPagination
@@ -66,6 +64,22 @@ class TaskPagination(PageNumberPagination):
                 }
             )
         ]
+    ),
+    retrieve=extend_schema(
+        summary="获取分类详情",
+        tags=['任务分类']
+    ),
+    update=extend_schema(
+        summary="更新分类",
+        tags=['任务分类']
+    ),
+    partial_update=extend_schema(
+        summary="部分更新分类",
+        tags=['任务分类']
+    ),
+    destroy=extend_schema(
+        summary="删除分类",
+        tags=['任务分类']
     )
 )
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -97,43 +111,41 @@ class CategoryViewSet(viewsets.ModelViewSet):
             headers=headers
         )
 
+    def destroy(self, request, *args, **kwargs):
+        category = self.get_object()
+        
+        # 将该分类下的所有任务的分类字段设置为空
+        Task.objects.filter(category=category).update(category=None)
+        
+        # 删除分类
+        category.delete()
+        
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 @extend_schema_view(
     list=extend_schema(
         summary="获取标签列表",
-        tags=['任务标签'],
-        responses={
-            200: OpenApiResponse(
-                description="成功获取标签列表",
-                examples=[
-                    OpenApiExample(
-                        'Tag List Example',
-                        value=[{
-                            'id': 1,
-                            'name': '重要',
-                            'color': '#FF0000'
-                        }, {
-                            'id': 2,
-                            'name': '紧急',
-                            'color': '#FF3300'
-                        }]
-                    )
-                ]
-            )
-        }
+        tags=['任务标签']
     ),
     create=extend_schema(
         summary="创建标签",
-        tags=['任务标签'],
-        request=TagSerializer,
-        examples=[
-            OpenApiExample(
-                'Create Tag Example',
-                value={
-                    'name': '个人',
-                    'color': '#0033FF'
-                }
-            )
-        ]
+        tags=['任务标签']
+    ),
+    retrieve=extend_schema(
+        summary="获取标签详情",
+        tags=['任务标签']
+    ),
+    update=extend_schema(
+        summary="更新标签",
+        tags=['任务标签']
+    ),
+    partial_update=extend_schema(
+        summary="部分更新标签",
+        tags=['任务标签']
+    ),
+    destroy=extend_schema(
+        summary="删除标签",
+        tags=['任务标签']
     )
 )
 class TagViewSet(viewsets.ModelViewSet):
@@ -233,6 +245,22 @@ class TagViewSet(viewsets.ModelViewSet):
                 }
             )
         ]
+    ),
+    retrieve=extend_schema(
+        summary="获取任务详情",
+        tags=['任务管理']
+    ),
+    update=extend_schema(
+        summary="更新任务",
+        tags=['任务管理']
+    ),
+    partial_update=extend_schema(
+        summary="部分更新任务",
+        tags=['任务管理']
+    ),
+    destroy=extend_schema(
+        summary="删除任务",
+        tags=['任务管理']
     )
 )
 class TaskViewSet(viewsets.ModelViewSet):
@@ -388,37 +416,27 @@ class TaskViewSet(viewsets.ModelViewSet):
 @extend_schema_view(
     list=extend_schema(
         summary="获取任务评论列表",
-        tags=['任务评论'],
-        responses={
-            200: OpenApiResponse(
-                description="成功获取任务评论列表",
-                examples=[
-                    OpenApiExample(
-                        'Task Comment List Example',
-                        value=[{
-                            'id': 1,
-                            'task': 1,
-                            'content': '已经完成初稿，请查看',
-                            'created_at': '2024-12-09T12:00:00Z'
-                        }]
-                    )
-                ]
-            )
-        }
+        tags=['任务评论']
     ),
     create=extend_schema(
         summary="创建任务评论",
-        tags=['任务评论'],
-        request=TaskCommentSerializer,
-        examples=[
-            OpenApiExample(
-                'Create Task Comment Example',
-                value={
-                    'task': 1,
-                    'content': '这部分需要修改一下格式'
-                }
-            )
-        ]
+        tags=['任务评论']
+    ),
+    retrieve=extend_schema(
+        summary="获取任务评论详情",
+        tags=['任务评论']
+    ),
+    update=extend_schema(
+        summary="更新任务评论",
+        tags=['任务评论']
+    ),
+    partial_update=extend_schema(
+        summary="部分更新任务评论",
+        tags=['任务评论']
+    ),
+    destroy=extend_schema(
+        summary="删除任务评论",
+        tags=['任务评论']
     )
 )
 class TaskCommentViewSet(viewsets.ModelViewSet):
@@ -438,33 +456,12 @@ class TaskCommentViewSet(viewsets.ModelViewSet):
 class MonthStatsView(APIView):
     permission_classes = [IsAuthenticated]
 
-    @swagger_auto_schema(
-        operation_description="获取指定月份的任务统计数据",
-        manual_parameters=[
-            openapi.Parameter(
-                'month',
-                openapi.IN_PATH,
-                description="月份，格式：YYYY-MM，例如：2023-12",
-                type=openapi.TYPE_STRING,
-                required=True
-            )
+    @extend_schema(
+        summary="获取指定月份的任务统计数据",
+        parameters=[
+            OpenApiParameter(name='month', type=str, description='月份，格式：YYYY-MM，例如：2023-12')
         ],
-        responses={
-            200: openapi.Response(
-                description="成功",
-                schema=openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        'total': openapi.Schema(type=openapi.TYPE_INTEGER, description='总任务数'),
-                        'completed': openapi.Schema(type=openapi.TYPE_INTEGER, description='已完成任务数'),
-                        'pending': openapi.Schema(type=openapi.TYPE_INTEGER, description='进行中任务数'),
-                        'overdue': openapi.Schema(type=openapi.TYPE_INTEGER, description='已逾期任务数')
-                    }
-                )
-            ),
-            400: "参数错误：month参数格式错误",
-            500: "服务器错误"
-        }
+        tags=['任务管理']
     )
     def get(self, request, month):
         """获取月度统计数据"""
@@ -508,34 +505,12 @@ class MonthStatsView(APIView):
 class CategoryStatsView(APIView):
     permission_classes = [IsAuthenticated]
 
-    @swagger_auto_schema(
-        operation_description="获取指定月份的任务分类统计数据",
-        manual_parameters=[
-            openapi.Parameter(
-                'month',
-                openapi.IN_PATH,
-                description="月份，格式：YYYY-MM，例如：2023-12",
-                type=openapi.TYPE_STRING,
-                required=True
-            )
+    @extend_schema(
+        summary="获取指定月份的任务分类统计数据",
+        parameters=[
+            OpenApiParameter(name='month', type=str, description='月份，格式：YYYY-MM，例如：2023-12')
         ],
-        responses={
-            200: openapi.Response(
-                description="成功",
-                schema=openapi.Schema(
-                    type=openapi.TYPE_ARRAY,
-                    items=openapi.Schema(
-                        type=openapi.TYPE_OBJECT,
-                        properties={
-                            'name': openapi.Schema(type=openapi.TYPE_STRING, description='分类名称'),
-                            'value': openapi.Schema(type=openapi.TYPE_INTEGER, description='任务数量')
-                        }
-                    )
-                )
-            ),
-            400: "参数错误：month参数格式错误",
-            500: "服务器错误"
-        }
+        tags=['任务管理']
     )
     def get(self, request, month):
         """获取分类统计数据"""
@@ -576,34 +551,12 @@ class CategoryStatsView(APIView):
 class DailyTrendView(APIView):
     permission_classes = [IsAuthenticated]
 
-    @swagger_auto_schema(
-        operation_description="获取指定月份的每日任务完成趋势",
-        manual_parameters=[
-            openapi.Parameter(
-                'month',
-                openapi.IN_PATH,
-                description="月份，格式：YYYY-MM，例如：2023-12",
-                type=openapi.TYPE_STRING,
-                required=True
-            )
+    @extend_schema(
+        summary="获取指定月份的每日任务完成趋势",
+        parameters=[
+            OpenApiParameter(name='month', type=str, description='月份，格式：YYYY-MM，例如：2023-12')
         ],
-        responses={
-            200: openapi.Response(
-                description="成功",
-                schema=openapi.Schema(
-                    type=openapi.TYPE_ARRAY,
-                    items=openapi.Schema(
-                        type=openapi.TYPE_OBJECT,
-                        properties={
-                            'date': openapi.Schema(type=openapi.TYPE_STRING, description='日期，格式：YYYY-MM-DD'),
-                            'count': openapi.Schema(type=openapi.TYPE_INTEGER, description='完成的任务数量')
-                        }
-                    )
-                )
-            ),
-            400: "参数错误：month参数格式错误",
-            500: "服务器错误"
-        }
+        tags=['任务管理']
     )
     def get(self, request, month):
         """获取每日完成趋势数据"""
@@ -646,32 +599,12 @@ class DailyTrendView(APIView):
 class PriorityStatsView(APIView):
     permission_classes = [IsAuthenticated]
 
-    @swagger_auto_schema(
-        operation_description="获取指定月份的任务优先级分布统计",
-        manual_parameters=[
-            openapi.Parameter(
-                'month',
-                openapi.IN_PATH,
-                description="月份，格式：YYYY-MM，例如：2023-12",
-                type=openapi.TYPE_STRING,
-                required=True
-            )
+    @extend_schema(
+        summary="获取指定月份的任务优先级分布统计",
+        parameters=[
+            OpenApiParameter(name='month', type=str, description='月份，格式：YYYY-MM，例如：2023-12')
         ],
-        responses={
-            200: openapi.Response(
-                description="成功",
-                schema=openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        'high': openapi.Schema(type=openapi.TYPE_INTEGER, description='高优先级任务数量'),
-                        'medium': openapi.Schema(type=openapi.TYPE_INTEGER, description='中优先级任务数量'),
-                        'low': openapi.Schema(type=openapi.TYPE_INTEGER, description='低优先级任务数量')
-                    }
-                )
-            ),
-            400: "参数错误：month参数格式错误",
-            500: "服务器错误"
-        }
+        tags=['任务管理']
     )
     def get(self, request, month):
         """获取优先级分布统计数据"""

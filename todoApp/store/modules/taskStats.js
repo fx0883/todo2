@@ -22,7 +22,7 @@ export const useTaskStatsStore = defineStore('taskStats', () => {
 	  stats.total = response.total;
 	  stats.completed = response.completed;
 	  stats.pending = response.pending;
-	  stats.completion_rate = response.completion_rate;
+	  stats.completion_rate = Math.round((stats.completed / stats.total) * 100 + Number.EPSILON) ;
 	  
 	  console.dir(stats)
     } catch (err) {

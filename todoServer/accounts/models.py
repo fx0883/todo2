@@ -104,12 +104,18 @@ class UserFeedback(models.Model):
     """
     用户反馈
     """
+    STATUS_CHOICES = (
+        ('pending', _('待处理')),
+        ('resolved', _('已解决')),
+        ('closed', _('已关闭')),
+    )
+    
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='feedbacks')
     type = models.CharField(_('反馈类型'), max_length=20)  # bug, feature_request, complaint, other
     title = models.CharField(_('标题'), max_length=200)
     content = models.TextField(_('内容'))
     contact_info = models.CharField(_('联系方式'), max_length=100, null=True, blank=True)
-    status = models.CharField(_('状态'), max_length=20, default='pending')  # pending, in_progress, resolved, closed
+    status = models.CharField(_('状态'), max_length=20, choices=STATUS_CHOICES, default='pending')
     response = models.TextField(_('回复'), null=True, blank=True)
     created_at = models.DateTimeField(_('创建时间'), auto_now_add=True)
     updated_at = models.DateTimeField(_('更新时间'), auto_now=True)

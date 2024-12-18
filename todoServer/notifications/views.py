@@ -46,6 +46,22 @@ from .serializers import NotificationTemplateSerializer, NotificationSerializer,
                 }
             )
         ]
+    ),
+    retrieve=extend_schema(
+        summary="获取通知模板详情",
+        tags=['通知模板']
+    ),
+    update=extend_schema(
+        summary="更新通知模板",
+        tags=['通知模板']
+    ),
+    partial_update=extend_schema(
+        summary="部分更新通知模板",
+        tags=['通知模板']
+    ),
+    destroy=extend_schema(
+        summary="删除通知模板",
+        tags=['通知模板']
     )
 )
 class NotificationTemplateViewSet(viewsets.ModelViewSet):
@@ -95,6 +111,22 @@ class NotificationTemplateViewSet(viewsets.ModelViewSet):
                 }
             )
         ]
+    ),
+    retrieve=extend_schema(
+        summary="获取通知详情",
+        tags=['通知管理']
+    ),
+    update=extend_schema(
+        summary="更新通知",
+        tags=['通知管理']
+    ),
+    partial_update=extend_schema(
+        summary="部分更新通知",
+        tags=['通知管理']
+    ),
+    destroy=extend_schema(
+        summary="删除通知",
+        tags=['通知管理']
     )
 )
 class NotificationViewSet(viewsets.ModelViewSet):
@@ -153,6 +185,22 @@ class NotificationViewSet(viewsets.ModelViewSet):
                 }
             )
         ]
+    ),
+    retrieve=extend_schema(
+        summary="获取通知设备详情",
+        tags=['通知设备']
+    ),
+    update=extend_schema(
+        summary="更新通知设备",
+        tags=['通知设备']
+    ),
+    partial_update=extend_schema(
+        summary="部分更新通知设备",
+        tags=['通知设备']
+    ),
+    destroy=extend_schema(
+        summary="删除通知设备",
+        tags=['通知设备']
     )
 )
 class NotificationDeviceViewSet(viewsets.ModelViewSet):

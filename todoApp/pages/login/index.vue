@@ -71,29 +71,38 @@ const handleLogin = async () => {
   if (!isValid.value || loading.value) return
 
   try {
-	const loginParam = {
-  "username": form.value.username.trim(),
-  "password": form.value.password
-}
-    await login(loginParam)
-    uni.showToast({
-      title: '登录成功',
-      icon: 'success'
-    })
+    const loginParam = {
+      username: form.value.username.trim(),
+      password: form.value.password
+    }
+    const success = await login(loginParam)
     
-    // 跳转到主页
-    setTimeout(() => {
-      uni.switchTab({
-        url: '/pages/index/index'
+    if (success) {
+      uni.showToast({
+        title: '登录成功',
+        icon: 'success'
       })
-    }, 1500)
+      
+      // 跳转到主页
+      setTimeout(() => {
+        uni.switchTab({
+          url: '/pages/index/index'
+        })
+      }, 1500)
+    } else {
+      uni.showToast({
+        title: '登录失败',
+        icon: 'error'
+      })
+    }
   } catch (err) {
-    // 错误已经在 useAuth 中处理
     console.error('Login failed:', err)
+    uni.showToast({
+      title: '登录失败',
+      icon: 'error'
+    })
   }
 }
-
-
 
 // 页面跳转
 const navigateToRegister = () => {

@@ -110,7 +110,7 @@ const chooseImage = async () => {
 // 页面加载时获取统计数据
 onMounted(async () => {
   try {
-    // await fetchStats()
+	await fetchStats()
   } catch (error) {
     console.error('获取统计数据失败:', error)
   }

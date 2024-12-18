@@ -91,7 +91,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onActivated } from 'vue'
 import { onPullDownRefresh } from '@dcloudio/uni-app'
 import { useTask } from '@/composables/useTask'
 import { useCategory } from '@/composables/useCategory'
@@ -168,6 +168,22 @@ const navigateToDetail = (taskId) => {
 
 // 页面生命周期
 onMounted(async () => {
+  try {
+    await Promise.all([
+      refreshList(),
+      fetchCategories()
+    ])
+  } catch (error) {
+    console.error('Failed to load initial data:', error)
+    uni.showToast({
+      title: '加载失败',
+      icon: 'none'
+    })
+  }
+})
+
+
+onActivated(async () => {
   try {
     await Promise.all([
       refreshList(),

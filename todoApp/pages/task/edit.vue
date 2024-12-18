@@ -34,6 +34,20 @@
       </view>
       
       <view class="form-item">
+        <text class="label">分类</text>
+        <picker 
+          :range="categoryOptions" 
+          :range-key="'name'"
+          :value="categoryIndex" 
+          @change="onCategoryChange"
+        >
+          <view class="picker">
+            {{ editForm.category ? getCategoryName(editForm.category) : '请选择分类' }}
+          </view>
+        </picker>
+      </view>
+      
+      <view class="form-item">
         <text class="label">优先级</text>
         <picker 
           :range="priorityOptions" 
@@ -72,13 +86,28 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useTask } from '@/composables/useTask'
+import { useCategory } from '@/composables/useCategory'
 import { useRoute } from '@/composables/useRoute'
 import { formatDate } from '@/utils/date'
 
 const route = useRoute()
 const { getTaskDetail, updateTask, loading } = useTask()
+const { categories, initCategoryData } = useCategory()
 const task = ref(null)
 const editForm = ref({})
+
+// 分类选项
+const categoryOptions = computed(() => {
+  return [{ id: null, name: '无分类' }, ...categories.value]
+})
+const categoryIndex = computed(() => {
+  if (!editForm.value.category) return 0
+  return categoryOptions.value.findIndex(cat => cat.id === editForm.value.category)
+})
+const getCategoryName = (categoryId) => {
+  const category = categoryOptions.value.find(cat => cat.id === categoryId)
+  return category ? category.name : '无分类'
+}
 
 // 优先级选项
 const priorityOptions = ['低', '中', '高']
@@ -96,7 +125,8 @@ const fetchTaskDetail = async () => {
       title: task.value.title,
       description: task.value.description,
       due_date: task.value.due_date ? task.value.due_date.split('T')[0] : '',
-      priority: task.value.priority
+      priority: task.value.priority,
+      category: task.value.category
     }
   } catch (error) {
     uni.showToast({
@@ -109,6 +139,12 @@ const fetchTaskDetail = async () => {
 // 日期选择处理
 const onDateChange = (e) => {
   editForm.value.due_date = e.detail.value + 'T00:00:00+08:00'
+}
+
+// 分类选择处理
+const onCategoryChange = (e) => {
+  const index = e.detail.value
+  editForm.value.category = categoryOptions.value[index].id
 }
 
 // 优先级选择处理
@@ -127,16 +163,16 @@ const handleSave = async () => {
     return
   }
 
-  const formData = {
-    ...task.value,
-    ...editForm.value,
-    due_date: editForm.value.due_date.includes('T') 
-      ? editForm.value.due_date 
-      : editForm.value.due_date + 'T00:00:00+08:00'
+  const taskData = {
+    title: editForm.value.title,
+    description: editForm.value.description,
+    due_date: editForm.value.due_date,
+    priority: editForm.value.priority,
+    category: editForm.value.category
   }
 
   try {
-    await updateTask(route.params.id, formData)
+    await updateTask(route.params.id, taskData)
     
     uni.showToast({
       title: '更新成功',
@@ -158,8 +194,9 @@ const handleCancel = () => {
   uni.navigateBack()
 }
 
-onMounted(() => {
-  fetchTaskDetail()
+onMounted(async () => {
+  await initCategoryData()
+  await fetchTaskDetail()
 })
 </script>
 
@@ -228,4 +265,4 @@ onMounted(() => {
     color: #999;
   }
 }
-</style> 
+</style>

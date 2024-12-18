@@ -65,7 +65,7 @@
           </button>
           <button 
             class="dialog-button confirm"
-            @click="handleSave"
+            @click="handleSave(formData.name)"
           >
             确定
           </button>
@@ -98,20 +98,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted, defineOptions } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useCategory } from '@/composables/useCategory'
-
-// 导入 uni-ui 组件
-import uniPopup from '@dcloudio/uni-ui/lib/uni-popup/uni-popup.vue'
-import uniLoadMore from '@dcloudio/uni-ui/lib/uni-load-more/uni-load-more.vue'
-
-// 定义组件
-defineOptions({
-  components: {
-    uniPopup,
-    uniLoadMore
-  }
-})
 
 // 使用 composables
 const {
@@ -167,8 +155,8 @@ const handleEdit = (category) => {
 }
 
 // 保存分类
-const handleSave = async () => {
-  if (!formData.value.name.trim()) {
+const handleSave = async (name) => {
+  if (!name.trim()) {
     uni.showToast({
       title: '分类名称不能为空',
       icon: 'none'
@@ -178,7 +166,7 @@ const handleSave = async () => {
 
   try {
     const categoryData = {
-      name: formData.value.name.trim(),
+      name: name.trim(),
       color: formData.value.color
     }
 
@@ -330,7 +318,6 @@ onMounted(() => {
   border-radius: 16rpx;
   padding: 30rpx;
   width: 560rpx;
-  box-sizing: border-box;
   
   .dialog-title {
     display: block;
@@ -372,7 +359,6 @@ onMounted(() => {
       font-size: 28rpx;
       border-radius: 8rpx;
       margin: 0;
-      padding: 0;
       
       &.cancel {
         background-color: #f5f5f5;

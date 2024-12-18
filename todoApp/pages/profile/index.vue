@@ -9,8 +9,10 @@
         />
         <text v-if="uploading" class="uploading-text">上传中...</text>
       </view>
-      <text class="username">{{ userInfo?.username || '未登录' }}</text>
-      <text class="email">{{ userInfo?.email }}</text>
+      <view class="nickname-wrapper" @click="showNicknameInput">
+        <text v-if="userInfo.nickname">{{ userInfo.nickname }}</text>
+        <text v-else class="placeholder">请输入昵称</text>
+      </view>
     </view>
     
     <view class="stats-cards">
@@ -71,20 +73,35 @@
       </button>
     </view>
   </view>
+
+  <!-- 昵称修改弹窗 -->
+  <uni-popup ref="nicknamePopup" type="dialog">
+    <uni-popup-dialog
+      mode="input"
+      title="修改昵称"
+      :value="tempNickname"
+      placeholder="请输入昵称"
+      @confirm="handleUpdateNickname"
+    ></uni-popup-dialog>
+  </uni-popup>
 </template>
 
 <script setup>
-import { ref, onMounted, onActivated  } from 'vue'
+import { ref, onMounted, onActivated, computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useUserStore } from '@/store/modules/user'
 import { useProfile } from '@/composables/useProfile'
 import { useTaskStatsStore } from '@/store/modules/taskStats.js'
+import userApi from '@/api/user'
 
 // 状态管理
 const userStore = useUserStore()
 const { userInfo } = storeToRefs(userStore)
 const { uploading, uploadAvatar, taskStatsLoading, fetchStats } = useProfile()
 const { stats } = useTaskStatsStore()
+
+const nicknamePopup = ref(null)
+const tempNickname = ref('')
 
 // 选择并上传图片
 const chooseImage = async () => {
@@ -149,6 +166,44 @@ const handlePrivacy = () => {
   })
 }
 
+// 显示昵称输入弹窗
+const showNicknameInput = () => {
+  tempNickname.value = userStore.userInfo.nickname || ''
+  nicknamePopup.value.open()
+}
+
+// 更新昵称
+const handleUpdateNickname = async (value) => {
+  if (!value.trim()) {
+    uni.showToast({
+      title: '昵称不能为空',
+      icon: 'none'
+    })
+    return
+  }
+
+  try {
+    const userData = {
+      ...userStore.userInfo,
+      nickname: value.trim()
+    }
+    await userApi.updateUser(userData)
+    
+    // 更新 store 中的用户信息
+    userStore.setUserInfo(userData)
+    
+    uni.showToast({
+      title: '昵称修改成功',
+      icon: 'success'
+    })
+  } catch (error) {
+    uni.showToast({
+      title: error?.data?.error_message || '修改失败',
+      icon: 'none'
+    })
+  }
+}
+
 // 退出登录
 const handleLogout = async () => {
   try {
@@ -201,16 +256,15 @@ onActivated (async () => {
       }
     }
     
-    .username {
-      font-size: 36rpx;
-      font-weight: bold;
+    .nickname-wrapper {
+      font-size: 32rpx;
       color: #333;
-      margin-bottom: 10rpx;
-    }
-    
-    .email {
-      font-size: 28rpx;
-      color: #666;
+      text-align: center;
+      padding: 10rpx 0;
+      
+      .placeholder {
+        color: #999;
+      }
     }
   }
   

@@ -124,6 +124,16 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
+  const updateUserInfo = async (userInfo) => {
+    try {
+      const response = await userApi.updateUserInfo(userInfo)
+      setUserInfo(response)
+      return response
+    } catch (err) {
+      throw new Error(err.data?.message || '更新用户信息失败')
+    }
+  }
+
   return {
     // 状态
     userInfo,
@@ -142,6 +152,7 @@ export const useUserStore = defineStore('user', () => {
     refreshToken,
     requestPasswordReset,
     confirmPasswordReset,
-    updateAvatar
+    updateAvatar,
+    updateUserInfo
   }
 })

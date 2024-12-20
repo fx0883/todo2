@@ -32,6 +32,8 @@
         {{ error }}
       </view>
       
+
+      
       <button 
         class="submit-btn" 
         :disabled="!isValid || loading || !state.protocol"
@@ -48,11 +50,10 @@
      
 	  
     </view>
-	
+    
 
 <view v-if="isWeixinClient" style="height: 220rpx;"></view>
 		
-	<!-- 用户协议勾选 -->
 	<view class="agreement-box">
 	  <label class="radio" @tap="onChange">
 	    <radio
@@ -71,13 +72,10 @@
 	        隐私协议
 	      </text>
 	    </view>
-		</radio>
+	    </radio>
 	  </label>
 	</view>
-	
-	
-	
-	
+		
 	<view v-if="isWeixinClient">
 	  <button 
 	    class="wechat-btn" 
@@ -135,8 +133,12 @@ const onChange = () => {
 
 // 查看协议
 const onProtocol = (type) => {
+  const pages = {
+    '用户协议': '/pages/agreement/index',
+    '隐私协议': '/pages/privacy/index'
+  }
   uni.navigateTo({
-    url: `/pages/protocol/index?type=${type}`
+    url: pages[type]
   })
 }
 
@@ -299,6 +301,34 @@ const navigateToForgotPassword = () => {
       text-align: center;
     }
     
+    .agreement-box {
+      margin: 20rpx 0;
+      padding: 0 20rpx;
+      
+      .radio {
+        display: flex;
+        align-items: center;
+        font-size: 26rpx;
+        
+        .agreement-text {
+          margin-left: 8rpx;
+          color: #666;
+          display: flex;
+          align-items: center;
+          flex-wrap: wrap;
+        }
+        
+        .protocol-link {
+          color: #007AFF;
+          padding: 0 4rpx;
+          
+          &:active {
+            opacity: 0.6;
+          }
+        }
+      }
+    }
+    
     .submit-btn {
       width: 100%;
       height: 80rpx;
@@ -316,30 +346,6 @@ const navigateToForgotPassword = () => {
       &[disabled] {
         background-color: #ccc;
         opacity: 0.6;
-      }
-    }
-    
-    .agreement-box {
-      margin: 20rpx 0;
-      padding: 0 20rpx;
-      
-      .radio {
-        display: flex;
-        align-items: center;
-        font-size: 26rpx;
-      }
-      
-      .agreement-text {
-        margin-left: 18rpx;
-        color: #666;
-      }
-      
-      .protocol-link {
-        color: #007AFF;
-        
-        &:active {
-          opacity: 0.6;
-        }
       }
     }
     

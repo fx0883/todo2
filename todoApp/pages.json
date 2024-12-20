@@ -103,6 +103,19 @@
 			"style": {
 				"navigationBarTitleText": "隐私政策"
 			}
+		},
+		{
+			"path": "pages/protocol/index",
+			"style": {
+				"navigationBarTitleText": "",
+				"navigationStyle": "custom"
+			}
+		},
+		{
+			"path": "pages/agreement/index",
+			"style": {
+				"navigationBarTitleText": "用户协议"
+			}
 		}
 	],
 	"tabBar": {

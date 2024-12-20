@@ -12,13 +12,32 @@ export function useWechatAuth() {
 
     try {
       // 调用微信登录
-      const [loginError, loginRes] = await uni.login({
-        provider: 'weixin'
-      })
-
-      if (loginError) {
-        throw loginError
-      }
+   //    const loginRes = await new Promise((resolve, reject) => {
+   //      uni.login({
+   //        provider: 'weixin',
+   //        success: (res) => {
+			//   console.log(res)
+			//   resolve(res)
+			// },
+   //        fail: (err) => reject(err)
+   //      })
+   //    })
+   
+   // 1. 获得微信 code
+   const codeResult = await uni.login({provider: 'weixin'});
+   if (codeResult.errMsg !== 'login:ok') {
+   	return resolve(false);
+   }
+   
+   console.log(`codeResult.code = ${codeResult.code}`)
+   // 2. 一键登录
+   // const loginResult = await AuthUtil.weixinMiniAppLogin(e.code, codeResult.code, 'default');
+   // if (loginResult.code === 0) {
+   // 	setOpenid(loginResult.data.openid);
+   // 	return resolve(true);
+   // } else {
+   // 	return resolve(false);
+   // }
 
       // 调用 store 的微信登录方法
       const success = await authStore.wechatLogin(loginRes.code)
@@ -30,7 +49,7 @@ export function useWechatAuth() {
       return true
     } catch (err) {
       console.error('微信登录失败:', err)
-      error.value = '微信登录失败，请重试'
+      error.value = err.message || '登录失败，请重试'
       return false
     } finally {
       loading.value = false

@@ -50,15 +50,15 @@
     "quickapp" : {},
     /* 小程序特有相关 */
     "mp-weixin" : {
-        "appid" : "",
+        "appid" : "wx6161859380d3a3ff",
         "setting" : {
             "urlCheck" : false,
-            "es6" : true,
+            "es6" : false,
             "postcss" : true,
-            "minified" : true
+            "minified" : false
         },
         "usingComponents" : true,
-        "lazyCodeLoading": "requiredComponents"
+        "lazyCodeLoading" : "requiredComponents"
     },
     "mp-alipay" : {
         "usingComponents" : true
@@ -73,11 +73,11 @@
         "enable" : false
     },
     "vueVersion" : "3",
-    "h5": {
-        "title": "todoApp",
-        "router": {
-            "mode": "hash",
-            "base": "/"
+    "h5" : {
+        "title" : "todoApp",
+        "router" : {
+            "mode" : "hash",
+            "base" : "/"
         }
     }
 }

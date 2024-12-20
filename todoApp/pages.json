@@ -58,18 +58,9 @@
     {
       "path": "pages/category/index",
       "style": {
-        "navigationBarTitleText": "分类管理",
-        "navigationBarButtonStyle": "dark",
-        "titleNView": {
-          "buttons": [{
-            "text": "+",
-            "fontSize": "24px",
-            "color": "#333333",
-            "width": "40px",
-            "float": "right"
-          }]
+        "navigationBarTitleText": "分类管理"
         }
-      },
+      ,
       "requiresAuth": true
     },
     {

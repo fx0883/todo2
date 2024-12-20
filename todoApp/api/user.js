@@ -79,6 +79,15 @@ const updateUser = async (userData) => {
   })
 };
 
+// 微信登录
+export function wechatLogin(code) {
+  return request({
+    url: '/users/wechat_login/',
+    method: 'POST',
+    data: { code }
+  })
+}
+
 export default {
   login,
   register,
@@ -88,5 +97,6 @@ export default {
   refreshToken,
   uploadAvatar,
   getTaskStats,
-  updateUser
+  updateUser,
+  wechatLogin
 }

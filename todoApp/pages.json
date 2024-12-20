@@ -1,155 +1,151 @@
 {
-  "pages": [
-    {
-      "path": "pages/index/index",
-      "style": {
-        "navigationBarTitleText": "任务清单",
-        "enablePullDownRefresh": false,
-		"disableScroll": true
-      }
-    },
+	"pages": [{
+			"path": "pages/index/index",
+			"style": {
+				"navigationBarTitleText": "任务清单",
+				"enablePullDownRefresh": false,
+				"disableScroll": true
+			}
+		},
 
-    {
-      "path": "pages/register/index",
-      "style": {
-        "navigationBarTitleText": "注册"
-      }
-    },
-    {
-      "path": "pages/forgot-password/index",
-      "style": {
-        "navigationBarTitleText": "忘记密码"
-      }
-    },
-    {
-      "path": "pages/calendar/index",
-      "style": {
-        "navigationBarTitleText": "日历"
-      }
-    },
-    {
-      "path": "pages/statistics/index",
-      "style": {
-        "navigationBarTitleText": "统计"
-      },
-      "requiresAuth": true
-    },
-    {
-      "path": "pages/profile/index",
-      "style": {
-        "navigationBarTitleText": "我的"
-      },
-      "requiresAuth": true
-    },
-    {
-      "path": "pages/task/create",
-      "style": {
-        "navigationBarTitleText": "创建任务"
-      },
-      "requiresAuth": true
-    },
-    {
-      "path": "pages/task/detail",
-      "style": {
-        "navigationBarTitleText": "任务详情"
-      },
-      "requiresAuth": true
-    },
-    {
-      "path": "pages/category/index",
-      "style": {
-        "navigationBarTitleText": "分类管理"
-        }
-      ,
-      "requiresAuth": true
-    },
-    {
-      "path": "pages/tag/index",
-      "style": {
-        "navigationBarTitleText": "标签管理"
-      },
-      "requiresAuth": true
-    },
-	{
-	  "path": "pages/login/index",
-	  "style": {
-	    "navigationBarTitleText": "登录"
-	  }
+		{
+			"path": "pages/register/index",
+			"style": {
+				"navigationBarTitleText": "注册"
+			}
+		},
+		{
+			"path": "pages/forgot-password/index",
+			"style": {
+				"navigationBarTitleText": "忘记密码"
+			}
+		},
+		{
+			"path": "pages/calendar/index",
+			"style": {
+				"navigationBarTitleText": "日历"
+			}
+		},
+		{
+			"path": "pages/statistics/index",
+			"style": {
+				"navigationBarTitleText": "统计"
+			},
+			"requiresAuth": true
+		},
+		{
+			"path": "pages/profile/index",
+			"style": {
+				"navigationBarTitleText": "我的"
+			},
+			"requiresAuth": true
+		},
+		{
+			"path": "pages/task/create",
+			"style": {
+				"navigationBarTitleText": "创建任务"
+			},
+			"requiresAuth": true
+		},
+		{
+			"path": "pages/task/detail",
+			"style": {
+				"navigationBarTitleText": "任务详情"
+			},
+			"requiresAuth": true
+		},
+		{
+			"path": "pages/category/index",
+			"style": {
+				"navigationBarTitleText": "分类管理"
+			},
+			"requiresAuth": true
+		},
+		{
+			"path": "pages/tag/index",
+			"style": {
+				"navigationBarTitleText": "标签管理"
+			},
+			"requiresAuth": true
+		},
+		{
+			"path": "pages/login/index",
+			"style": {
+				"navigationBarTitleText": "登录"
+			}
+		},
+		{
+			"path": "pages/task/edit",
+			"style": {
+				"navigationBarTitleText": "编辑任务"
+			}
+		},
+		{
+			"path": "pages/change-password/index",
+			"style": {
+				"navigationBarTitleText": "修改密码"
+			}
+		},
+		{
+			"path": "pages/feedback/index",
+			"style": {
+				"navigationBarTitleText": "意见反馈"
+			}
+		},
+		{
+			"path": "pages/about/index",
+			"style": {
+				"navigationBarTitleText": "关于"
+			}
+		},
+		{
+			"path": "pages/privacy/index",
+			"style": {
+				"navigationBarTitleText": "隐私政策"
+			}
+		}
+	],
+	"tabBar": {
+		"color": "#999999",
+		"selectedColor": "#007AFF",
+		"backgroundColor": "#FFFFFF",
+		"borderStyle": "black",
+		"list": [{
+				"pagePath": "pages/index/index",
+				"text": "主页",
+				"iconPath": "static/tabbar/home.png",
+				"selectedIconPath": "static/tabbar/home-active.png"
+			},
+			{
+				"pagePath": "pages/calendar/index",
+				"text": "日历",
+				"iconPath": "static/tabbar/calendar.png",
+				"selectedIconPath": "static/tabbar/calendar-active.png"
+			},
+			{
+				"pagePath": "pages/statistics/index",
+				"text": "统计",
+				"iconPath": "static/tabbar/statistics.png",
+				"selectedIconPath": "static/tabbar/statistics-active.png"
+			},
+			{
+				"pagePath": "pages/profile/index",
+				"text": "我的",
+				"iconPath": "static/tabbar/profile.png",
+				"selectedIconPath": "static/tabbar/profile-active.png"
+			}
+		]
 	},
-	{
-	  "path": "pages/task/edit",
-	  "style": {
-	    "navigationBarTitleText": "编辑任务"
-	  }
+	"globalStyle": {
+		"navigationBarTextStyle": "black",
+		"navigationBarTitleText": "Todo",
+		"navigationBarBackgroundColor": "#FFFFFF",
+		"backgroundColor": "#F5F5F5"
 	},
-    {
-      "path": "pages/change-password/index",
-      "style": {
-        "navigationBarTitleText": "修改密码"
-      }
-    },
-    {
-      "path": "pages/feedback/index",
-      "style": {
-        "navigationBarTitleText": "意见反馈"
-      }
-    },
-    {
-      "path": "pages/about/index",
-      "style": {
-        "navigationBarTitleText": "关于"
-      }
-    },
-    {
-      "path": "pages/privacy/index",
-      "style": {
-        "navigationBarTitleText": "隐私政策"
-      }
-    }
-  ],
-  "tabBar": {
-    "color": "#999999",
-    "selectedColor": "#007AFF",
-    "backgroundColor": "#FFFFFF",
-    "borderStyle": "black",
-    "list": [
-      {
-        "pagePath": "pages/index/index",
-        "text": "主页",
-        "iconPath": "static/tabbar/home.png",
-        "selectedIconPath": "static/tabbar/home-active.png"
-      },
-      {
-        "pagePath": "pages/calendar/index",
-        "text": "日历",
-        "iconPath": "static/tabbar/calendar.png",
-        "selectedIconPath": "static/tabbar/calendar-active.png"
-      },
-      {
-        "pagePath": "pages/statistics/index",
-        "text": "统计",
-        "iconPath": "static/tabbar/statistics.png",
-        "selectedIconPath": "static/tabbar/statistics-active.png"
-      },
-      {
-        "pagePath": "pages/profile/index",
-        "text": "我的",
-        "iconPath": "static/tabbar/profile.png",
-        "selectedIconPath": "static/tabbar/profile-active.png"
-      }
-    ]
-  },
-  "globalStyle": {
-    "navigationBarTextStyle": "black",
-    "navigationBarTitleText": "Todo",
-    "navigationBarBackgroundColor": "#FFFFFF",
-    "backgroundColor": "#F5F5F5"
-  },
-  "easycom": {
-    "autoscan": true,
-    "custom": {
-      "^uni-(.*)": "@dcloudio/uni-ui/lib/uni-$1/uni-$1.vue",
-      "calendar-view": "@/components/calendar-view.vue"
-    }
-  }
+	"easycom": {
+		"autoscan": true,
+		"custom": {
+			"calendar-view": "@/components/calendar-view.vue"
+		}
+	}
 }

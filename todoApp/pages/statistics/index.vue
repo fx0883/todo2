@@ -59,8 +59,9 @@
 
     <!-- 分类统计和趋势图表 -->
     <view class="charts-section">
+      <!-- 任务分类分布 -->
       <view class="chart-card">
-        <text class="section-title text-center">任务分类分布</text>
+        <text class="section-title">任务分类分布</text>
         <view class="category-list">
           <view 
             v-for="(category, index) in categoryStats" 
@@ -82,10 +83,30 @@
           </view>
         </view>
       </view>
+
+      <!-- 优先级分布统计 -->
       <view class="chart-card">
         <text class="section-title">优先级分布统计</text>
-        <view class="chart-wrapper">
-          <VChart class="chart" :option="trendChartOption" autoresize />
+        <view class="priority-list">
+          <view 
+            v-for="priority in priorityChartData" 
+            :key="priority.name"
+            class="priority-item"
+          >
+            <view class="priority-info">
+              <text class="priority-name">{{ priority.name }}</text>
+              <text class="priority-value">{{ priority.value }}</text>
+            </view>
+            <view class="priority-progress">
+              <view 
+                class="priority-bar"
+                :style="{ 
+                  width: `${(priority.value / monthStats.total) * 100}%`,
+                  backgroundColor: getPriorityColor(priority.name)
+                }"
+              />
+            </view>
+          </view>
         </view>
       </view>
     </view>
@@ -95,28 +116,6 @@
 <script setup>
 import { ref, computed, onMounted, onActivated } from 'vue'
 import { useTaskStore } from '@/store/modules/task'
-import VChart from 'vue-echarts'
-import * as echarts from 'echarts/core'
-import { CanvasRenderer } from 'echarts/renderers'
-import { PieChart, LineChart, BarChart } from 'echarts/charts'
-import {
-  TitleComponent,
-  TooltipComponent,
-  LegendComponent,
-  GridComponent
-} from 'echarts/components'
-
-// 注册必需的组件
-echarts.use([
-  CanvasRenderer,
-  PieChart,
-  LineChart,
-  BarChart,
-  TitleComponent,
-  TooltipComponent,
-  LegendComponent,
-  GridComponent
-])
 
 const taskStore = useTaskStore()
 const currentMonth = ref(new Date().toISOString().slice(0, 7)) // YYYY-MM
@@ -152,6 +151,20 @@ const progressColor = computed(() => {
   if (rate >= 60) return '#ff9900'
   return '#ff0000'
 })
+
+// 获取优先级颜色
+function getPriorityColor(priority) {
+  switch (priority) {
+    case '高优先级':
+      return '#F56C6C'
+    case '中优先级':
+      return '#E6A23C'
+    case '低优先级':
+      return '#67C23A'
+    default:
+      return '#909399'
+  }
+}
 
 // 模拟数据 - 实际项目中应从后端获取
 const onTimeRate = computed(() => 85)
@@ -193,58 +206,10 @@ const maxTaskCount = computed(() => {
   return Math.max(...categoryStats.value.map(item => item.value))
 })
 
-// 移除不需要的图表配置
-const categoryChartOption = computed(() => ({}))
-
-// 优先级分布统计
-const trendChartOption = computed(() => ({
-  tooltip: {
-    trigger: 'item',
-    formatter: '{b}: {c} ({d}%)'
-  },
-  legend: {
-    orient: 'horizontal',
-    bottom: 'bottom'
-  },
-  series: [
-    {
-      type: 'pie',
-      radius: ['40%', '70%'],
-      avoidLabelOverlap: false,
-      itemStyle: {
-        borderRadius: 10,
-        borderColor: '#fff',
-        borderWidth: 2
-      },
-      label: {
-        show: true,
-        position: 'inside',
-        formatter: '{d}%'
-      },
-      emphasis: {
-        label: {
-          show: true,
-          fontSize: '16',
-          fontWeight: 'bold'
-        }
-      },
-      data: priorityChartData.value.map(item => ({
-        name: item.name,
-        value: item.value,
-        itemStyle: {
-          color: item.name === '高优先级' ? '#F56C6C' :
-                item.name === '中优先级' ? '#E6A23C' : '#67C23A'
-        }
-      }))
-    }
-  ]
-}))
-
 // 组件挂载时获取数据
 onMounted(() => {
   fetchStatistics()
 })
-
 
 onActivated(() => {
   fetchStatistics()
@@ -262,6 +227,10 @@ onActivated(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background: #fff;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
 }
 
 .month-selector {
@@ -291,9 +260,9 @@ onActivated(() => {
   flex-direction: column;
   align-items: center;
   padding: 20px;
-  border: 1px solid #ddd;
+  background: #fff;
   border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
 }
 
 .stat-card .stat-value {
@@ -362,49 +331,28 @@ onActivated(() => {
 
 .charts-section {
   margin-top: 20px;
- 
 }
 
 .chart-card {
-  display: flex;
-  flex-direction: column;
-  align-items: self-start;
-  padding: 20px;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  background: #fff;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 20px;
 }
 
-.chart-card .section-title {
-  font-size: 18px;
+.section-title {
+  font-size: 16px;
   font-weight: bold;
   color: #303133;
-  margin-bottom: 10px;
-}
-
-.chart-card .section-title.text-center {
-  text-align: center;
-  display: block;
-}
-
-.chart-wrapper {
-  width: 100%;
-  height: 400px;
-}
-
-.chart {
-  width: 100%;
-  height: 100%;
+  margin-bottom: 15px;
 }
 
 .category-list {
   margin-top: 15px;
-  padding: 0 15px;
 }
 
 .category-item {
-  padding: 10px 0;
-  border-bottom: 1px solid #ebeef5;
+  margin-bottom: 15px;
 }
 
 .category-name {
@@ -412,7 +360,6 @@ onActivated(() => {
   color: #303133;
   margin-bottom: 8px;
   display: block;
-  text-align: left;
 }
 
 .progress-container {
@@ -420,24 +367,60 @@ onActivated(() => {
   background-color: #f5f7fa;
   border-radius: 12px;
   overflow: hidden;
-  position: relative;
 }
 
 .progress-bar {
   height: 100%;
   border-radius: 12px;
   transition: width 0.3s ease;
-  position: relative;
-  min-width: 30px; /* 确保即使数值很小也能显示文字 */
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 10px;
+  min-width: 30px;
 }
 
 .progress-text {
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #ffffff;
+  color: #fff;
   font-size: 12px;
   text-shadow: 0 0 2px rgba(0, 0, 0, 0.2);
+}
+
+.priority-list {
+  margin-top: 15px;
+}
+
+.priority-item {
+  margin-bottom: 15px;
+}
+
+.priority-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.priority-name {
+  font-size: 14px;
+  color: #303133;
+}
+
+.priority-value {
+  font-size: 14px;
+  color: #909399;
+}
+
+.priority-progress {
+  height: 8px;
+  background-color: #f5f7fa;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.priority-bar {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
 }
 </style>

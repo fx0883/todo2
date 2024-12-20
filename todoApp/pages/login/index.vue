@@ -4,7 +4,7 @@
       <image src="/static/logo.png" mode="aspectFit"></image>
     </view>
     
-    <view class="form-container">
+    <view class="form-container" v-if="!isWeixinClient">
       <view class="form-item">
         <text class="label">用户名</text>
         <input 
@@ -34,26 +34,75 @@
       
       <button 
         class="submit-btn" 
-        :disabled="!isValid || loading"
+        :disabled="!isValid || loading || !state.protocol"
         :loading="loading"
         @click="handleLogin"
       >
         登录
       </button>
-      
-      <view class="actions">
+      <view class="actions" v-if="!isWeixinClient">
         <text @click="navigateToRegister">注册账号</text>
         <text @click="navigateToForgotPassword">忘记密码？</text>
+      
       </view>
+     
+	  
     </view>
-  </view>
+	
+
+<view v-if="isWeixinClient" style="height: 220rpx;"></view>
+		
+	<!-- 用户协议勾选 -->
+	<view class="agreement-box">
+	  <label class="radio" @tap="onChange">
+	    <radio
+	      :checked="state.protocol"
+	      color="#007AFF"
+	      style="transform: scale(0.8)"
+	      @tap.stop="onChange"
+	    >
+	    <view class="agreement-text">
+	      我已阅读并同意
+	      <text class="protocol-link" @tap.stop="onProtocol('用户协议')">
+	        用户协议
+	      </text>
+	      <text>与</text>
+	      <text class="protocol-link" @tap.stop="onProtocol('隐私协议')">
+	        隐私协议
+	      </text>
+	    </view>
+		</radio>
+	  </label>
+	</view>
+	
+	
+	
+	
+	<view v-if="isWeixinClient">
+	  <button 
+	    class="wechat-btn" 
+	    :loading="wxLoading"
+	    :disabled="!state.protocol"
+	    @click="handleWechatLogin"
+	  >
+	    <image 
+	      src="/static/images/wechat.png" 
+	      mode="aspectFit" 
+	      class="wechat-icon"
+	    />
+	    微信一键登录
+	  </button>
+	</view>
+</view>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useAuth } from '@/composables'
+import { useWechatAuth } from '@/composables/useWechatAuth'
 
 const { loading, error, login } = useAuth()
+const { loading: wxLoading, wechatLogin } = useWechatAuth()
 
 // 表单数据
 const form = ref({
@@ -66,9 +115,34 @@ const isValid = computed(() => {
   return form.value.username.trim() && form.value.password.trim()
 })
 
+// 微信环境检测
+const isWeixinClient = ref(false)
+onMounted(() => {
+  // #ifdef MP-WEIXIN 
+  isWeixinClient.value = true
+  // #endif
+})
+
+// 用户协议状态
+const state = ref({
+  protocol: false
+})
+
+// 切换协议勾选状态
+const onChange = () => {
+  state.value.protocol = !state.value.protocol
+}
+
+// 查看协议
+const onProtocol = (type) => {
+  uni.navigateTo({
+    url: `/pages/protocol/index?type=${type}`
+  })
+}
+
 // 登录处理
 const handleLogin = async () => {
-  if (!isValid.value || loading.value) return
+  if (!isValid.value || loading.value || !state.value.protocol) return
 
   try {
     const loginParam = {
@@ -104,6 +178,22 @@ const handleLogin = async () => {
   }
 }
 
+// 处理微信登录
+const handleWechatLogin = async () => {
+  const success = await wechatLogin()
+  if (success) {
+    uni.showToast({
+      title: '登录成功',
+      icon: 'success'
+    })
+    setTimeout(() => {
+      uni.switchTab({
+        url: '/pages/index/index'
+      })
+    }, 1500)
+  }
+}
+
 // 页面跳转
 const navigateToRegister = () => {
   uni.navigateTo({
@@ -135,6 +225,38 @@ const navigateToForgotPassword = () => {
     image {
       width: 100%;
       height: 100%;
+    }
+  }
+
+  .wechat-btn {
+    width: 100%;
+    max-width: 600rpx;
+    height: 88rpx;
+    line-height: 88rpx;
+    background-color: #07c160;
+    color: #fff;
+    font-size: 32rpx;
+    border-radius: 8rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+	margin-top: 50rpx;
+    margin-bottom: 30rpx;
+    border: none;
+    
+    .wechat-icon {
+      width: 40rpx;
+      height: 40rpx;
+      margin-right: 10rpx;
+    }
+    
+    &:active {
+      opacity: 0.8;
+    }
+
+    &[disabled] {
+      background-color: #ccc;
+      opacity: 0.6;
     }
   }
   
@@ -194,6 +316,30 @@ const navigateToForgotPassword = () => {
       &[disabled] {
         background-color: #ccc;
         opacity: 0.6;
+      }
+    }
+    
+    .agreement-box {
+      margin: 20rpx 0;
+      padding: 0 20rpx;
+      
+      .radio {
+        display: flex;
+        align-items: center;
+        font-size: 26rpx;
+      }
+      
+      .agreement-text {
+        margin-left: 18rpx;
+        color: #666;
+      }
+      
+      .protocol-link {
+        color: #007AFF;
+        
+        &:active {
+          opacity: 0.6;
+        }
       }
     }
     

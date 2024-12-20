@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import { useAuthStore } from '@/store/modules/auth'
+import { useAuthStore } from '../store/modules/auth'
 
 export function useWechatAuth() {
   const loading = ref(false)
@@ -20,11 +20,13 @@ export function useWechatAuth() {
         throw loginError
       }
 
-      // TODO: 调用后端 API 进行登录验证
-      // const response = await authStore.wechatLogin(loginRes.code)
-      console.log('微信登录成功，code:', loginRes.code)
+      // 调用 store 的微信登录方法
+      const success = await authStore.wechatLogin(loginRes.code)
       
-      // 模拟登录成功
+      if (!success) {
+        throw new Error('登录失败')
+      }
+
       return true
     } catch (err) {
       console.error('微信登录失败:', err)

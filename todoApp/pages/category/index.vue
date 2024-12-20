@@ -84,6 +84,11 @@
         </view>
       </view>
     </uni-popup>
+    
+    <!-- 悬浮添加按钮 -->
+    <button class="floating-add-btn" @click="handleAdd">
+      添加分类
+    </button>
   </view>
 </template>
 
@@ -253,6 +258,7 @@ const cancelDelete = () => {
 <style lang="scss">
 .category-container {
   padding: 20rpx;
+  position: relative;
   
   .category-list {
     margin-bottom: 20rpx;
@@ -372,5 +378,20 @@ const cancelDelete = () => {
       }
     }
   }
+}
+
+.floating-add-btn {
+  position: fixed;
+  bottom: 30rpx;
+  right: 30rpx;
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+  background-color: #42b983;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.2);
 }
 </style>

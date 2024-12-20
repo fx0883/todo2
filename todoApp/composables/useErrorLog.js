@@ -20,11 +20,36 @@ export function useErrorLog() {
       }
       this.context = {
         userId: user?.value?.id,
-        url: window.location.href,
-        userAgent: navigator.userAgent,
+        ...this.getPlatformInfo(),
         ...context
       }
       this.status = 'pending'
+    }
+
+    getPlatformInfo() {
+      // #ifdef H5
+      return {
+        url: window.location.href,
+        userAgent: navigator.userAgent,
+        platform: 'h5'
+      }
+      // #endif
+
+      // #ifdef MP-WEIXIN
+      const accountInfo = uni.getAccountInfoSync()
+      return {
+        url: '',
+        platform: 'mp-weixin',
+        version: accountInfo.miniProgram.version || '',
+        envVersion: accountInfo.miniProgram.envVersion || ''
+      }
+      // #endif
+
+      // 其他平台
+      return {
+        url: '',
+        platform: 'unknown'
+      }
     }
   }
 

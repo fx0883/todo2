@@ -19,13 +19,8 @@ export function useNotification() {
       read: false
     })
 
-    // 如果支持系统通知，则显示系统通知
-    if (window.Notification && Notification.permission === 'granted') {
-      new Notification(notification.title, {
-        body: notification.message,
-        icon: notification.icon
-      })
-    }
+    // 根据平台显示不同的通知
+    showPlatformNotification(notification)
 
     // 5秒后自动移除通知
     setTimeout(() => {
@@ -33,6 +28,32 @@ export function useNotification() {
     }, 5000)
 
     return id
+  }
+
+  // 根据平台显示通知
+  const showPlatformNotification = (notification) => {
+    // #ifdef H5
+    if (window.Notification && Notification.permission === 'granted') {
+      new Notification(notification.title, {
+        body: notification.message,
+        icon: notification.icon
+      })
+    }
+    // #endif
+
+    // #ifdef MP-WEIXIN
+    uni.showToast({
+      title: notification.message,
+      icon: notification.type === 'error' ? 'error' : 'none',
+      duration: 2000
+    })
+    // #endif
+
+    // #ifdef APP-PLUS
+    plus.nativeUI.toast(notification.message, {
+      duration: 'short'
+    })
+    // #endif
   }
 
   // 移除通知

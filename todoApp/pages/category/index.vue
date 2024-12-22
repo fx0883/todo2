@@ -134,7 +134,12 @@ const deletePopup = ref(null)
 
 // 获取分类列表
 onMounted(async () => {
+  console.log('Before fetchCategories')
   await fetchCategories()
+  console.log('After fetchCategories')
+  console.log('categories:', categories.value)
+  console.log('categories is array:', Array.isArray(categories.value))
+  console.log('categories length:', categories.value?.length)
 })
 
 // 导航栏按钮点击处理

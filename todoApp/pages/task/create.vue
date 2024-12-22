@@ -69,6 +69,7 @@
         class="submit-btn" 
         :disabled="!isValid || loading"
         :loading="loading"
+        :class="{ 'submit-btn-disabled': !isValid || loading }"
         @click="handleSubmit"
       >
         创建任务
@@ -80,11 +81,7 @@
 <script setup>
 import { ref, computed, onMounted, onActivated } from 'vue'
 import { useTaskStore } from '@/store/modules/task'
-import taskApi from '@/api/task'
-import categoryApi from '@/api/category'
-import { useTask } from '@/composables'
-
-console.log('导入的 categoryApi:', categoryApi)
+import { useTask, useCategory } from '@/composables'
 
 const taskStore = useTaskStore()
 const loading = ref(false)
@@ -92,8 +89,9 @@ const loading = ref(false)
 const { 
   fetchTasks, 
   createTask
-
 } = useTask()
+
+const { categories, fetchCategories } = useCategory()
 
 // 表单数据
 const taskForm = ref({
@@ -106,7 +104,6 @@ const taskForm = ref({
 })
 
 // 分类和优先级选项
-const categories = ref([])
 const priorities = [
   { label: '低', value: 1 },
   { label: '中', value: 2 },
@@ -118,24 +115,6 @@ const priorityLabels = {
   3: '高优先级'
 }
 const selectedCategory = ref(null)
-
-// 获取分类列表
-const fetchCategories = async () => {
-  try {
-    console.log('开始获取分类列表')
-    const response = await categoryApi.getCategories()
-    console.log('获取到的分类列表:', response)
-    categories.value = response.results || []
-    console.log('设置后的分类列表:', categories.value)
-  } catch (error) {
-    console.error('获取分类失败:', error)
-    categories.value = []
-    uni.showToast({
-      title: '获取分类失败',
-      icon: 'none'
-    })
-  }
-}
 
 // 页面跳转
 const navigateToCategory = () => {
@@ -262,9 +241,12 @@ onActivated(() => {
       color: #fff;
       border-radius: 45rpx;
       font-size: 32rpx;
+      transition: all 0.3s ease;
       
-      &:disabled {
-        opacity: 0.6;
+      &.submit-btn-disabled {
+        background-color: #ccc;
+        color: #fff;
+        cursor: not-allowed;
       }
     }
   }

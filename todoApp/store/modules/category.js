@@ -36,24 +36,23 @@ export const useCategoryStore = defineStore('category', () => {
 		const cacheKey = 'categories'
 		const cachedCategories = cache.get(cacheKey)
 		if (!isRefresh) {
-
-
 			if (cachedCategories) {
 				categories.value = cachedCategories
 				return cachedCategories
 			}
 		}
 
-
 		loading.value = true
 		try {
 			const response = await categoryApi.getCategories()
-			categories.value = response.results
-			cache.set(cacheKey, response.results, 5 * 60 * 1000) // 缓存5分钟
+			console.log('API Response:', response)
+			categories.value = response
+			console.log('Updated categories:', categories.value)
+			cache.set(cacheKey, response, 5 * 60 * 1000)
 			return response
 		} catch (error) {
 			addErrorLog(error, {
-				action: 'fetchCategories'
+					action: 'fetchCategories'
 			})
 			throw error
 		} finally {

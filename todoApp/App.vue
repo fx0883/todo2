@@ -92,6 +92,9 @@ export default {
 }
 </script>
 
-<style>
+<style lang="scss">
   /*每个页面公共css */
+  /* #ifndef APP-NVUE */
+  @import '@/uni_modules/wu-ui-tools/index.scss';
+  /* #endif */
 </style>

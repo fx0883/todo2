@@ -4,16 +4,16 @@
   "description": "",
   "main": "main.js",
   "dependencies": {
+    "@dcloudio/uni-ui": "^1.5.7",
+    "@qiun/ucharts": "^2.5.0-20230101",
     "pinia": "^2.0.0",
     "pinia-plugin-persist-uni": "^1.2.0",
-    "vue": "^3.2.45",
-    "@qiun/ucharts": "^2.5.0-20230101"
+    "vue": "^3.2.45"
   },
   "devDependencies": {
     "sass": "^1.32.0",
     "sass-loader": "^10.1.0",
     "vite": "^4.0.0"
   },
-  "scripts": {
-  }
+  "scripts": {}
 }

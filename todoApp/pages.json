@@ -158,7 +158,9 @@
 	"easycom": {
 		"autoscan": true,
 		"custom": {
-			"calendar-view": "@/components/calendar-view.vue"
+			"calendar-view": "@/components/calendar-view.vue",
+			"^uni-(.*)": "@dcloudio/uni-ui/lib/uni-$1/uni-$1.vue",
+			"^wu-(.*)": "@/uni_modules/wu-$1/components/wu-$1/wu-$1.vue"
 		}
 	}
 }

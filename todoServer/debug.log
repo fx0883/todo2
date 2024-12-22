@@ -4959,3 +4959,9 @@ ERROR 2024-12-22 21:00:29,784 log 1568 25596 Internal Server Error: /api/v1/acco
 ERROR 2024-12-22 21:00:29,785 basehttp 1568 25596 "POST /api/v1/accounts/users/wechat_login/ HTTP/1.1" 500 24
 ERROR 2024-12-22 21:02:34,255 log 1568 25596 Internal Server Error: /api/v1/accounts/users/wechat_login/
 ERROR 2024-12-22 21:02:34,256 basehttp 1568 25596 "POST /api/v1/accounts/users/wechat_login/ HTTP/1.1" 500 24
+ERROR 2024-12-22 21:04:25,614 log 1568 25596 Internal Server Error: /api/v1/accounts/users/wechat_login/
+ERROR 2024-12-22 21:04:25,616 basehttp 1568 25596 "POST /api/v1/accounts/users/wechat_login/ HTTP/1.1" 500 24
+ERROR 2024-12-22 21:04:41,891 log 1568 25596 Internal Server Error: /api/v1/accounts/users/wechat_login/
+ERROR 2024-12-22 21:04:41,892 basehttp 1568 25596 "POST /api/v1/accounts/users/wechat_login/ HTTP/1.1" 500 24
+ERROR 2024-12-22 21:05:06,624 log 1568 25596 Internal Server Error: /api/v1/accounts/users/wechat_login/
+ERROR 2024-12-22 21:05:06,624 basehttp 1568 25596 "POST /api/v1/accounts/users/wechat_login/ HTTP/1.1" 500 24

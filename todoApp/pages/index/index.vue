@@ -48,7 +48,7 @@
             v-for="task in filteredTasks" 
             :key="task.id" 
             class="task-item"
-            :class="{ completed: task.status === 'completed' }"
+            :class="{ completed: task.status === 'completed', 'p' + task.priority: true }"
             @click="navigateToDetail(task.id)"
           >
             <checkbox 
@@ -241,7 +241,7 @@ const onLoadMore = async () => {
         padding: 12rpx 32rpx;
         margin-right: 16rpx;
         font-size: 28rpx;
-        color: #595959;
+        color: #666;
         background-color: #fafafa;
         border-radius: 32rpx;
         white-space: nowrap;
@@ -249,7 +249,7 @@ const onLoadMore = async () => {
         
         &.active {
           color: #ffffff;
-          background-color: #262626;
+          background-color: #007AFF;
         }
         
         &:last-child {
@@ -276,7 +276,8 @@ const onLoadMore = async () => {
       margin-bottom: 20rpx;
       background-color: #ffffff;
       border-radius: 16rpx;
-      box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+      box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
+      border-left: 8rpx solid transparent;
       transition: all 0.2s;
       
       &:last-child {
@@ -284,7 +285,8 @@ const onLoadMore = async () => {
       }
       
       &.completed {
-        opacity: 0.7;
+        opacity: 0.6;
+        background-color: #f8f8f8;
       }
       
       &:active {
@@ -328,18 +330,18 @@ const onLoadMore = async () => {
             border-radius: 4rpx;
             
             &.p1 {
-              color: #52c41a;
-              background-color: #f6ffed;
+              color: #34C759;
+              background-color: rgba(52, 199, 89, 0.1);
             }
             
             &.p2 {
-              color: #faad14;
-              background-color: #fff7e6;
+              color: #FF9500;
+              background-color: rgba(255, 149, 0, 0.1);
             }
             
             &.p3 {
-              color: #f5222d;
-              background-color: #fff1f0;
+              color: #FF3B30;
+              background-color: rgba(255, 59, 48, 0.1);
             }
           }
         }
@@ -357,10 +359,15 @@ const onLoadMore = async () => {
   .add-btn {
     position: fixed;
     right: 40rpx;
-    bottom: calc(140rpx + env(safe-area-inset-bottom));
+    /* #ifdef H5 */
+    bottom: 40rpx;
+    /* #endif */
+    /* #ifdef MP */
+    bottom: 140rpx;
+    /* #endif */
     width: 96rpx;
     height: 96rpx;
-    background-color: #262626;
+    background-color: #007AFF;
     border-radius: 50%;
     display: flex;
     align-items: center;

@@ -10,6 +10,14 @@ const originalRedirectTo = uni.redirectTo
 uni.navigateTo = function(options) {
   const userStore = useUserStore()
   const requiresAuth = checkIfRequiresAuth(options.url)
+  
+  // 添加调试信息
+  console.log('Navigation Debug:', {
+    url: options.url,
+    isAuthenticated: userStore.isAuthenticated,
+    requiresAuth: requiresAuth,
+    token: uni.getStorageSync('accessToken')  // 检查 token 是否存在
+  })
 
   if (requiresAuth && !userStore.isAuthenticated) {
     uni.showModal({

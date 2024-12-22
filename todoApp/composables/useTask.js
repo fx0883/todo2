@@ -75,7 +75,9 @@ export function useTask() {
       error.value = null
       return await taskStore.fetchTasks(params, append)
     } catch (err) {
-      error.value = err
+      if (err.statusCode !== 401) {
+        error.value = err
+      }
       throw err
     } finally {
       loading.value = false

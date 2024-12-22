@@ -26,14 +26,9 @@ export function createApp() {
   // 设置全局错误处理
   setupGlobalErrorHandling()
   
-  // 添加全局错误监听器
-  errorHandler.addListener((error) => {
-    console.warn('Global error caught:', error)
-  })
-  
   return {
     app,
-    pinia // 返回 pinia 实例
+    pinia
   }
 }
 // #endif

@@ -31,7 +31,7 @@ const refreshToken = async () => {
   try {
     const refreshToken = uni.getStorageSync('refreshToken')
     if (!refreshToken) {
-      throw new Error('No refresh token')
+      return null
     }
 
     const response = await uni.request({
@@ -43,18 +43,18 @@ const refreshToken = async () => {
     })
 
     if (response.statusCode === 200) {
-      const { access,refresh } = response.data
+      const { access, refresh } = response.data
       uni.setStorageSync('accessToken', access)
-	  uni.setStorageSync('refreshToken', refresh)
+      uni.setStorageSync('refreshToken', refresh)
       return access
     } else {
-      throw new Error('Failed to refresh token')
+      return null
     }
   } catch (error) {
-    // 刷新失败，清除所有 token
+    // 清除所有 token
     uni.removeStorageSync('accessToken')
     uni.removeStorageSync('refreshToken')
-    throw error
+    return null
   }
 }
 
@@ -164,8 +164,6 @@ const request = async (options) => {
     }
   }
 
-  
-
   try {
     // 添加 token
     const token = uni.getStorageSync('accessToken')
@@ -175,35 +173,34 @@ const request = async (options) => {
         'Authorization': `Bearer ${token}`
       }
     }
-	console.log(config.url);
-	console.dir(config, {depth: null});
-    // 发送请求
+
     return new Promise((resolve, reject) => {
       uni.request({
         ...config,
-        success: (res) => {
+        success: async (res) => {
           if (res.statusCode >= 200 && res.statusCode < 300) {
             resolve(res.data)
           } else if (res.statusCode === 401 && !refreshing) {
             refreshing = true
-            refreshToken()
-              .then(() => {
-                refreshing = false
-                processQueue()
-                // 重新发送请求
-                return request(options)
+            const newToken = await refreshToken()
+            refreshing = false
+            
+            if (newToken) {
+              // 如果获取到新 token，重试请求
+              config.header['Authorization'] = `Bearer ${newToken}`
+              try {
+                const retryResponse = await request(options)
+                resolve(retryResponse)
+              } catch (retryError) {
+                reject(retryError)
+              }
+            } else {
+              // 如果没有获取到新 token，返回 401 错误
+              reject({
+                statusCode: 401,
+                data: { message: '未登录或登录已过期' }
               })
-              .then(resolve)
-              .catch(err => {
-                refreshing = false
-                processQueue(err)
-                // 刷新token失败，清除用户状态并跳转到登录页
-                uni.removeStorageSync('accessToken')
-                uni.removeStorageSync('refreshToken')
-                uni.removeStorageSync('userInfo')
-
-                reject(err)
-              })
+            }
           } else {
             reject({
               statusCode: res.statusCode,
@@ -212,7 +209,6 @@ const request = async (options) => {
           }
         },
         fail: (err) => {
-			console.log(err)
           reject({
             statusCode: 0,
             data: { message: '网络请求失败' },

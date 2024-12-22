@@ -168,53 +168,43 @@ const navigateToDetail = (taskId) => {
 
 // 页面生命周期
 onMounted(async () => {
-  try {
-    // 分开调用，单独处理每个请求的错误
-    try {
-      await refreshList()
-    } catch (err) {
-      // 401 错误不需要显示错误提示
-      if (err.statusCode !== 401) {
-        console.error('Failed to load tasks:', err)
-      }
-    }
-
-    try {
-      await fetchCategories()
-    } catch (err) {
-      if (err.statusCode !== 401) {
-        console.error('Failed to load categories:', err)
-      }
-    }
-  } catch (err) {
-    console.error('Failed to load initial data:', err)
-  }
+	await freshAllData()
 })
 
 
 onActivated(async () => {
-  try {
-    await Promise.all([
-      refreshList(),
-      fetchCategories()
-    ])
-  } catch (error) {
-    console.error('Failed to load initial data:', error)
-    uni.showToast({
-      title: '加载失败',
-      icon: 'none'
-    })
-  }
+	await freshAllData()
 })
+
+const freshAllData = async () => {
+	try {
+	  // 分开调用，单独处理每个请求的错误
+	  try {
+	    await refreshList()
+	  } catch (err) {
+	    // 401 错误不需要显示错误提示
+	    if (err.statusCode !== 401) {
+	      console.error('Failed to load tasks:', err)
+	    }
+	  }
+	
+	  try {
+	    await fetchCategories()
+	  } catch (err) {
+	    if (err.statusCode !== 401) {
+	      console.error('Failed to load categories:', err)
+	    }
+	  }
+	} catch (err) {
+	  console.error('Failed to load initial data:', err)
+	}
+}
 
 // 下拉刷新
 const onRefresh = async () => {
   refreshing.value = true
   try {
-    await Promise.all([
-      refreshList(),
-      fetchCategories()
-    ])
+	await freshAllData()
   } finally {
     refreshing.value = false
   }
@@ -225,10 +215,7 @@ const onLoadMore = async () => {
   await loadMore()
 }
 
-// 初始加载
-onMounted(async () => {
-  await refreshList()
-})
+
 </script>
 
 <style lang="scss">

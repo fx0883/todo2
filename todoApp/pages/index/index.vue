@@ -81,9 +81,9 @@
       </view>
 
       <!-- 空状态 -->
-      <view v-else-if="!filteredTasks.length" class="empty">
+<!--      <view v-else-if="!filteredTasks.length" class="empty">
         <text>{{ selectedCategory ? '该分类下暂无任务' : '开始创建你的第一个任务' }}</text>
-      </view>
+      </view> -->
     </scroll-view>
 
     <!-- 添加按钮 -->
@@ -272,7 +272,7 @@ const onLoadMore = async () => {
   
   .task-list-container {
 	  position: fixed;
-	     margin-top: 80rpx;
+	     margin-top: 105rpx;
     flex: 1;
     height: calc(100vh - 100rpx);
   }

@@ -155,10 +155,7 @@ const fetchComments = async () => {
   try {
     await getTaskComments(taskId)
   } catch (error) {
-    uni.showToast({
-      title: '获取评论失败',
-      icon: 'none'
-    })
+	console.log(error)
   }
 }
 

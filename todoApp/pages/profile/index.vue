@@ -43,10 +43,16 @@
       </view>
       
       <view class="menu-group">
-        <view class="menu-item" @click="handleChangePassword">
-          <text class="menu-label">修改密码</text>
-          <text class="arrow">></text>
-        </view>
+		  
+	
+		  
+		  <!-- #ifndef MP-WEIXIN -->
+		  <view class="menu-item" @click="handleChangePassword">
+		    <text class="menu-label">修改密码</text>
+		    <text class="arrow">></text>
+		  </view>
+		  <!-- #endif -->
+
         <view class="menu-item" @click="handleFeedback">
           <text class="menu-label">意见反馈</text>
           <text class="arrow">></text>
@@ -124,8 +130,15 @@ const chooseImage = async () => {
   }
 }
 
+// 微信环境检测
+const isWeixinClient = ref(false)
+
+
 // 页面加载时获取统计数据
 onMounted(async () => {
+  // #ifdef MP-WEIXIN
+  isWeixinClient.value = true
+  // #endif
   try {
 	await fetchStats()
   } catch (error) {

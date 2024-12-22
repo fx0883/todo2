@@ -13,6 +13,7 @@ export const useUserStore = defineStore('user', () => {
   // Getters
   const isAuthenticated = computed(() => {
     const hasToken = !!uni.getStorageSync('accessToken')
+	console.log(`hasToken = ${hasToken}`)
     return hasToken
   })
 
@@ -40,6 +41,17 @@ export const useUserStore = defineStore('user', () => {
       const response = await userApi.login(credentials)
 	  setToken(response.access, response.refresh)
 	  setUserInfo(response.user)
+      return response
+    } catch (err) {
+      throw new Error(err.data?.message || '登录失败')
+    }
+  }
+  
+  const wechatLogin = async (code) => {
+    try {
+      const response = await userApi.wechatLogin(code)
+  	  setToken(response.access, response.refresh)
+  	  setUserInfo(response.user)
       return response
     } catch (err) {
       throw new Error(err.data?.message || '登录失败')
@@ -143,6 +155,7 @@ export const useUserStore = defineStore('user', () => {
 
     // Actions
     login,
+	wechatLogin,
     register,
     logout,
     setToken,

@@ -97,10 +97,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useAuth } from '@/composables'
-import { useWechatAuth } from '@/composables/useWechatAuth'
-
-const { loading, error, login } = useAuth()
-const { loading: wxLoading, wechatLogin } = useWechatAuth()
+const { loading, error, login, wechatLogin } = useAuth()
 
 // 表单数据
 const form = ref({

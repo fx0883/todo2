@@ -149,6 +149,58 @@ export function useAuth() {
 			return true // 如果解析失败，认为 token 已过期
 		}
 	}
+	
+	const wechatLogin = async () => {
+	  loading.value = true
+	  error.value = null
+	
+	  try {
+	    // 获取微信登录 code
+	    const { code, errMsg } = await uni.login({
+	      provider: 'weixin'
+	    })
+	
+	    if (errMsg !== 'login:ok') {
+	      throw new Error('微信登录失败')
+		  return false
+	    }
+		const response = await userStore.wechatLogin(code)
+		console.log('Login response:', response)
+
+		
+		await refreshData()
+		await refreshUserData()
+		return true
+
+	
+	    // 显示成功提示
+	    uni.showToast({
+	      title: '登录成功',
+	      icon: 'success'
+	    })
+	
+	    // 延迟跳转到首页
+	    setTimeout(() => {
+	      uni.switchTab({
+	        url: '/pages/index/index'
+	      })
+	    }, 1500)
+	
+	    return true
+	  } catch (err) {
+	    console.error('微信登录失败:', err)
+	    error.value = err.message || '登录失败'
+	    
+	    uni.showToast({
+	      title: error.value,
+	      icon: 'error'
+	    })
+	    
+	    return false
+	  } finally {
+	    loading.value = false
+	  }
+	}
 
 	return {
 		// 状态
@@ -157,7 +209,7 @@ export function useAuth() {
 		isAuthenticated,
 		user,
 		token,
-
+		wechatLogin,
 		// 方法
 		login,
 		register,

@@ -10,7 +10,7 @@ from notifications.models import Notification
 from .serializers import (
     UserSerializer, UserProfileSerializer, UserDeviceSerializer,
     RegisterSerializer, LoginSerializer, PasswordResetRequestSerializer, PasswordResetConfirmSerializer,
-    UserFeedbackSerializer
+    UserFeedbackSerializer, WechatLoginSerializer
 )
 from rest_framework.authtoken.models import Token
 from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiExample, OpenApiResponse
@@ -26,6 +26,7 @@ from rest_framework.parsers import MultiPartParser
 from django.db.models import Count, Q
 from rest_framework.exceptions import ValidationError
 from rest_framework.views import exception_handler
+from .utils import get_wechat_session
 
 User = get_user_model()
 
@@ -216,7 +217,7 @@ class UserViewSet(viewsets.ModelViewSet):
     tags = ['用户管理']
 
     def get_permissions(self):
-        if self.action in ['register', 'login', 'request_password_reset', 'confirm_password_reset']:
+        if self.action in ['register', 'login', 'request_password_reset', 'confirm_password_reset', 'wechat_login']:
             return [permissions.AllowAny()]
         return super().get_permissions()
 
@@ -503,6 +504,55 @@ class UserViewSet(viewsets.ModelViewSet):
             'pending': pending_tasks,
             'overdue': overdue_tasks
         })
+
+    @method_decorator(csrf_exempt)
+    @extend_schema(
+        summary="微信小程序登录",
+        tags=['用户认证'],
+        request=WechatLoginSerializer,
+        responses={200: OpenApiResponse(description="登录成功")},
+        auth=[]
+    )
+    @method_decorator(csrf_exempt)
+    @action(detail=False, methods=['post'], permission_classes=[permissions.AllowAny], authentication_classes=[])
+    def wechat_login(self, request):
+        serializer = WechatLoginSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        
+        try:
+            # 获取微信session信息
+            wx_session = get_wechat_session(serializer.validated_data['js_code'])
+            
+            # 查找或创建用户
+            user = User.objects.filter(openid=wx_session['openid']).first()
+            
+            if not user:
+                # 创建新用户
+                username = f"wx_{uuid.uuid4().hex[:8]}"
+                user = User.objects.create_user(
+                    username=username,
+                    openid=wx_session['openid'],
+                    unionid=wx_session.get('unionid'),
+                )
+            
+            # 更新session_key
+            user.session_key = wx_session['session_key']
+            user.save()
+            
+            # 生成JWT token
+            from rest_framework_simplejwt.tokens import RefreshToken
+            refresh = RefreshToken.for_user(user)
+            
+            return Response({
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+                'user': UserSerializer(user, context={'request': request}).data
+            })
+            
+        except ValueError as e:
+            return Response({'error': str(e)}, status=400)
+        except Exception as e:
+            return Response({'error': '登录失败'}, status=500)
 
 @extend_schema_view(
     list=extend_schema(

@@ -176,3 +176,6 @@ class UserFeedbackSerializer(serializers.ModelSerializer):
         model = UserFeedback
         fields = ('id', 'type', 'title', 'content', 'contact_info', 'status', 'response', 'created_at', 'updated_at')
         read_only_fields = ('id', 'status', 'response', 'created_at', 'updated_at')
+
+class WechatLoginSerializer(serializers.Serializer):
+    js_code = serializers.CharField(required=True)

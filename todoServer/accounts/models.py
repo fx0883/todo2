@@ -32,6 +32,9 @@ class User(AbstractUser):
     created_at = models.DateTimeField(_('创建时间'), auto_now_add=True)
     updated_at = models.DateTimeField(_('更新时间'), auto_now=True)
     history = HistoricalRecords()
+    openid = models.CharField(_('微信 OpenID'), max_length=100, unique=True, null=True, blank=True)
+    unionid = models.CharField(_('微信 UnionID'), max_length=100, unique=True, null=True, blank=True)
+    session_key = models.CharField(_('微信 SessionKey'), max_length=100, null=True, blank=True)
 
     class Meta:
         verbose_name = _('用户')

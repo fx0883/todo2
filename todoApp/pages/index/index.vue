@@ -48,7 +48,10 @@
             v-for="task in filteredTasks" 
             :key="task.id" 
             class="task-item"
-            :class="{ completed: task.status === 'completed', 'p' + task.priority: true }"
+            :class="[
+              { completed: task.status === 'completed' },
+              `p${task.priority}`
+            ]"
             @click="navigateToDetail(task.id)"
           >
             <checkbox 
@@ -227,29 +230,37 @@ const onLoadMore = async () => {
     position: fixed;
     z-index:999;
     background-color: #ffffff;
-    padding: 20rpx 0;
+    padding: 24rpx 0;
     border-bottom: 1rpx solid #f0f0f0;
     
     .category-list {
       display: flex;
 	  z-index: 999;
-	  height: 80rpx;
+	  height: 72rpx;
       padding: 0 20rpx;
 	  top: calc(var(--window-top));
       
       .category-item {
-        padding: 12rpx 32rpx;
+        padding: 16rpx 32rpx;
         margin-right: 16rpx;
         font-size: 28rpx;
-        color: #666;
-        background-color: #fafafa;
+        color: #8c8c8c;
+        background-color: #f5f5f5;
         border-radius: 32rpx;
         white-space: nowrap;
-        transition: all 0.2s;
+        transition: all 0.3s ease;
+        border: 2rpx solid transparent;
         
         &.active {
           color: #ffffff;
           background-color: #007AFF;
+          box-shadow: 0 4rpx 12rpx rgba(0, 122, 255, 0.2);
+        }
+        
+        &:not(.active):hover {
+          color: #007AFF;
+          border-color: #007AFF;
+          background-color: rgba(0, 122, 255, 0.05);
         }
         
         &:last-child {
@@ -345,6 +356,17 @@ const onLoadMore = async () => {
             }
           }
         }
+      }
+      
+      // 优先级边框颜色
+      &.p1 {
+        border-left-color: #34C759;  // 低优先级
+      }
+      &.p2 {
+        border-left-color: #FF9500;  // 中优先级
+      }
+      &.p3 {
+        border-left-color: #FF3B30;  // 高优先级
       }
     }
     

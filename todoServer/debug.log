@@ -4955,3 +4955,7 @@ django.core.exceptions.FieldError: 'created_at' cannot be specified for User mod
         
 ERROR 2024-12-22 13:47:04,101 log 12700 2308 Internal Server Error: /admin/accounts/user/11/change/
 ERROR 2024-12-22 13:47:04,101 basehttp 12700 2308 "GET /admin/accounts/user/11/change/ HTTP/1.1" 500 263
+ERROR 2024-12-22 21:00:29,784 log 1568 25596 Internal Server Error: /api/v1/accounts/users/wechat_login/
+ERROR 2024-12-22 21:00:29,785 basehttp 1568 25596 "POST /api/v1/accounts/users/wechat_login/ HTTP/1.1" 500 24
+ERROR 2024-12-22 21:02:34,255 log 1568 25596 Internal Server Error: /api/v1/accounts/users/wechat_login/
+ERROR 2024-12-22 21:02:34,256 basehttp 1568 25596 "POST /api/v1/accounts/users/wechat_login/ HTTP/1.1" 500 24

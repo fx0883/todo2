@@ -115,6 +115,13 @@
 
 <script setup>
 import { ref, computed, onMounted, onActivated } from 'vue'
+	import {
+		onLoad,
+		onPageScroll,
+		onPullDownRefresh,
+		onReachBottom,
+		onShow
+	} from '@dcloudio/uni-app';
 import { useTaskStore } from '@/store/modules/task'
 
 const taskStore = useTaskStore()
@@ -211,7 +218,7 @@ onMounted(() => {
   fetchStatistics()
 })
 
-onActivated(() => {
+onShow(async () => {
   fetchStatistics()
 })
 </script>

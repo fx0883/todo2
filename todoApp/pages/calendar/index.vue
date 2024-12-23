@@ -43,6 +43,13 @@
 
 <script setup>
 import { ref, computed, onMounted, onActivated } from 'vue'
+	import {
+		onLoad,
+		onPageScroll,
+		onPullDownRefresh,
+		onReachBottom,
+		onShow
+	} from '@dcloudio/uni-app';
 import { useCalendar } from '@/composables/useCalendar'
 import { formatDateTime, isSameDay } from '@/utils/dateTime'
 import { getPriorityText } from '@/utils/task'
@@ -120,10 +127,15 @@ onMounted(() => {
   // 设置当前日期为今天
   changeDate(new Date(new Date().getTime()))
 })
-
-onActivated(() => {
+onShow(async () => {
   changeDate(new Date(currentDate.value))
 })
+
+
+
+
+		
+
 
 
 

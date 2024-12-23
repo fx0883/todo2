@@ -94,6 +94,13 @@
 
 <script setup>
 import { ref, onMounted, onActivated, computed } from 'vue'
+	import {
+		onLoad,
+		onPageScroll,
+		onPullDownRefresh,
+		onReachBottom,
+		onShow
+	} from '@dcloudio/uni-app';
 import { storeToRefs } from 'pinia'
 import { useUserStore } from '@/store/modules/user'
 import { useProfile } from '@/composables/useProfile'
@@ -230,7 +237,7 @@ const handleLogout = async () => {
 }
 
 // 页面显示时刷新数据
-onActivated (async () => {
+onShow(async () => {
   await fetchStats()
   console.log(stats)
 })

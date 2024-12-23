@@ -74,8 +74,13 @@
 		onActivated
 	} from 'vue'
 	import {
-		onPullDownRefresh
-	} from '@dcloudio/uni-app'
+		onLoad,
+		onPageScroll,
+		onPullDownRefresh,
+		onReachBottom,
+		onShow
+	} from '@dcloudio/uni-app';
+
 	import {
 		useTask
 	} from '@/composables/useTask'
@@ -172,8 +177,8 @@
 	})
 
 
-	onActivated(async () => {
-		await freshAllData()
+	onShow(async () => {
+		// await freshAllData()
 	})
 
 	const freshAllData = async () => {

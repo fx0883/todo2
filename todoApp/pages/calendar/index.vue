@@ -73,7 +73,7 @@
 
       <!-- 空状态优化 -->
       <view v-if="!unfinishedTasks.length && !finishedTasks.length" class="empty-state">
-        <image src="/static/images/empty-calendar.png" mode="aspectFit"/>
+
         <text class="empty-text">{{ isToday.value ? '今天暂无计划' : '该日期暂无计划' }}</text>
         <!-- <text class="sub-text">点击下方按钮添加任务</text> -->
       </view>

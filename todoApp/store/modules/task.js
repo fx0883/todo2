@@ -132,7 +132,7 @@ export const useTaskStore = defineStore('task', () => {
 
 	  
       if (!task) {
-		  task = calendarTasks.value.findIndex(t => t.id === taskId)
+		  task = calendarTasks.value.find(t => t.id === taskId)
         // 如果本地没有找到,尝试从服务器获取
 		if (!task){
 			await fetchTasks()

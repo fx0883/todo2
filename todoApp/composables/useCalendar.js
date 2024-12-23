@@ -3,12 +3,32 @@ import { useTaskStore } from '@/store'
 import { usePreferences } from './usePreferences'
 
 export function useCalendar() {
+	
   const taskStore = useTaskStore()
   const { preferences } = usePreferences()
   
   const viewType = ref('month')
   const currentDate = ref(new Date())
   
+  
+  const loading = ref(taskStore.loading)
+  const error = ref(taskStore.error)
+  const tasks = computed(() => {
+    const allTasks = taskStore.calendarTasks
+    // 根据用户偏好设置排序
+    return [...allTasks].sort((a, b) => {
+      switch (preferences.value.taskSort) {
+        case 'dueDate':
+          return new Date(a.dueDate) - new Date(b.dueDate)
+        case 'priority':
+          return b.priority - a.priority
+        case 'title':
+          return a.title.localeCompare(b.title)
+        default:
+          return new Date(b.createdAt) - new Date(a.createdAt)
+      }
+    })
+  })
   // 计算日历范围
   const dateRange = computed(() => {
     const start = new Date(currentDate.value)
@@ -106,19 +126,79 @@ export function useCalendar() {
       throw err
     }
   }
+  
+  // 清除错误
+  const clearError = () => {
+    error.value = null
+  }
+  
+ // 修改 toggleTaskStatus 方法
+ const toggleTaskStatus = async (taskId) => {
+   try {
+     loading.value = true
+     clearError()
+     
+     // 先获取当前任务信息
+     const currentTask = tasks.value.find(t => t.id === taskId)
+     if (!currentTask) {
+       throw new Error('任务不存在')
+     }
+     
+     // 准备更新数据，包含必填字段
+     const updateData = {
+       title: currentTask.title, // 保留原标题
+       status: currentTask.status === 'completed' ? 'pending' : 'completed'
+     }
+     
+     const updatedTask = await updateTask(taskId, updateData)
+     
+     if (updatedTask) {
+       uni.showToast({
+         title: updatedTask.status === 'completed' ? '已完成' : '已取消完成',
+         icon: 'success'
+       })
+     }
+     
+     return updatedTask
+   } catch (e) {
+     error.value = e.message || '更新任务状态失败'
+     throw e
+   } finally {
+     loading.value = false
+   }
+ }
+  
+  const updateTask = async (taskId, taskData) => {
+    try {
+      loading.value = true
+      clearError()
+      const task = await taskStore.updateTask(taskId, taskData)
+      return task
+    } catch (e) {
+      error.value = e.message || '更新任务失败'
+      return null
+    } finally {
+      loading.value = false
+    }
+  }
+  
+
+  
 
   return {
+	  
     viewType,
     currentDate,
     dateRange,
-    loading: computed(() => taskStore.loading),
-    error: computed(() => taskStore.error),
-    tasks: computed(() => taskStore.calendarTasks),
+    loading,
+    error,
+    tasks,
     fetchCalendarTasks,
     updateTaskDate,
     quickAddTask,
     changeViewType,
     changeDate,
+	toggleTaskStatus,
     updateTaskStatus
   }
 } 

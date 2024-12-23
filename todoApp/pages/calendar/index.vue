@@ -12,77 +12,32 @@
       :selected="[currentDate]"
     />
 
-    <!-- 任务列表区域 -->
-    <view class="tasks-section">
-      <!-- 未完成任务 -->
-      <view class="task-group" v-if="unfinishedTasks.length">
-        <view class="group-header">
-          <text class="title">待完成</text>
-          <text class="count">{{ unfinishedTasks.length }}</text>
-        </view>
-        <view class="task-list">
-          <view 
-            v-for="task in unfinishedTasks" 
-            :key="task.id"
-            class="task-item"
-            :class="{ 'is-important': task.is_important }"
-            @tap="navigateToDetail(task.id)"
-          >
-            <view class="task-checkbox" @tap.stop="toggleTaskStatus(task)">
-              <text class="checkbox" :class="{ 'checked': task.completed }"/>
-            </view>
-            <view class="task-content">
-              <view class="task-main">
-                <text class="task-title">{{ task.title }}</text>
-                <view class="task-meta" v-if="task.due_date || task.category">
-                  <text class="due-time" v-if="task.due_date">{{ formatTime(task.due_date) }}</text>
-                  <text class="category" v-if="task.category">{{ task.category.name }}</text>
-                </view>
-              </view>
-              <view class="task-priority" v-if="task.priority > 1">
-                <text class="priority-tag" :class="'p' + task.priority">P{{ task.priority }}</text>
-              </view>
-            </view>
-          </view>
-        </view>
-      </view>
-
-      <!-- 已完成任务 -->
-      <view class="task-group completed" v-if="finishedTasks.length">
-        <view class="group-header">
-          <text class="title">已完成</text>
-          <text class="count">{{ finishedTasks.length }}</text>
-        </view>
-        <view class="task-list">
-          <view 
-            v-for="task in finishedTasks" 
-            :key="task.id"
-            class="task-item"
-            @tap="navigateToDetail(task.id)"
-          >
-            <view class="task-checkbox" @tap.stop="toggleTaskStatus(task)">
-              <text class="checkbox checked"/>
-            </view>
-            <view class="task-content">
-              <text class="task-title">{{ task.title }}</text>
-              <text class="complete-time" v-if="task.completed_at">{{ formatTime(task.completed_at) }}完成</text>
-            </view>
-          </view>
-        </view>
-      </view>
-
-      <!-- 空状态优化 -->
-      <view v-if="!unfinishedTasks.length && !finishedTasks.length" class="empty-state">
-
-        <text class="empty-text">{{ isToday.value ? '今天暂无计划' : '该日期暂无计划' }}</text>
-        <!-- <text class="sub-text">点击下方按钮添加任务</text> -->
-      </view>
-    </view>
-
+			<!-- 任务列表内容 -->
+			<template v-if="filteredTasks && filteredTasks.length > 0">
+				<view class="task-list">
+					<view v-for="task in filteredTasks" :key="task.id" class="task-item" :class="[
+              { completed: task.status === 'completed' },
+              `p${task.priority}`
+            ]" @click="navigateToDetail(task.id)">
+						<checkbox :checked="task.status === 'completed'" @tap.stop="toggleTaskStatus(task.id)"
+							class="checkbox" />
+						<view class="content">
+							<text class="title"
+								:class="{ 'completed-text': task.status === 'completed' }">{{ task.title }}</text>
+							<view class="meta">
+								<!-- <text class="due-date" v-if="task.due_date">{{ formatDate(task.due_date) }}</text> -->
+								<text class="priority"
+									:class="'p' + task.priority">{{ getPriorityText(task.priority) }}</text>
+							</view>
+						</view>
+					</view>
+				</view>
+			</template>
     <!-- 添加任务按钮 -->
     <view class="add-btn" @tap="showQuickAddModal">
       <text class="icon">+</text>
     </view>
+	
   </view>
 </template>
 
@@ -90,30 +45,36 @@
 import { ref, computed, onMounted, onActivated } from 'vue'
 import { useCalendar } from '@/composables/useCalendar'
 import { formatDateTime, isSameDay } from '@/utils/dateTime'
-
+import { getPriorityText } from '@/utils/task'
+	import {
+		useTaskStore
+	} from '@/store/modules/task'
+	
+	import {
+		storeToRefs
+	} from 'pinia'
 const {
   currentDate,
-  tasks,
-  loading,
   fetchCalendarTasks,
   updateTaskDate,
   quickAddTask,
   changeDate,
-  updateTaskStatus
+  updateTaskStatus,
+  toggleTaskStatus
 } = useCalendar()
 
+const taskStore = useTaskStore()
+const {
+	calendarTasks,
+	loading
+} = storeToRefs(taskStore)
 // 获取今天日期
 const today = new Date()
 
-// 计算未完成任务
-const unfinishedTasks = computed(() => {
-  return tasks.value.filter(task => !task.completed)
-})
 
-// 计算已完成任务
-const finishedTasks = computed(() => {
-  return tasks.value.filter(task => task.completed)
-})
+
+	// 过滤和排序任务
+
 
 // 格式化时间
 const formatTime = (dateStr) => {
@@ -126,18 +87,6 @@ const isToday = computed(() => {
   return isSameDay(currentDate.value, today)
 })
 
-// 切换任务状态
-const toggleTaskStatus = async (task) => {
-  try {
-    await updateTaskStatus(task.id, !task.completed)
-    // 状态更新后会自动刷新任务列表
-  } catch (error) {
-    uni.showToast({
-      title: '更新任务状态失败',
-      icon: 'none'
-    })
-  }
-}
 
 // 日历确认事件
 const onConfirmCalendar = (e) => {
@@ -153,13 +102,6 @@ const onChangeCalendar = (e) => {
   changeDate(selectedDate)
 }
 
-// 跳转到任务详情
-const navigateToDetail = (taskId) => {
-  uni.navigateTo({
-    url: `/pages/task/detail?id=${taskId}`
-  })
-}
-
 // 显示快速添加任务弹窗
 const showQuickAddModal = () => {
   uni.navigateTo({
@@ -167,7 +109,11 @@ const showQuickAddModal = () => {
   })
 }
 
-// let curDate = ref(new Date())
+const navigateToDetail = (taskId) => {
+	uni.navigateTo({
+		url: `/pages/task/detail?id=${taskId}`
+	})
+}
 
 // 页面加载时获取今天的任务
 onMounted(() => {
@@ -178,22 +124,143 @@ onMounted(() => {
 onActivated(() => {
   changeDate(new Date(currentDate.value))
 })
+
+
+
+// 过滤和排序任务
+const filteredTasks = computed(() => {
+	if (!Array.isArray(calendarTasks.value)) return []
+
+	let filtered = [...calendarTasks.value]
+
+	// 排序：未完成的任务优先，然后按创建时间倒序
+	return filtered.sort((a, b) => {
+		if (a.status !== b.status) {
+			return a.status === 'completed' ? 1 : -1
+		}
+		return new Date(b.createdAt) - new Date(a.createdAt)
+	})
+})
 </script>
 
 <style lang="scss">
 .calendar-page {
   min-height: 100vh;
-  background: #f8f9fa;
+  background: #f5f5f5;
   
   .tasks-section {
     padding: 20rpx;
+  }
+  
+  .task-list {
+  	padding: 20rpx;
+  
+	.task-item {
+		display: flex;
+		align-items: center;
+		padding: 30rpx;
+		margin-bottom: 20rpx;
+		background-color: #ffffff;
+		border-radius: 16rpx;
+		box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.08);
+		border-left: 8rpx solid transparent;
+		transition: all 0.2s;
+	
+		&:last-child {
+			margin-bottom: 0;
+		}
+	
+		&.completed {
+			opacity: 0.6;
+			background-color: #f8f8f8;
+		}
+	
+		&:active {
+			transform: scale(0.99);
+			box-shadow: 0 1rpx 4rpx rgba(0, 0, 0, 0.03);
+		}
+	
+		.checkbox {
+			margin-right: 24rpx;
+			transform: scale(0.9);
+		}
+	
+		.content {
+			flex: 1;
+	
+			.title {
+				font-size: 32rpx;
+				color: #262626;
+				margin-bottom: 12rpx;
+				transition: all 0.3s ease;
+				line-height: 1.4;
+	
+				&.completed-text {
+					text-decoration: line-through;
+					color: #8c8c8c;
+				}
+			}
+	
+			.meta {
+				display: flex;
+				align-items: center;
+				font-size: 24rpx;
+	
+				.due-date {
+					color: #8c8c8c;
+					margin-right: 16rpx;
+				}
+	
+				.priority {
+					padding: 4rpx 16rpx;
+					border-radius: 4rpx;
+	
+					&.p1 {
+						color: #34C759;
+						background-color: rgba(52, 199, 89, 0.1);
+					}
+	
+					&.p2 {
+						color: #FF9500;
+						background-color: rgba(255, 149, 0, 0.1);
+					}
+	
+					&.p3 {
+						color: #FF3B30;
+						background-color: rgba(255, 59, 48, 0.1);
+					}
+				}
+			}
+		}
+	
+		// 优先级边框颜色
+		&.p1 {
+			border-left-color: #34C759; // 低优先级
+		}
+	
+		&.p2 {
+			border-left-color: #FF9500; // 中优先级
+		}
+	
+		&.p3 {
+			border-left-color: #FF3B30; // 高优先级
+		}
+	}
+  
+  	.loading,
+  	.empty {
+  		padding: 40rpx;
+  		text-align: center;
+  		color: #8c8c8c;
+  		font-size: 28rpx;
+  	}
   }
   
   .task-group {
     margin-bottom: 30rpx;
     background: #fff;
     border-radius: 12rpx;
-    box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.05);
+    box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.08);
     
     &.completed {
       opacity: 0.8;
@@ -207,7 +274,7 @@ onActivated(() => {
       
       .title {
         font-size: 28rpx;
-        font-weight: 500;
+        font-weight: 600;
         color: #333;
       }
       
@@ -215,119 +282,18 @@ onActivated(() => {
         margin-left: 12rpx;
         font-size: 24rpx;
         color: #999;
+        background: #f5f5f5;
+        padding: 2rpx 12rpx;
+        border-radius: 20rpx;
       }
     }
   }
   
-  .task-item {
-    display: flex;
-    align-items: center;
-    padding: 24rpx 20rpx;
-    border-bottom: 1rpx solid #f5f5f5;
-    
-    &:last-child {
-      border-bottom: none;
-    }
-    
-    &.is-important {
-      background: rgba(255, 82, 82, 0.05);
-    }
-    
-    .task-checkbox {
-      margin-right: 16rpx;
-      
-      .checkbox {
-        display: block;
-        width: 36rpx;
-        height: 36rpx;
-        border: 2rpx solid #ddd;
-        border-radius: 50%;
-        
-        &.checked {
-          background: #4CAF50;
-          border-color: #4CAF50;
-          position: relative;
-          
-          &::after {
-            content: '';
-            position: absolute;
-            left: 12rpx;
-            top: 6rpx;
-            width: 8rpx;
-            height: 16rpx;
-            border: solid white;
-            border-width: 0 2rpx 2rpx 0;
-            transform: rotate(45deg);
-          }
-        }
-      }
-    }
-    
-    .task-content {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      
-      .task-main {
-        flex: 1;
-      }
-      
-      .task-title {
-        font-size: 28rpx;
-        color: #333;
-        margin-bottom: 8rpx;
-      }
-      
-      .task-meta {
-        display: flex;
-        align-items: center;
-        font-size: 24rpx;
-        color: #999;
-        
-        .due-time {
-          margin-right: 16rpx;
-        }
-        
-        .category {
-          background: #f5f5f5;
-          padding: 4rpx 12rpx;
-          border-radius: 20rpx;
-        }
-      }
-      
-      .priority-tag {
-        font-size: 22rpx;
-        padding: 4rpx 12rpx;
-        border-radius: 4rpx;
-        
-        &.p2 {
-          background: #FFF3E0;
-          color: #FF9800;
-        }
-        
-        &.p3 {
-          background: #FFEBEE;
-          color: #F44336;
-        }
-      }
-      
-      .complete-time {
-        font-size: 24rpx;
-        color: #999;
-      }
-    }
-  }
+
   
   .empty-state {
     padding: 60rpx 0;
     text-align: center;
-    
-    image {
-      width: 240rpx;
-      height: 240rpx;
-      margin-bottom: 20rpx;
-    }
     
     .empty-text {
       font-size: 28rpx;
@@ -344,10 +310,10 @@ onActivated(() => {
   .add-btn {
     position: fixed;
     right: 40rpx;
-    bottom: calc(140rpx + env(safe-area-inset-bottom));
+    bottom: 140rpx;
     width: 96rpx;
     height: 96rpx;
-    background-color: #262626;
+    background-color: #007AFF;
     border-radius: 50%;
     display: flex;
     align-items: center;

@@ -310,7 +310,12 @@ const filteredTasks = computed(() => {
   .add-btn {
     position: fixed;
     right: 40rpx;
-    bottom: 140rpx;
+	/* #ifdef H5 */
+	bottom: 140rpx;
+	/* #endif */
+	/* #ifdef MP */
+	bottom: 140rpx;
+	/* #endif */
     width: 96rpx;
     height: 96rpx;
     background-color: #007AFF;

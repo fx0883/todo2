@@ -380,7 +380,7 @@
 			position: fixed;
 			right: 40rpx;
 			/* #ifdef H5 */
-			bottom: 40rpx;
+			bottom: 140rpx;
 			/* #endif */
 			/* #ifdef MP */
 			bottom: 140rpx;

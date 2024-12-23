@@ -124,11 +124,20 @@ export const useTaskStore = defineStore('task', () => {
   const updateTask = async (taskId, taskData) => {
     loading.value = true
     try {
+		
+	  
       // 先获取任务详情确保存在
       const task = rawTasks.value.find(t => t.id === taskId)
+	  
+
+	  
       if (!task) {
+		  task = calendarTasks.value.findIndex(t => t.id === taskId)
         // 如果本地没有找到,尝试从服务器获取
-        await fetchTasks()
+		if (!task){
+			await fetchTasks()
+		}
+    
       }
       
       const response = await taskApi.updateTask(taskId, taskData)
@@ -141,6 +150,12 @@ export const useTaskStore = defineStore('task', () => {
         // 如果任务不在列表中,添加到列表
         rawTasks.value.push(response)
       }
+	  
+	  // 同时更新 calendarTasks
+	  const calendarIndex = calendarTasks.value.findIndex(t => t.id === taskId)
+	  if (calendarIndex !== -1) {
+	    calendarTasks.value[calendarIndex] = { ...calendarTasks.value[calendarIndex], ...response }
+	  }
       
       // 清除缓存
       cache.remove('tasks:{}')

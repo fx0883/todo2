@@ -37,9 +37,8 @@ RUN pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/ \
 # 复制项目文件到容器中
 COPY . /app/
 
-# 升级 pip 并安装 gunicorn
-RUN pip install --no-cache-dir --upgrade pip \
-    && pip install --no-cache-dir gunicorn
+# 升级 pip
+RUN pip install --upgrade pip
 
 # 安装项目依赖
 RUN pip install --no-cache-dir -r requirements.txt
@@ -47,5 +46,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 # 暴露端口
 EXPOSE 8000
 
-# 启动 gunicorn 服务器（生产环境推荐）
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "todoServer.wsgi:application", "--workers", "4", "--timeout", "120"]
+# 启动 Django 服务器
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]

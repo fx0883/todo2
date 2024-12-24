@@ -87,10 +87,10 @@ ASGI_APPLICATION = 'todoServer.asgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'todo_db',
-        'USER': 'root',
-        'PASSWORD': '123456',
-        'HOST': 'localhost',
+        'NAME': os.getenv('MYSQL_DATABASE', 'todo_db'),
+        'USER': os.getenv('MYSQL_USER', 'root'),
+        'PASSWORD': os.getenv('MYSQL_PASSWORD', '123456'),
+        'HOST': os.getenv('MYSQL_HOST', 'db'),
         'PORT': '3306',
         'OPTIONS': {
             'charset': 'utf8mb4',

@@ -1,56 +1,54 @@
+version: '3.8'
+
 services:
   web:
     build: .
-    restart: always
+    container_name: todo_web
+    command: >
+      bash -c "while ! nc -z db 3306; do
+        echo 'Waiting for database to be ready...'
+        sleep 2
+      done &&
+      python manage.py migrate &&
+      python manage.py runserver 0.0.0.0:8000"
     volumes:
-      - static_volume:/root/todoServer/static
-      - media_volume:/root/todoServer/media
-    environment:
-      - DJANGO_SETTINGS_MODULE=todoServer.settings
-      - MYSQL_DATABASE=todo_db
-      - MYSQL_USER=root
-      - MYSQL_PASSWORD=123456
-      - MYSQL_HOST=db
-      - SECRET_KEY=your_secret_key_here
-      - DEBUG=False
-    depends_on:
-      - db
-    networks:
-      - app_network
+      - .:/app
+      - static_volume:/app/static
+      - media_volume:/app/media
     ports:
       - "8000:8000"
+    environment:
+      - DEBUG=True
+      - SECRET_KEY=django-insecure-your-secret-key-here
+      - MYSQL_DATABASE=todo_db
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=root_password
+      - MYSQL_HOST=db
+    depends_on:
+      db:
+        condition: service_healthy
+
   db:
     image: mysql:8.0
-    restart: always
+    container_name: todo_db
     volumes:
       - mysql_data:/var/lib/mysql
+      - ./sql:/docker-entrypoint-initdb.d
     environment:
       - MYSQL_DATABASE=todo_db
-      - MYSQL_ROOT_PASSWORD=123456
+      - MYSQL_ROOT_PASSWORD=root_password
     ports:
       - "3306:3306"
-    networks:
-      - app_network
-
-  nginx:
-    image: nginx:1.21
+    command: >
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
     restart: always
-    volumes:
-      - ./nginx/conf.d:/root/todoServer/nginx/conf.d
-      - ./nginx/ssl:/root/todoServer/nginx/ssl
-      - static_volume:/root/todoServer/static
-      - media_volume:/root/todoServer/media
-    ports:
-      - "80:80"
-      - "443:443"
-    depends_on:
-      - web
-    networks:
-      - app_network
-
-networks:
-  app_network:
-    driver: bridge
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   mysql_data:

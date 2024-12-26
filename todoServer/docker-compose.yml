@@ -50,6 +50,22 @@ services:
       timeout: 5s
       retries: 5
 
+  nginx:
+    image: nginx:alpine
+    container_name: todo_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/playstudy.asia_nginx:/etc/nginx/ssl
+      - ./media/website/index:/usr/share/nginx/html
+      - static_volume:/app/static
+      - media_volume:/app/media
+    depends_on:
+      - web
+    restart: always
+
 volumes:
   mysql_data:
   static_volume:

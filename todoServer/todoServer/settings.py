@@ -332,3 +332,21 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # 确保上传目录存在
 AVATAR_UPLOAD_PATH = 'images/avatar'
+
+# CSRF 设置
+CSRF_TRUSTED_ORIGINS = ['https://playstudy.asia', 'https://www.playstudy.asia']
+
+# 静态文件设置
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
+# 媒体文件设置
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# CORS 设置
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = [
+    'https://playstudy.asia',
+    'https://www.playstudy.asia',
+]

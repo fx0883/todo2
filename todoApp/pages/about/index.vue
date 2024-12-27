@@ -3,7 +3,7 @@
     <view class="app-info">
       <image class="app-logo" src="/static/logo.png" mode="aspectFit" />
       <text class="app-name">Todo App</text>
-      <text class="app-version">Version 1.0.0</text>
+      <text class="app-version"></text>
     </view>
     
     <view class="info-section">
@@ -27,7 +27,7 @@
       <view class="section-title">联系我们</view>
       <view class="section-content">
         如果您有任何问题或建议，欢迎通过以下方式联系我们：
-        <view class="contact-item">邮箱：support@todoapp.com</view>
+        <view class="contact-item">邮箱：fx0883@qq.com</view>
       </view>
     </view>
   </view>

@@ -236,8 +236,29 @@ const handleLogout = async () => {
   }
 }
 
+// 检查登录状态
+const checkAuth = () => {
+  console.log('Profile Auth Check:', {
+    isAuthenticated: userStore.isAuthenticated,
+    token: uni.getStorageSync('accessToken')
+  })
+
+  if (!uni.getStorageSync('accessToken')) {
+    uni.navigateTo({
+      url: '/pages/login/index'
+    })
+    return false
+  }
+  return true
+}
+
 // 页面显示时刷新数据
 onShow(async () => {
+  // 首先检查登录状态
+  if (!checkAuth()) {
+    return
+  }
+  // 如果已登录，继续获取统计数据
   await fetchStats()
   console.log(stats)
 })

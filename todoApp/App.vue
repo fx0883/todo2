@@ -64,11 +64,15 @@ uni.redirectTo = function(options) {
 
 // 自定义函数，检查页面是否需要登录
 function checkIfRequiresAuth(url) {
-  const userStore = useUserStore()
-  // 如果用户已登录，允许访问任何页面
-  if (userStore.isAuthenticated) {
+  // const userStore = useUserStore()
+  // // 如果用户已登录，允许访问任何页面
+  // if (userStore.isAuthenticated) {
+  //   return false
+  // }
+  if (!!uni.getStorageSync('accessToken')) {
     return false
   }
+  
   // 确保首页不需要检查登录状态
   if (url === '/pages/index/index') {
     return false

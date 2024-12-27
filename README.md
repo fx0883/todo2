@@ -10,17 +10,12 @@ A modern, full-stack todo application built with Vue.js 3 and Django REST Framew
 
 ## 📱 Screenshots
 
-### Task Management Interface
-![Task Management](doc/images/1.jpg)
-
-### Task Details View
-![Task Details](doc/images/2.jpg)
-
-### Task Statistics
-![Statistics](doc/images/3.jpg)
-
-### User Profile
-![User Profile](doc/images/4.jpg)
+<div style="display: flex; justify-content: space-between;">
+    <img src="doc/images/1.jpg" width="200" alt="Task Management" />
+    <img src="doc/images/2.jpg" width="200" alt="Task Details" />
+    <img src="doc/images/3.jpg" width="200" alt="Statistics" />
+    <img src="doc/images/4.jpg" width="200" alt="User Profile" />
+</div>
 
 ## 🏗️ Architecture
 
@@ -154,17 +149,12 @@ This project is licensed under the MIT License.
 
 ## 📱 应用截图
 
-### 任务管理界面
-![任务管理](doc/images/1.jpg)
-
-### 任务详情视图
-![任务详情](doc/images/2.jpg)
-
-### 任务统计
-![统计信息](doc/images/3.jpg)
-
-### 用户档案
-![用户档案](doc/images/4.jpg)
+<div style="display: flex; justify-content: space-between;">
+    <img src="doc/images/1.jpg" width="200" alt="任务管理" />
+    <img src="doc/images/2.jpg" width="200" alt="任务详情" />
+    <img src="doc/images/3.jpg" width="200" alt="统计信息" />
+    <img src="doc/images/4.jpg" width="200" alt="用户档案" />
+</div>
 
 ## 🏗️ 架构
 

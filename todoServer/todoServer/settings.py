@@ -16,8 +16,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
-ALLOWED_HOSTS = ['*']
-
+ALLOWED_HOSTS = ["*"]
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -87,10 +86,10 @@ ASGI_APPLICATION = 'todoServer.asgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'todo_db',
-        'USER': 'root',
-        'PASSWORD': '123456',
-        'HOST': 'localhost',
+        'NAME': os.getenv('MYSQL_DATABASE', 'todo_db'),
+        'USER': os.getenv('MYSQL_USER', 'root'),
+        'PASSWORD': os.getenv('MYSQL_PASSWORD', '123456'),
+        'HOST': os.getenv('MYSQL_HOST', 'db'),
         'PORT': '3306',
         'OPTIONS': {
             'charset': 'utf8mb4',
@@ -333,3 +332,21 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # 确保上传目录存在
 AVATAR_UPLOAD_PATH = 'images/avatar'
+
+# CSRF 设置
+CSRF_TRUSTED_ORIGINS = ['https://playstudy.asia', 'https://www.playstudy.asia']
+
+# 静态文件设置
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
+# 媒体文件设置
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# CORS 设置
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = [
+    'https://playstudy.asia',
+    'https://www.playstudy.asia',
+]

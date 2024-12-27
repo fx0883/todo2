@@ -40,7 +40,7 @@
         :loading="loading"
         @click="handleLogin"
       >
-        登录
+        {{ loading ? '登录中...' : '登录' }}
       </button>
       <view class="actions" v-if="!isWeixinClient">
         <text @click="navigateToRegister">注册账号</text>
@@ -143,17 +143,33 @@ const onProtocol = (type) => {
 const handleLogin = async () => {
   if (!isValid.value || loading.value || !state.value.protocol) return
 
+  // 显示加载中
+  uni.showLoading({
+    title: '登录中...',
+    mask: true
+  })
+
   try {
     const loginParam = {
       username: form.value.username.trim(),
       password: form.value.password
     }
+    // 显示加载中
+    uni.showLoading({
+      title: '登录中...',
+      mask: true
+    })
+    
     const success = await login(loginParam)
+    
+    // 隐藏加载中
+    uni.hideLoading()
     
     if (success) {
       uni.showToast({
         title: '登录成功',
-        icon: 'success'
+        icon: 'success',
+        duration: 1500
       })
       
       // 跳转到主页
@@ -164,32 +180,66 @@ const handleLogin = async () => {
       }, 1500)
     } else {
       uni.showToast({
-        title: '登录失败',
-        icon: 'error'
+        title: error.value || '登录失败，请检查用户名和密码',
+        icon: 'error',
+        duration: 2000
       })
     }
   } catch (err) {
     console.error('Login failed:', err)
+    // 隐藏加载中
+    uni.hideLoading()
+    
     uni.showToast({
-      title: '登录失败',
-      icon: 'error'
+      title: err?.data?.error_message || '登录失败，请稍后重试',
+      icon: 'error',
+      duration: 2000
     })
+  } finally {
+    // 无论成功失败都隐藏 loading
+    uni.hideLoading()
   }
 }
 
 // 处理微信登录
 const handleWechatLogin = async () => {
-  const success = await wechatLogin()
-  if (success) {
-    uni.showToast({
-      title: '登录成功',
-      icon: 'success'
-    })
-    setTimeout(() => {
-      uni.switchTab({
-        url: '/pages/index/index'
+  uni.showLoading({
+    title: '登录中...',
+    mask: true
+  })
+
+  try {
+    const success = await wechatLogin()
+    uni.hideLoading()
+
+    if (success) {
+      uni.showToast({
+        title: '登录成功',
+        icon: 'success',
+        duration: 1500
       })
-    }, 1500)
+      setTimeout(() => {
+        uni.switchTab({
+          url: '/pages/index/index'
+        })
+      }, 1500)
+    } else {
+      uni.showToast({
+        title: error.value || '微信登录失败，请重试',
+        icon: 'error',
+        duration: 2000
+      })
+    }
+  } catch (err) {
+    console.error('WeChat login failed:', err)
+    uni.showToast({
+      title: err?.data?.error_message || '微信登录失败，请稍后重试',
+      icon: 'error',
+      duration: 2000
+    })
+  } finally {
+    // 无论成功失败都隐藏 loading
+    uni.hideLoading()
   }
 }
 
@@ -256,6 +306,12 @@ const navigateToForgotPassword = () => {
     &[disabled] {
       background-color: #ccc;
       opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    &.loading {
+      opacity: 0.8;
+      cursor: not-allowed;
     }
   }
   
@@ -343,6 +399,12 @@ const navigateToForgotPassword = () => {
       &[disabled] {
         background-color: #ccc;
         opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      &.loading {
+        opacity: 0.8;
+        cursor: not-allowed;
       }
     }
     

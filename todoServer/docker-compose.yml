@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: todo_web
+    command: >
+      bash -c "while ! nc -z db 3306; do
+        echo 'Waiting for database to be ready...'
+        sleep 2
+      done &&
+      python manage.py migrate &&
+      python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/app
+      - static_volume:/app/static
+      - media_volume:/app/media
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=True
+      - SECRET_KEY=django-insecure-your-secret-key-here
+      - MYSQL_DATABASE=todo_db
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=root_password
+      - MYSQL_HOST=db
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: mysql:8.0
+    container_name: todo_db
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./sql:/docker-entrypoint-initdb.d
+    environment:
+      - MYSQL_DATABASE=todo_db
+      - MYSQL_ROOT_PASSWORD=root_password
+    ports:
+      - "3306:3306"
+    command: >
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+    restart: always
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  nginx:
+    image: nginx:alpine
+    container_name: todo_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/playstudy.asia_nginx:/etc/nginx/ssl
+      - ./media/website/index:/usr/share/nginx/html
+      - static_volume:/app/static
+      - media_volume:/app/media
+    depends_on:
+      - web
+    restart: always
+
+volumes:
+  mysql_data:
+  static_volume:
+  media_volume: 

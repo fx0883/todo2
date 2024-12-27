@@ -63,7 +63,7 @@
           <view class="sub-title">6. 联系方式</view>
           <view class="paragraph">
             如有任何问题，请联系我们：
-            <view class="list-item">邮箱：support@todoapp.com</view>
+            <view class="list-item">邮箱：fx0883@qq.com</view>
           </view>
         </view>
       </view>

@@ -64,7 +64,7 @@
           <view class="sub-title">6. 联系我们</view>
           <view class="paragraph">
             如果您对本隐私政策有任何疑问或建议，请通过以下方式联系我们：
-            <view class="list-item">邮箱：privacy@todoapp.com</view>
+            <view class="list-item">邮箱：fx0883@qq.com</view>
           </view>
         </view>
       </view>

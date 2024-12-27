@@ -86,12 +86,12 @@
 				"navigationBarTitleText": "修改密码"
 			}
 		},
-		{
-			"path": "pages/feedback/index",
-			"style": {
-				"navigationBarTitleText": "意见反馈"
-			}
-		},
+		// {
+		// 	"path": "pages/feedback/index",
+		// 	"style": {
+		// 		"navigationBarTitleText": "意见反馈"
+		// 	}
+		// },
 		{
 			"path": "pages/about/index",
 			"style": {

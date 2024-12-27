@@ -13,7 +13,7 @@
             :style="{ backgroundColor: category.color }"
           />
           <text class="category-name">{{ category.name }}</text>
-          <text class="task-count">({{ category.taskCount || 0 }})</text>
+ <!--         <text class="task-count">({{ category.taskCount || 0 }})</text> -->
         </view>
         
         <view class="category-actions">

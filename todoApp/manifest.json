@@ -55,7 +55,7 @@
             "urlCheck" : false,
             "es6" : false,
             "postcss" : true,
-            "minified" : false
+            "minified" : true
         },
         "usingComponents" : true,
         "lazyCodeLoading" : "requiredComponents"

@@ -51,13 +51,14 @@
 		    <text class="menu-label">修改密码</text>
 		    <text class="arrow">></text>
 		  </view>
-		  <!-- #endif -->
+
 
         <view class="menu-item" @click="handleFeedback">
           <text class="menu-label">意见反馈</text>
           <text class="arrow">></text>
         </view>
-
+		  <!-- #endif -->
+		  
         <view class="menu-item" @click="handlePrivacy">
           <text class="menu-label">隐私政策</text>
           <text class="arrow">></text>
@@ -94,6 +95,13 @@
 
 <script setup>
 import { ref, onMounted, onActivated, computed } from 'vue'
+	import {
+		onLoad,
+		onPageScroll,
+		onPullDownRefresh,
+		onReachBottom,
+		onShow
+	} from '@dcloudio/uni-app';
 import { storeToRefs } from 'pinia'
 import { useUserStore } from '@/store/modules/user'
 import { useProfile } from '@/composables/useProfile'
@@ -229,8 +237,29 @@ const handleLogout = async () => {
   }
 }
 
+// 检查登录状态
+const checkAuth = () => {
+  console.log('Profile Auth Check:', {
+    isAuthenticated: userStore.isAuthenticated,
+    token: uni.getStorageSync('accessToken')
+  })
+
+  if (!uni.getStorageSync('accessToken')) {
+    uni.navigateTo({
+      url: '/pages/login/index'
+    })
+    return false
+  }
+  return true
+}
+
 // 页面显示时刷新数据
-onActivated (async () => {
+onShow(async () => {
+  // 首先检查登录状态
+  if (!checkAuth()) {
+    return
+  }
+  // 如果已登录，继续获取统计数据
   await fetchStats()
   console.log(stats)
 })

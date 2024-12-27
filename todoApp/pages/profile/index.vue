@@ -51,13 +51,14 @@
 		    <text class="menu-label">修改密码</text>
 		    <text class="arrow">></text>
 		  </view>
-		  <!-- #endif -->
+
 
         <view class="menu-item" @click="handleFeedback">
           <text class="menu-label">意见反馈</text>
           <text class="arrow">></text>
         </view>
-
+		  <!-- #endif -->
+		  
         <view class="menu-item" @click="handlePrivacy">
           <text class="menu-label">隐私政策</text>
           <text class="arrow">></text>

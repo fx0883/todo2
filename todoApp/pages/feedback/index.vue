@@ -26,7 +26,7 @@
       />
     </view>
 
-    <view class="form-group">
+<!--    <view class="form-group">
       <text class="label">联系方式（选填）</text>
       <input
         v-model="feedbackForm.contact_info"
@@ -34,7 +34,7 @@
         type="text"
         placeholder="请输入您的联系方式"
       />
-    </view>
+    </view> -->
 
     <button class="submit-btn" @tap="handleSubmit" :disabled="isSubmitting">
       {{ isSubmitting ? '提交中...' : '提交反馈' }}

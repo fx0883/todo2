@@ -60,15 +60,6 @@ class Task(models.Model):
         ('archived', _('已归档')),
     ]
 
-    REPEAT_CHOICES = [
-        ('none', _('不重复')),
-        ('daily', _('每天')),
-        ('weekly', _('每周')),
-        ('monthly', _('每月')),
-        ('yearly', _('每年')),
-        ('custom', _('自定义')),
-    ]
-
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='tasks')
     title = models.CharField(_('标题'), max_length=200)
     description = models.TextField(_('描述'), null=True, blank=True)
@@ -78,11 +69,15 @@ class Task(models.Model):
     status = models.CharField(_('状态'), max_length=20, choices=STATUS_CHOICES, default='pending')
     due_date = models.DateTimeField(_('截止时间'), null=True, blank=True)
     reminder_time = models.DateTimeField(_('提醒时间'), null=True, blank=True)
-    repeat_type = models.CharField(_('重复类型'), max_length=20, choices=REPEAT_CHOICES, default='none')
-    repeat_config = models.JSONField(_('重复配置'), null=True, blank=True)
     completed_at = models.DateTimeField(_('完成时间'), null=True, blank=True)
     is_important = models.BooleanField(_('是否重要'), default=False)
     order = models.IntegerField(_('排序'), default=0)
+    
+    # 新增字段
+    repeat_task = models.ForeignKey('RepeatTask', on_delete=models.SET_NULL, null=True, blank=True, related_name='instances')
+    scheduled_date = models.DateTimeField(_('计划日期'), null=True, blank=True)
+    instance_number = models.IntegerField(_('重复序号'), null=True, blank=True)
+    
     created_at = models.DateTimeField(_('创建时间'), auto_now_add=True)
     updated_at = models.DateTimeField(_('更新时间'), auto_now=True)
     history = HistoricalRecords()
@@ -91,6 +86,10 @@ class Task(models.Model):
         verbose_name = _('任务')
         verbose_name_plural = _('任务')
         ordering = ['-is_important', 'order', '-created_at']
+        indexes = [
+            models.Index(fields=['repeat_task', 'scheduled_date']),
+            models.Index(fields=['user', 'scheduled_date']),
+        ]
 
     def __str__(self):
         return f"{self.user.username}'s task: {self.title}"
@@ -134,3 +133,39 @@ class TaskSync(models.Model):
 
     def __str__(self):
         return f"Sync status for {self.task.title} on {self.device.device_name}"
+
+class RepeatTask(models.Model):
+    """
+    重复任务主表，存储重复任务的基本信息和重复规则
+    """
+    REPEAT_CHOICES = [
+        ('none', _('不重复')),
+        ('daily', _('每天')),
+        ('weekly', _('每周')),
+        ('monthly', _('每月')),
+        ('yearly', _('每年')),
+        ('continuous', _('一直重复')),
+        ('workdays', _('工作日')),
+        ('weekends', _('周末')),
+        ('holidays', _('节假日')),
+        ('custom', _('自定义')),
+    ]
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='repeat_tasks')
+    title = models.CharField(_('标题'), max_length=200)
+    description = models.TextField(_('描述'), null=True, blank=True)
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name='repeat_tasks')
+    repeat_type = models.CharField(_('重复类型'), max_length=20, choices=REPEAT_CHOICES)
+    repeat_config = models.JSONField(_('重复配置'))
+    is_active = models.BooleanField(_('是否激活'), default=True)
+    created_at = models.DateTimeField(_('创建时间'), auto_now_add=True)
+    updated_at = models.DateTimeField(_('更新时间'), auto_now=True)
+    history = HistoricalRecords()
+
+    class Meta:
+        verbose_name = _('重复任务')
+        verbose_name_plural = _('重复任务')
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.username}'s repeat task: {self.title}"

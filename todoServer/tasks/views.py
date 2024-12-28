@@ -1,16 +1,18 @@
 from django.shortcuts import render
 from rest_framework import viewsets, status, filters
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiExample, OpenApiResponse, OpenApiParameter
-from .models import Category, Tag, Task, TaskComment
-from .serializers import CategorySerializer, TagSerializer, TaskSerializer, TaskCommentSerializer
+from .models import Category, Task, TaskComment, RepeatTask
+from .serializers import CategorySerializer, TaskSerializer, TaskCommentSerializer, RepeatTaskSerializer
+from .tasks import create_future_task_instances
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.decorators import action
 from django.utils import timezone
 from datetime import datetime, timedelta
-from django.db.models import Q
+from django.db.models import Q, F
 from rest_framework.views import APIView
 
 # 添加分页器类
@@ -24,7 +26,7 @@ class TaskPagination(PageNumberPagination):
 @extend_schema_view(
     list=extend_schema(
         summary="获取分类列表",
-        tags=['任务分类'],
+        tags=['任务分类', '任务管理'],
         responses={
             200: OpenApiResponse(
                 description="成功获取分类列表",
@@ -51,7 +53,7 @@ class TaskPagination(PageNumberPagination):
     ),
     create=extend_schema(
         summary="创建分类",
-        tags=['任务分类'],
+        tags=['任务分类', '任务管理'],
         request=CategorySerializer,
         examples=[
             OpenApiExample(
@@ -67,19 +69,19 @@ class TaskPagination(PageNumberPagination):
     ),
     retrieve=extend_schema(
         summary="获取分类详情",
-        tags=['任务分类']
+        tags=['任务分类', '任务管理']
     ),
     update=extend_schema(
         summary="更新分类",
-        tags=['任务分类']
+        tags=['任务分类', '任务管理']
     ),
     partial_update=extend_schema(
         summary="部分更新分类",
-        tags=['任务分类']
+        tags=['任务分类', '任务管理']
     ),
     destroy=extend_schema(
         summary="删除分类",
-        tags=['任务分类']
+        tags=['任务分类', '任务管理']
     )
 )
 class CategoryViewSet(viewsets.ModelViewSet):
@@ -105,11 +107,7 @@ class CategoryViewSet(viewsets.ModelViewSet):
         serializer.save(user=request.user)
         
         headers = self.get_success_headers(serializer.data)
-        return Response(
-            serializer.data, 
-            status=status.HTTP_201_CREATED, 
-            headers=headers
-        )
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def destroy(self, request, *args, **kwargs):
         category = self.get_object()
@@ -121,61 +119,6 @@ class CategoryViewSet(viewsets.ModelViewSet):
         category.delete()
         
         return Response(status=status.HTTP_204_NO_CONTENT)
-
-@extend_schema_view(
-    list=extend_schema(
-        summary="获取标签列表",
-        tags=['任务标签']
-    ),
-    create=extend_schema(
-        summary="创建标签",
-        tags=['任务标签']
-    ),
-    retrieve=extend_schema(
-        summary="获取标签详情",
-        tags=['任务标签']
-    ),
-    update=extend_schema(
-        summary="更新标签",
-        tags=['任务标签']
-    ),
-    partial_update=extend_schema(
-        summary="部分更新标签",
-        tags=['任务标签']
-    ),
-    destroy=extend_schema(
-        summary="删除标签",
-        tags=['任务标签']
-    )
-)
-class TagViewSet(viewsets.ModelViewSet):
-    serializer_class = TagSerializer
-    permission_classes = [IsAuthenticated]
-    filter_backends = [filters.SearchFilter]
-    search_fields = ['name']
-
-    def get_queryset(self):
-        return Tag.objects.filter(user=self.request.user)
-
-    def create(self, request, *args, **kwargs):
-        # 检查当前用户是否已有同名标签
-        name = request.data.get('name')
-        if Tag.objects.filter(user=request.user, name=name).exists():
-            return Response(
-                {"error": "标签名称已存在"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-            
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save(user=self.request.user)
-        
-        headers = self.get_success_headers(serializer.data)
-        return Response(
-            serializer.data, 
-            status=status.HTTP_201_CREATED, 
-            headers=headers
-        )
 
 @extend_schema_view(
     list=extend_schema(
@@ -217,7 +160,6 @@ class TagViewSet(viewsets.ModelViewSet):
                                 'priority': 2,
                                 'status': 'pending',
                                 'category': 1,
-                                'tags': [1, 2],
                                 'is_important': True,
                                 'order': 1
                             }]
@@ -230,28 +172,201 @@ class TagViewSet(viewsets.ModelViewSet):
     create=extend_schema(
         summary="创建任务",
         tags=['任务管理'],
-        request=TaskSerializer,
+        description="""
+        创建新任务，支持创建普通任务和重复任务。
+        
+        重复任务类型(repeat_type)：
+        - none: 不重复
+        - daily: 每天
+        - weekly: 每周
+        - monthly: 每月
+        - yearly: 每年
+        - continuous: 一直重复
+        - workdays: 工作日重复
+        - weekends: 周末重复
+        - holidays: 节假日重复
+        - custom: 自定义重复
+        
+        重复配置(repeat_config)示例：
+        ```json
+        {
+            "start_date": "2024-01-01",     # 开始日期（必填）
+            "end_date": "2024-12-31",       # 结束日期（可选）
+            "interval": 1,                   # 重复间隔（可选，默认1）
+            "custom_days": [0,2,4]          # 自定义重复时必填，0-6表示周一到周日
+        }
+        ```
+        """,
+        request=OpenApiExample(
+            'Task Create Example',
+            value={
+                # 普通任务示例
+                "title": "项目会议",
+                "description": "讨论第四季度项目计划",
+                "due_date": "2024-01-01T10:00:00Z",
+                "priority": 2,
+                "category": 1,
+                "reminder_time": "2024-01-01T09:30:00Z",
+                "is_important": True
+            },
+            summary="创建普通任务"
+        ),
         examples=[
             OpenApiExample(
-                'Create Task Example',
+                'Regular Task Example',
                 value={
-                    'title': '准备会议材料',
-                    'description': '准备下周一的项目进度会议材料',
-                    'due_date': '2024-12-15T14:00:00Z',
-                    'priority': 1,
-                    'category': 1,
-                    'tag_ids': [1],
-                    'is_important': True
-                }
+                    "title": "项目会议",
+                    "description": "讨论第四季度项目计划",
+                    "due_date": "2024-01-01T10:00:00Z",
+                    "priority": 2,
+                    "category": 1,
+                    "reminder_time": "2024-01-01T09:30:00Z",
+                    "is_important": True
+                },
+                summary="创建普通任务示例"
+            ),
+            OpenApiExample(
+                'Repeat Task Example',
+                value={
+                    "title": "每周例会",
+                    "description": "团队周会",
+                    "repeat_type": "weekly",
+                    "repeat_config": {
+                        "start_date": "2024-01-01",
+                        "custom_days": [0],  # 每周一
+                        "interval": 1
+                    },
+                    "priority": 2,
+                    "category": 1,
+                    "reminder_time": "2024-01-01T09:30:00Z",
+                    "is_important": True
+                },
+                summary="创建重复任务示例"
+            ),
+            OpenApiExample(
+                'Custom Repeat Task Example',
+                value={
+                    "title": "健身计划",
+                    "description": "每周三次健身",
+                    "repeat_type": "custom",
+                    "repeat_config": {
+                        "start_date": "2024-01-01",
+                        "custom_days": [0, 2, 4],  # 周一、三、五
+                        "interval": 1
+                    },
+                    "priority": 2,
+                    "category": 1
+                },
+                summary="创建自定义重复任务示例"
             )
-        ]
-    ),
-    retrieve=extend_schema(
-        summary="获取任务详情",
-        tags=['任务管理']
+        ],
+        responses={
+            201: OpenApiResponse(
+                response=TaskSerializer,
+                description="任务创建成功"
+            ),
+            400: OpenApiResponse(
+                description="请求数据验证失败",
+                examples=[
+                    OpenApiExample(
+                        'Validation Error',
+                        value={
+                            "repeat_config": ["自定义重复必须指定重复日期"],
+                            "title": ["这个字段是必需的。"]
+                        }
+                    )
+                ]
+            )
+        }
     ),
     update=extend_schema(
         summary="更新任务",
+        tags=['任务管理'],
+        description="""
+        更新任务信息，支持更新普通任务和重复任务。
+        
+        更新模式(update_mode)：
+        - single: 只更新当前任务实例（默认）
+        - future: 更新当前和未来的任务实例
+        - all: 更新所有任务实例（包括历史记录）
+        
+        可更新字段：
+        - 对于单个实例：所有字段都可以更新
+        - 对于批量更新：只能更新以下字段
+          * title: 标题
+          * description: 描述
+          * category: 分类
+          * priority: 优先级
+          * reminder_time: 提醒时间
+          * is_important: 是否重要
+        
+        重复任务更新示例：
+        ```json
+        {
+            "title": "更新的标题",
+            "update_mode": "future",
+            "repeat_config": {
+                "custom_days": [1, 3, 5]
+            }
+        }
+        ```
+        """,
+        request=OpenApiExample(
+            'Task Update Example',
+            value={
+                "title": "更新的标题",
+                "description": "更新的描述",
+                "update_mode": "future",
+                "priority": 3,
+                "is_important": True
+            }
+        ),
+        examples=[
+            OpenApiExample(
+                'Single Update Example',
+                value={
+                    "title": "更新的标题",
+                    "description": "更新的描述",
+                    "update_mode": "single"
+                },
+                summary="更新单个任务实例"
+            ),
+            OpenApiExample(
+                'Future Update Example',
+                value={
+                    "title": "更新的标题",
+                    "update_mode": "future",
+                    "repeat_config": {
+                        "custom_days": [1, 3, 5]
+                    }
+                },
+                summary="更新未来任务实例"
+            )
+        ],
+        responses={
+            200: OpenApiResponse(
+                description="任务更新成功",
+                examples=[
+                    OpenApiExample(
+                        'Update Response',
+                        value={
+                            "current_task": {
+                                "id": 1,
+                                "title": "更新的标题",
+                                "description": "更新的描述",
+                                "priority": 3,
+                                "is_important": True
+                            },
+                            "update_mode": "future",
+                            "updated_count": 5
+                        }
+                    )
+                ]
+            )
+        }
+    ),
+    retrieve=extend_schema(
+        summary="获取任务详情",
         tags=['任务管理']
     ),
     partial_update=extend_schema(
@@ -276,6 +391,95 @@ class TaskViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         return Task.objects.filter(user=self.request.user)
     
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    def create(self, request, *args, **kwargs):
+        data = request.data
+        repeat_type = data.get('repeat_type', 'none')
+        
+        if repeat_type == 'none':
+            # 创建普通任务
+            serializer = self.get_serializer(data=data)
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            headers = self.get_success_headers(serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        
+        # 创建重复任务
+        repeat_data = {
+            'title': data.get('title'),
+            'description': data.get('description'),
+            'category': data.get('category'),
+            'repeat_type': repeat_type,
+            'repeat_config': data.get('repeat_config', {}),
+            'is_active': True
+        }
+        
+        print(f"Creating repeat task with data: {repeat_data}")  # Debug log
+        
+        # 创建重复任务主记录
+        repeat_serializer = RepeatTaskSerializer(
+            data=repeat_data,
+            context={'request': request}
+        )
+        repeat_serializer.is_valid(raise_exception=True)
+        repeat_task = repeat_serializer.save()  # user会在serializer的create方法中设置
+        
+        print(f"Created repeat task: {repeat_task.id}")  # Debug log
+        
+        # 只在当天调用时创建子任务
+        today = timezone.now().date()
+        scheduled_dates = []
+        
+        if today.weekday() in data['repeat_config']['custom_days']:
+            task_data = {
+                'title': data.get('title'),
+                'description': data.get('description'),
+                'category': data.get('category'),
+                'priority': data.get('priority'),
+                'reminder_time': data.get('reminder_time'),
+                'is_important': data.get('is_important', False),
+                'repeat_task': repeat_task.id,
+                'scheduled_date': today,
+                'instance_number': 1,
+                'status': 'pending'
+            }
+            
+            print(f"Creating task instance for today with data: {task_data}")  # Debug log
+            task_serializer = self.get_serializer(data=task_data)
+            task_serializer.is_valid(raise_exception=True)
+            task_serializer.save()  # user会在perform_create中设置
+            
+            print(f"Created task instance for today")  # Debug log
+        
+        headers = self.get_success_headers(repeat_serializer.data)
+        response_data = {
+            'repeat_task': repeat_serializer.data,
+            'message': '任务创建成功，子任务将在有效日期创建'
+        }
+        return Response(response_data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def update(self, request, *args, **kwargs):
+        # 获取要更新的重复任务
+        instance = self.get_object()
+        print(f"Updating repeat task: {instance.id}, current data: {instance}")  # Debug log
+        data = request.data
+        print(f"Request data: {data}")  # Debug log
+
+        # 更新重复任务的属性
+        instance.title = data.get('title', instance.title)
+        instance.description = data.get('description', instance.description)
+        repeat_config = data.get('repeat_config', instance.repeat_config)
+        if 'custom_days' in repeat_config:
+            instance.repeat_config['custom_days'] = repeat_config['custom_days']
+        if 'start_date' in repeat_config:
+            instance.repeat_config['start_date'] = repeat_config['start_date']
+        instance.save()
+        print(f"Updated repeat task: {instance}")  # Debug log
+
+        return Response({'message': '重复任务更新成功'}, status=status.HTTP_200_OK)
+
     @extend_schema(
         summary="获取日历视图任务",
         parameters=[
@@ -380,6 +584,22 @@ class TaskViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+    def get_object(self):
+        print(f"kwargs: {self.kwargs}")  # Debug log
+        task_id = self.kwargs['pk']
+
+        # 这里可以根据请求数据判断是查找重复任务还是子任务
+        if 'repeat_task' in self.request.data and self.request.data['repeat_task'] is not None:
+            # 查找重复任务
+            queryset = RepeatTask.objects.all()
+        else:
+            # 查找子任务
+            queryset = Task.objects.all()
+
+        obj = get_object_or_404(queryset, id=task_id)
+        print(f"Retrieved object: {obj}")  # Debug log
+        return obj
+    
     @extend_schema(
         summary="快速创建任务",
         tags=['任务管理'],
@@ -410,33 +630,60 @@ class TaskViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+    def update(self, request, *args, **kwargs):
+        # 获取要更新的任务
+        instance = self.get_object()
+        print(f"Updating task: {instance.id}, current data: {instance}")  # Debug log
+        data = request.data
+        print(f"Request data: {data}")  # Debug log
+
+        if isinstance(instance, RepeatTask):
+            # 更新重复任务的属性
+            instance.title = data.get('title', instance.title)
+            instance.description = data.get('description', instance.description)
+            repeat_config = data.get('repeat_config', instance.repeat_config)
+            if 'custom_days' in repeat_config:
+                instance.repeat_config['custom_days'] = repeat_config['custom_days']
+            if 'start_date' in repeat_config:
+                instance.repeat_config['start_date'] = repeat_config['start_date']
+            instance.save()
+            print(f"Updated repeat task: {instance}")  # Debug log
+            return Response({'message': '重复任务更新成功'}, status=status.HTTP_200_OK)
+
+        elif isinstance(instance, Task):
+            # 更新子任务的属性
+            instance.title = data.get('title', instance.title)
+            instance.description = data.get('description', instance.description)
+            instance.save()
+            print(f"Updated task: {instance}")  # Debug log
+            return Response({'message': '任务更新成功'}, status=status.HTTP_200_OK)
+
+        return Response({'error': '无效的任务类型'}, status=status.HTTP_400_BAD_REQUEST)
 
 @extend_schema_view(
     list=extend_schema(
         summary="获取任务评论列表",
-        tags=['任务评论']
+        tags=['任务评论', '任务管理']
     ),
     create=extend_schema(
         summary="创建任务评论",
-        tags=['任务评论']
+        tags=['任务评论', '任务管理']
     ),
     retrieve=extend_schema(
         summary="获取任务评论详情",
-        tags=['任务评论']
+        tags=['任务评论', '任务管理']
     ),
     update=extend_schema(
         summary="更新任务评论",
-        tags=['任务评论']
+        tags=['任务评论', '任务管理']
     ),
     partial_update=extend_schema(
         summary="部分更新任务评论",
-        tags=['任务评论']
+        tags=['任务评论', '任务管理']
     ),
     destroy=extend_schema(
         summary="删除任务评论",
-        tags=['任务评论']
+        tags=['任务评论', '任务管理']
     )
 )
 class TaskCommentViewSet(viewsets.ModelViewSet):

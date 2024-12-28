@@ -5,7 +5,6 @@ from . import views
 
 router = DefaultRouter()
 router.register('categories', views.CategoryViewSet, basename='category')
-router.register('tags', views.TagViewSet, basename='tag')
 router.register('tasks', views.TaskViewSet, basename='task')
 
 # Nested router for task comments

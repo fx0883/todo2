@@ -25,25 +25,6 @@ class Category(models.Model):
     def __str__(self):
         return f"{self.user.username}'s category: {self.name}"
 
-class Tag(models.Model):
-    """
-    任务标签
-    """
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='tags')
-    name = models.CharField(_('标签名称'), max_length=50)
-    color = models.CharField(_('颜色'), max_length=7, default='#000000')
-    created_at = models.DateTimeField(_('创建时间'), auto_now_add=True)
-    updated_at = models.DateTimeField(_('更新时间'), auto_now=True)
-    history = HistoricalRecords()
-
-    class Meta:
-        verbose_name = _('标签')
-        verbose_name_plural = _('标签')
-        unique_together = ['user', 'name']
-
-    def __str__(self):
-        return f"{self.user.username}'s tag: {self.name}"
-
 class Task(models.Model):
     """
     任务
@@ -64,16 +45,16 @@ class Task(models.Model):
     title = models.CharField(_('标题'), max_length=200)
     description = models.TextField(_('描述'), null=True, blank=True)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name='tasks')
-    tags = models.ManyToManyField(Tag, blank=True, related_name='tasks')
     priority = models.IntegerField(_('优先级'), choices=PRIORITY_CHOICES, default=2)
     status = models.CharField(_('状态'), max_length=20, choices=STATUS_CHOICES, default='pending')
+    start_time = models.DateTimeField(_('开始时间'), null=True, blank=True)
     due_date = models.DateTimeField(_('截止时间'), null=True, blank=True)
     reminder_time = models.DateTimeField(_('提醒时间'), null=True, blank=True)
     completed_at = models.DateTimeField(_('完成时间'), null=True, blank=True)
     is_important = models.BooleanField(_('是否重要'), default=False)
     order = models.IntegerField(_('排序'), default=0)
     
-    # 新增字段
+    # 重复任务相关字段
     repeat_task = models.ForeignKey('RepeatTask', on_delete=models.SET_NULL, null=True, blank=True, related_name='instances')
     scheduled_date = models.DateTimeField(_('计划日期'), null=True, blank=True)
     instance_number = models.IntegerField(_('重复序号'), null=True, blank=True)

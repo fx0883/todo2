@@ -238,7 +238,7 @@ REST_FRAMEWORK = {
 # JWT Settings
 from datetime import timedelta
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # 访问令牌有效期1小时
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=360),  # 访问令牌有效期1小时
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),     # 刷新令牌有效期7天
     'ROTATE_REFRESH_TOKENS': True,                   # 刷新令牌时自动更新
     'BLACKLIST_AFTER_ROTATION': True,               # 刷新后将旧令牌加入黑名单
@@ -322,11 +322,23 @@ EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER  # 使用与授权用户相同的邮箱地址
 
 # Celery Settings
-CELERY_BROKER_URL = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
-CELERY_RESULT_BACKEND = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
+
+# 如果 Redis 不可用，使用内存作为 broker
+try:
+    import redis
+    redis_client = redis.Redis(host='localhost', port=6379, db=0)
+    redis_client.ping()
+    CELERY_BROKER_URL = 'redis://localhost:6379/0'
+except (redis.ConnectionError, ImportError):
+    CELERY_BROKER_URL = 'memory:///'
+    CELERY_TASK_ALWAYS_EAGER = True  # 在内存模式下同步执行任务
+
+CELERY_RESULT_BACKEND = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
 CELERY_TIMEZONE = TIME_ZONE
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

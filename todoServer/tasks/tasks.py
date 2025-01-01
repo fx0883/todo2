@@ -4,14 +4,13 @@ from datetime import datetime, timedelta
 from .models import RepeatTask, Task
 from .utils import generate_repeat_dates, should_create_task_instance
 
-@shared_task
-def create_future_task_instances(repeat_task_id: int, days_ahead: int = 30):
+def create_task_instances(repeat_task_id: int, days_ahead: int = 365):
     """
-    为重复任务创建未来的任务实例
+    为重复任务创建未来的任务实例（同步版本）
     
     Args:
         repeat_task_id: 重复任务ID
-        days_ahead: 提前创建多少天的任务实例
+        days_ahead: 提前创建多少天的任务实例，默认一年
     """
     try:
         repeat_task = RepeatTask.objects.get(id=repeat_task_id)
@@ -28,8 +27,11 @@ def create_future_task_instances(repeat_task_id: int, days_ahead: int = 30):
         if last_instance and last_instance.scheduled_date > start_date:
             start_date = last_instance.scheduled_date + timedelta(days=1)
         
-        # 生成日期列表
-        end_date = start_date + timedelta(days=days_ahead)
+        # 生成日期列表，最多一年
+        end_date = min(
+            start_date + timedelta(days=days_ahead),
+            start_date + timedelta(days=365)  # 最多一年
+        )
         dates = generate_repeat_dates(
             repeat_type=repeat_task.repeat_type,
             repeat_config=repeat_task.repeat_config,
@@ -48,6 +50,10 @@ def create_future_task_instances(repeat_task_id: int, days_ahead: int = 30):
         new_instances = []
         for i, date in enumerate(dates, start=1):
             if should_create_task_instance(date):
+                # 设置开始时间为当天9点
+                start_time = date.replace(hour=9, minute=0, second=0)
+                # 设置截止时间为当天结束
+                due_date = date.replace(hour=23, minute=59, second=59)
                 new_instances.append(Task(
                     user=repeat_task.user,
                     title=repeat_task.title,
@@ -55,6 +61,8 @@ def create_future_task_instances(repeat_task_id: int, days_ahead: int = 30):
                     category=repeat_task.category,
                     repeat_task=repeat_task,
                     scheduled_date=date,
+                    start_time=start_time,  # 添加开始时间
+                    due_date=due_date,
                     instance_number=last_number + i
                 ))
         
@@ -66,9 +74,20 @@ def create_future_task_instances(repeat_task_id: int, days_ahead: int = 30):
     except RepeatTask.DoesNotExist:
         return None
     except Exception as e:
-        # 记录错误日志
         print(f"Error creating task instances for repeat task {repeat_task_id}: {str(e)}")
         return None
+
+@shared_task
+def create_future_task_instances(repeat_task_id: int, days_ahead: int = 365):
+    """
+    为重复任务创建未来的任务实例（异步版本）
+    如果 Celery 不可用，会回退到同步版本
+    """
+    try:
+        return create_task_instances(repeat_task_id, days_ahead)
+    except Exception as e:
+        print(f"Async task creation failed, falling back to sync: {str(e)}")
+        return create_task_instances(repeat_task_id, days_ahead)
 
 @shared_task
 def cleanup_old_task_instances():

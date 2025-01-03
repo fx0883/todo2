@@ -2,6 +2,7 @@ from rest_framework import serializers
 from drf_spectacular.utils import extend_schema_serializer, OpenApiExample
 from .models import Category, Task, TaskComment, TaskSync, RepeatTask
 from datetime import datetime
+from django.utils import timezone
 
 @extend_schema_serializer(
     examples=[
@@ -150,16 +151,32 @@ class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = (
-            'id', 'user', 'title', 'description', 'due_date', 'priority', 'status',
-            'category', 'reminder_time', 'completed_at', 'is_important', 'order',
-            'created_at', 'updated_at', 'comments', 'repeat_task',
-            'repeat_task_detail', 'scheduled_date', 'instance_number'
+            'id', 'user', 'title', 'description', 'category', 'priority',
+            'status', 'start_time', 'due_date', 'reminder_time', 'completed_at',
+            'is_important', 'order', 'repeat_task', 'scheduled_date',
+            'instance_number', 'created_at', 'updated_at', 'comments',
+            'repeat_task_detail'
         )
-        read_only_fields = ('id', 'user', 'created_at', 'updated_at',
-                         'repeat_task_detail', 'instance_number')
-    
+        read_only_fields = ('id', 'user', 'created_at', 'updated_at', 'completed_at')
+
     def validate(self, data):
         """验证任务数据"""
+        # 如果没有开始时间，使用当前时间
+        if 'start_time' not in data:
+            data['start_time'] = timezone.now()
+
+        # 必须有结束时间
+        if 'due_date' not in data:
+            raise serializers.ValidationError({
+                'due_date': ['任务必须设置结束时间。']
+            })
+
+        # 验证结束时间必须大于开始时间
+        if data['due_date'] <= data['start_time']:
+            raise serializers.ValidationError({
+                'due_date': ['结束时间必须大于开始时间。']
+            })
+
         # 如果是重复任务，验证配置
         repeat_type = self.initial_data.get('repeat_type')
         if repeat_type and repeat_type != 'none':

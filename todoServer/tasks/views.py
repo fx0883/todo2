@@ -1,21 +1,20 @@
-from django.shortcuts import render
-from rest_framework import viewsets, status, filters
-from rest_framework.generics import get_object_or_404
-from rest_framework.permissions import IsAuthenticated
+from django.shortcuts import get_object_or_404
+from rest_framework import viewsets, status
+from rest_framework.views import APIView
+from rest_framework.decorators import action
 from rest_framework.response import Response
-from django_filters.rest_framework import DjangoFilterBackend
-from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiExample, OpenApiResponse, OpenApiParameter
-from .models import Category, Task, TaskComment, RepeatTask, RepeatTaskDate
+from rest_framework.permissions import IsAuthenticated
+from django.utils import timezone
+from django.db.models import Q
+from .models import Category, Task, TaskComment, RepeatTask
 from .serializers import CategorySerializer, TaskSerializer, TaskCommentSerializer, RepeatTaskSerializer
 from .tasks import create_future_task_instances
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.decorators import action
-from django.utils import timezone
+from rest_framework.filters import SearchFilter, OrderingFilter
+from django_filters.rest_framework import DjangoFilterBackend
+from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiExample, OpenApiResponse, OpenApiParameter
 from datetime import datetime, timedelta
-from django.db.models import Q, F, Case, When, BooleanField, ExpressionWrapper, FloatField
-from rest_framework.views import APIView
 from collections import defaultdict
-from datetime import time
 
 # 添加分页器类
 class TaskPagination(PageNumberPagination):
@@ -89,7 +88,7 @@ class TaskPagination(PageNumberPagination):
 class CategoryViewSet(viewsets.ModelViewSet):
     serializer_class = CategorySerializer
     permission_classes = [IsAuthenticated]
-    filter_backends = [filters.SearchFilter]
+    filter_backends = [SearchFilter]
     search_fields = ['name']
 
     def get_queryset(self):
@@ -126,534 +125,700 @@ class CategoryViewSet(viewsets.ModelViewSet):
     list=extend_schema(
         summary="获取任务列表",
         tags=['任务管理'],
+        description="""
+        获取用户的任务列表。支持以下功能：
+        
+        1. 日期范围过滤
+        - start_date: 开始日期（YYYY-MM-DD）
+        - end_date: 结束日期（YYYY-MM-DD）
+        如果不指定日期范围，默认返回从当前日期开始的一个月内的任务
+        
+        2. 状态过滤
+        - status: 任务状态 (pending/in_progress/completed/cancelled)
+        
+        3. 优先级过滤
+        - priority: 优先级 (1-5)
+        
+        4. 分类过滤
+        - category: 分类ID
+        
+        5. 重要性过滤
+        - is_important: 是否重要 (true/false)
+        
+        6. 搜索
+        - search: 搜索关键词（搜索标题和描述）
+        
+        7. 排序
+        - ordering: 排序字段
+          - created_at: 创建时间
+          - -created_at: 创建时间倒序
+          - due_date: 截止时间
+          - -due_date: 截止时间倒序
+        
+        对于重复任务：
+        - 系统会自动在查询的时间范围内创建重复任务的实例
+        - 重复任务实例的开始时间和结束时间基于重复任务的配置
+        - 已结束的重复任务不会创建新的实例
+        """,
         parameters=[
-            {
-                'name': 'page',
-                'in': 'query',
-                'description': '页码',
-                'required': False,
-                'type': 'integer',
-                'default': 1
-            },
-            {
-                'name': 'page_size',
-                'in': 'query',
-                'description': '每页数量',
-                'required': False,
-                'type': 'integer',
-                'default': 10
-            },
-            {
-                'name': 'status',
-                'in': 'query',
-                'description': '任务状态: pending, completed, archived',
-                'required': False,
-                'type': 'string'
-            },
-            {
-                'name': 'category',
-                'in': 'query',
-                'description': '分类ID',
-                'required': False,
-                'type': 'integer'
-            },
-            {
-                'name': 'priority',
-                'in': 'query',
-                'description': '优先级: 1(低), 2(中), 3(高)',
-                'required': False,
-                'type': 'integer'
-            },
-            {
-                'name': 'is_important',
-                'in': 'query',
-                'description': '是否重要',
-                'required': False,
-                'type': 'boolean'
-            },
-            {
-                'name': 'show_expired',
-                'in': 'query',
-                'description': '是否显示过期任务',
-                'required': False,
-                'type': 'boolean'
-            },
-            {
-                'name': 'start_date',
-                'in': 'query',
-                'description': '开始日期（YYYY-MM-DD）',
-                'required': False,
-                'type': 'string'
-            },
-            {
-                'name': 'end_date',
-                'in': 'query',
-                'description': '结束日期（YYYY-MM-DD）',
-                'required': False,
-                'type': 'string'
-            },
-            {
-                'name': 'date',
-                'in': 'query',
-                'description': '日期（YYYY-MM-DD）',
-                'required': False,
-                'type': 'string'
-            }
-        ],
-        responses={
-            200: OpenApiResponse(
-                description="成功获取任务列表",
-                examples=[
-                    OpenApiExample(
-                        'Task List Example',
-                        value={
-                            'count': 100,  # 总数量
-                            'next': 'http://localhost:8000/api/v1/tasks/tasks/?page=2',  # 下一页链接
-                            'previous': None,  # 上一页链接
-                            'results': [{  # 当前页数据
-                                'id': 1,
-                                'title': '完成项目报告',
-                                'description': '准备第四季度项目总结报告',
-                                'start_time': '2024-01-01T09:00:00Z',
-                                'due_date': '2024-12-31T23:59:59Z',
-                                'priority': 2,
-                                'status': 'pending',
-                                'category': 1,
-                                'is_important': True,
-                                'order': 1
-                            }]
-                        }
-                    )
-                ]
-            )
-        }
+            OpenApiParameter(
+                name='start_date',
+                description='开始日期（YYYY-MM-DD）',
+                required=False,
+                type=str,
+            ),
+            OpenApiParameter(
+                name='end_date',
+                description='结束日期（YYYY-MM-DD）',
+                required=False,
+                type=str,
+            ),
+            OpenApiParameter(
+                name='status',
+                description='任务状态',
+                required=False,
+                type=str,
+                enum=['pending', 'in_progress', 'completed', 'cancelled']
+            ),
+            OpenApiParameter(
+                name='priority',
+                description='优先级',
+                required=False,
+                type=int,
+                enum=[1, 2, 3, 4, 5]
+            ),
+            OpenApiParameter(
+                name='category',
+                description='分类ID',
+                required=False,
+                type=int,
+            ),
+            OpenApiParameter(
+                name='is_important',
+                description='是否重要',
+                required=False,
+                type=bool,
+            ),
+            OpenApiParameter(
+                name='search',
+                description='搜索关键词',
+                required=False,
+                type=str,
+            ),
+            OpenApiParameter(
+                name='ordering',
+                description='排序字段',
+                required=False,
+                type=str,
+                enum=['created_at', '-created_at', 'due_date', '-due_date']
+            ),
+        ]
     ),
     create=extend_schema(
         summary="创建任务",
         tags=['任务管理'],
         description="""
-        创建新任务，支持创建普通任务和重复任务。
-
-        时间规则：
-        1. due_date（结束时间）为必填字段
-        2. start_time（开始时间）若未指定，将使用当前时间
-        3. 结束时间必须大于开始时间
+        创建新任务。支持创建普通任务和重复任务。
         
-        重复任务类型(repeat_type)：
-        - none: 不重复
-        - daily: 每天
-        - weekly: 每周
-        - monthly: 每月
-        - yearly: 每年
-        - continuous: 一直重复
-        - workdays: 工作日重复
-        - weekends: 周末重复
-        - holidays: 节假日重复
-        - custom: 自定义重复
+        必填字段：
+        - title: 任务标题
+        - due_date: 结束时间（对于普通任务）
         
-        重复配置(repeat_config)示例：
-        ```json
-        {
-            "start_date": "2024-01-01",     # 开始日期（必填）
-            "end_date": "2024-12-31",       # 结束日期（可选）
-            "interval": 1,                   # 重复间隔（可选，默认1）
-            "custom_days": [0,2,4]          # 自定义重复时必填，0-6表示周一到周日
-        }
-        ```
+        重复任务配置说明：
+        1. repeat_type: 重复类型
+           - daily: 每天重复
+           - weekly: 每周重复
+           - monthly: 每月重复（日期不能大于28）
+           - workdays: 工作日重复（周一至周五）
+           - weekends: 周末重复（周六和周日）
+           - custom: 自定义重复
+        
+        2. repeat_config: 重复配置
+           必填字段：
+           - start_date: 开始日期（YYYY-MM-DD）
+           - start_time: 每次重复的开始时间（HH:MM）
+           - end_time: 每次重复的结束时间（HH:MM）
+           
+           可选字段：
+           - end_date: 结束日期（YYYY-MM-DD）
+           - interval: 重复间隔（默认为1）
+           - custom_days: 自定义重复日期（custom类型必填）
+             - 0-6 表示周一至周日
+             - 例如 [0, 2, 4] 表示每周一、三、五重复
         """,
-        request=OpenApiExample(
-            'Task Create Example',
-            value={
-                # 普通任务示例
-                "title": "项目会议",
-                "description": "讨论第四季度项目计划",
-                "due_date": "2024-01-01T10:00:00Z",  # 必填
-                "start_time": "2024-01-01T09:00:00Z",  # 可选，默认为当前时间
-                "priority": 2,
-                "category": 1,
-                "reminder_time": "2024-01-01T09:30:00Z",
-                "is_important": True
-            },
-            summary="创建普通任务"
-        ),
         examples=[
             OpenApiExample(
-                'Regular Task Example',
+                name="创建普通任务",
                 value={
-                    "title": "项目会议",
-                    "description": "讨论第四季度项目计划",
-                    "due_date": "2024-01-01T10:00:00Z",
-                    "start_time": "2024-01-01T09:00:00Z",
-                    "priority": 2,
+                    "title": "完成项目报告",
+                    "description": "编写第一季度项目总结报告",
                     "category": 1,
-                    "reminder_time": "2024-01-01T09:30:00Z",
+                    "priority": 3,
+                    "start_time": "2024-01-15T09:00:00Z",
+                    "due_date": "2024-01-15T17:00:00Z",
                     "is_important": True
-                },
-                summary="创建普通任务示例"
+                }
             ),
             OpenApiExample(
-                'Repeat Task Example',
+                name="创建每周重复任务",
                 value={
                     "title": "每周例会",
                     "description": "团队周会",
                     "repeat_type": "weekly",
                     "repeat_config": {
                         "start_date": "2024-01-01",
-                        "custom_days": [0],  # 每周一
+                        "end_date": "2024-12-31",
+                        "start_time": "09:00",
+                        "end_time": "10:00",
+                        "custom_days": [0],
                         "interval": 1
                     },
-                    "due_date": "2024-01-01T10:30:00Z",
-                    "start_time": "2024-01-01T09:00:00Z",
-                    "priority": 2,
                     "category": 1,
-                    "reminder_time": "2024-01-01T09:30:00Z",
-                    "is_important": True
-                },
-                summary="创建重复任务示例"
+                    "priority": 2,
+                    "is_important": True,
+                    "start_time": "2024-01-01T09:00:00Z",
+                    "due_date": "2024-12-31T10:00:00Z"
+                }
             ),
             OpenApiExample(
-                'Custom Repeat Task Example',
+                name="创建每月重复任务",
+                value={
+                    "title": "月度总结会议",
+                    "description": "回顾本月工作，规划下月任务",
+                    "repeat_type": "monthly",
+                    "repeat_config": {
+                        "start_date": "2024-01-25",
+                        "end_date": "2024-12-31",
+                        "start_time": "14:00",
+                        "end_time": "16:00",
+                        "interval": 1
+                    },
+                    "category": 1,
+                    "priority": 2,
+                    "is_important": True,
+                    "start_time": "2024-01-25T14:00:00Z",
+                    "due_date": "2024-12-31T16:00:00Z"
+                }
+            ),
+            OpenApiExample(
+                name="创建工作日重复任务",
+                value={
+                    "title": "每日晨会",
+                    "description": "团队日常工作同步",
+                    "repeat_type": "workdays",
+                    "repeat_config": {
+                        "start_date": "2024-01-01",
+                        "end_date": "2024-12-31",
+                        "start_time": "09:30",
+                        "end_time": "10:00"
+                    },
+                    "category": 1,
+                    "priority": 2,
+                    "is_important": True,
+                    "start_time": "2024-01-01T09:30:00Z",
+                    "due_date": "2024-12-31T10:00:00Z"
+                }
+            ),
+            OpenApiExample(
+                name="创建自定义重复任务",
                 value={
                     "title": "健身计划",
                     "description": "每周三次健身",
                     "repeat_type": "custom",
                     "repeat_config": {
                         "start_date": "2024-01-01",
-                        "custom_days": [0, 2, 4],  # 周一、三、五
+                        "end_date": "2024-12-31",
+                        "start_time": "18:00",
+                        "end_time": "19:30",
+                        "custom_days": [1, 3, 5],  # 每周二、四、六
                         "interval": 1
                     },
-                    "due_date": "2024-01-01T11:00:00Z",
-                    "start_time": "2024-01-01T09:00:00Z",
+                    "category": 1,
                     "priority": 2,
-                    "category": 1
-                },
-                summary="创建自定义重复任务示例"
-            )
-        ],
-        responses={
-            201: OpenApiResponse(
-                response=TaskSerializer,
-                description="任务创建成功"
+                    "is_important": True,
+                    "start_time": "2024-01-01T18:00:00Z",
+                    "due_date": "2024-12-31T19:30:00Z"
+                }
             ),
-            400: OpenApiResponse(
-                description="请求数据验证失败",
-                examples=[
-                    OpenApiExample(
-                        'Validation Error',
-                        value={
-                            "due_date": ["任务必须设置结束时间。"],
-                            "title": ["这个字段是必需的。"]
-                        }
-                    ),
-                    OpenApiExample(
-                        'Time Validation Error',
-                        value={
-                            "due_date": ["结束时间必须大于开始时间。"]
-                        }
-                    )
-                ]
+            OpenApiExample(
+                name="创建隔周重复任务",
+                value={
+                    "title": "项目进度会议",
+                    "description": "隔周项目进度同步",
+                    "repeat_type": "custom",
+                    "repeat_config": {
+                        "start_date": "2024-01-01",
+                        "end_date": "2024-12-31",
+                        "start_time": "14:00",
+                        "end_time": "15:30",
+                        "custom_days": [2],  # 每周三
+                        "interval": 2  # 每两周重复一次
+                    },
+                    "category": 1,
+                    "priority": 2,
+                    "is_important": True,
+                    "start_time": "2024-01-01T14:00:00Z",
+                    "due_date": "2024-12-31T15:30:00Z"
+                }
             )
-        }
+        ]
+    ),
+    retrieve=extend_schema(
+        summary="获取任务详情",
+        tags=['任务管理'],
+        description="获取单个任务的详细信息，包括重复任务的配置信息"
     ),
     update=extend_schema(
         summary="更新任务",
         tags=['任务管理'],
         description="""
-        更新任务信息，支持更新普通任务和重复任务。
+        更新任务信息。
         
-        更新模式(update_mode)：
-        - single: 只更新当前任务实例（默认）
-        - future: 更新当前和未来的任务实例
-        - all: 更新所有任务实例（包括历史记录）
+        注意：
+        1. 不能通过此接口修改重复任务的配置
+        2. 如果需要修改重复任务配置，请使用专门的重复任务接口
         """
-    ),
-    retrieve=extend_schema(
-        summary="获取任务详情",
-        tags=['任务管理']
-    ),
-    partial_update=extend_schema(
-        summary="部分更新任务",
-        tags=['任务管理']
     ),
     destroy=extend_schema(
         summary="删除任务",
-        tags=['任务管理']
+        tags=['任务管理'],
+        description="删除任务。如果是重复任务的实例，只删除该实例；如果是重复任务本身，会删除所有相关的任务实例"
     )
 )
 class TaskViewSet(viewsets.ModelViewSet):
-    serializer_class = TaskSerializer
     permission_classes = [IsAuthenticated]
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['status', 'priority', 'category']
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_fields = ['status', 'priority', 'category', 'repeat_task', 'repeat_task__is_active']
     search_fields = ['title', 'description']
     ordering_fields = ['created_at', 'updated_at', 'due_date', 'priority']
     ordering = ['-created_at']
     pagination_class = TaskPagination
 
+    def get_serializer_class(self):
+        """根据请求类型返回对应的序列化器"""
+        if self.request.method == 'POST' and self.request.data.get('repeat_type'):
+            return RepeatTaskSerializer
+        return TaskSerializer
+
     def get_queryset(self):
         """获取任务列表"""
-        queryset = super().get_queryset()
+        user = self.request.user
+        queryset = Task.objects.filter(user=user)
+
+        # 获取日期范围
+        start_date = self.request.query_params.get('start_date')
+        end_date = self.request.query_params.get('end_date')
         
-        # 基本过滤
+        # 如果没有指定日期范围，使用默认范围（当前日期开始的一个月）
+        if not start_date:
+            start_date = timezone.now().date().isoformat()
+        if not end_date:
+            end_date = (timezone.now().date() + timedelta(days=30)).isoformat()
+            
+        try:
+            start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+            end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+        except ValueError:
+            # 如果日期格式错误，使用默认范围
+            start_date = timezone.now().date()
+            end_date = start_date + timedelta(days=30)
+
+        # 处理重复任务的未来实例创建
+        repeat_tasks = RepeatTask.objects.filter(
+            user=user,
+            is_active=True,
+            repeat_config__start_date__lte=end_date.isoformat()  # 重复任务的开始日期在查询范围内
+        ).exclude(
+            # 排除已经在查询范围内有任务实例的重复任务
+            tasks__scheduled_date__range=[start_date, end_date]
+        ).distinct()
+
+        for repeat_task in repeat_tasks:
+            # 检查重复任务的结束日期（如果有）
+            end_date_str = repeat_task.repeat_config.get('end_date')
+            if end_date_str:
+                repeat_end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+                if repeat_end_date < start_date:
+                    continue  # 跳过已经结束的重复任务
+            
+            # 获取重复任务的时间设置
+            start_time = repeat_task.repeat_config.get('start_time', '09:00')
+            end_time = repeat_task.repeat_config.get('end_time', '17:00')
+            
+            # 创建任务实例
+            from .tasks import create_task_instances
+            create_task_instances(
+                repeat_task.id,
+                start_date=start_date,
+                end_date=end_date,
+                default_start_time=start_time,
+                default_end_time=end_time
+            )
+
+        # 过滤日期范围内的任务
+        queryset = queryset.filter(
+            Q(
+                # 普通任务：任务时间与查询范围有重叠
+                Q(repeat_task__isnull=True) &
+                Q(
+                    Q(start_time__date__lte=end_date) &
+                    Q(due_date__date__gte=start_date)
+                )
+            ) |
+            Q(
+                # 重复任务实例：计划日期在查询范围内
+                Q(repeat_task__isnull=False) &
+                Q(scheduled_date__range=[start_date, end_date])
+            )
+        )
+
+        # 处理状态筛选
         status = self.request.query_params.get('status')
-        category = self.request.query_params.get('category')
-        priority = self.request.query_params.get('priority')
-        is_important = self.request.query_params.get('is_important')
-        
         if status:
             queryset = queryset.filter(status=status)
-        if category:
-            queryset = queryset.filter(category_id=category)
+
+        # 处理优先级筛选
+        priority = self.request.query_params.get('priority')
         if priority:
             queryset = queryset.filter(priority=priority)
-        if is_important:
+
+        # 处理分类筛选
+        category = self.request.query_params.get('category')
+        if category:
+            queryset = queryset.filter(category=category)
+
+        # 处理重要性筛选
+        is_important = self.request.query_params.get('is_important')
+        if is_important is not None:
+            is_important = is_important.lower() == 'true'
             queryset = queryset.filter(is_important=is_important)
-            
-        # 处理日期查询
-        query_date = self.request.query_params.get('date')
-        if query_date:
-            try:
-                target_date = datetime.strptime(query_date, '%Y-%m-%d').date()
-                
-                # 查找当天的普通任务和重复任务
-                repeat_task_ids = RepeatTaskDate.objects.filter(
-                    task_date=target_date,
-                    repeat_task__user=self.request.user
-                ).values_list('repeat_task_id', flat=True)
-                
-                # 构建查询条件
-                date_condition = Q(
-                    # 普通任务条件：在目标日期范围内
-                    Q(
-                        Q(start_time__date__lte=target_date) &
-                        Q(due_date__date__gte=target_date) &
-                        Q(repeat_task__isnull=True)  # 非重复任务
-                    ) |
-                    # 重复任务条件：有对应的日期记录
-                    Q(repeat_task_id__in=repeat_task_ids)
-                )
-                
-                queryset = queryset.filter(date_condition)
-                
-                # 对于重复任务，我们需要动态设置其时间
-                tasks = list(queryset)
-                for task in tasks:
-                    if task.repeat_task_id in repeat_task_ids:
-                        task.start_time = datetime.combine(target_date, time.min)
-                        task.due_date = datetime.combine(target_date, time.max)
-                        task.start_time = timezone.make_aware(task.start_time)
-                        task.due_date = timezone.make_aware(task.due_date)
-                
-                return tasks
-                
-            except ValueError:
-                pass
-        
+
+        # 处理搜索
+        search = self.request.query_params.get('search')
+        if search:
+            queryset = queryset.filter(
+                Q(title__icontains=search) |
+                Q(description__icontains=search)
+            )
+
+        # 处理排序
+        ordering = self.request.query_params.get('ordering', '-created_at')
+        if ordering:
+            # 添加自定义排序逻辑
+            if ordering == 'due_date':
+                # 将没有截止日期的任务排在最后
+                queryset = queryset.annotate(
+                    due_date_null=Case(
+                        When(due_date__isnull=True, then=1),
+                        default=0,
+                        output_field=BooleanField(),
+                    )
+                ).order_by('due_date_null', 'due_date')
+            elif ordering == '-due_date':
+                queryset = queryset.annotate(
+                    due_date_null=Case(
+                        When(due_date__isnull=True, then=1),
+                        default=0,
+                        output_field=BooleanField(),
+                    )
+                ).order_by('due_date_null', '-due_date')
+            else:
+                queryset = queryset.order_by(ordering)
+
         return queryset
 
     def perform_create(self, serializer):
-        """创建任务"""
-        # 获取重复任务配置
-        repeat_type = self.request.data.get('repeat_type')
-        repeat_config = self.request.data.get('repeat_config')
-        
-        # 如果是重复任务
-        if repeat_type and repeat_config:
-            # 验证重复任务配置
-            if not repeat_config.get('start_date'):
-                raise ValidationError({'repeat_config': {'start_date': 'Start date is required for repeat tasks.'}})
-            
-            # 创建重复任务记录
-            repeat_task = RepeatTask.objects.create(
-                user=self.request.user,
-                title=serializer.validated_data['title'],
-                description=serializer.validated_data.get('description', ''),
-                category=serializer.validated_data.get('category'),
-                repeat_type=repeat_type,
-                repeat_config=repeat_config,
-                is_active=True
-            )
-            
-            # 计算第一个任务实例的时间
-            base_start_time = serializer.validated_data.get('start_time')
-            if not base_start_time:
-                base_start_time = timezone.now()
-            
-            start_time, due_date = repeat_task.calculate_first_instance_time(base_start_time)
-            
-            if start_time and due_date:
-                # 更新序列化器中的时间
-                serializer.validated_data['start_time'] = start_time
-                serializer.validated_data['due_date'] = due_date
-                serializer.validated_data['repeat_task'] = repeat_task
-                
-                # 生成未来90天的日期记录
-                repeat_task.generate_dates()
-            else:
-                repeat_task.delete()
-                raise ValidationError({'repeat_config': 'Invalid repeat configuration'})
-        
-        # 保存任务
-        task = serializer.save(user=self.request.user)
-        return task
-
-    def update(self, request, *args, **kwargs):
-        """
-        更新任务，支持重复任务的批量更新
-        
-        update_mode:
-        - single: 只更新当前任务实例（默认）
-        - future: 更新当前和未来的任务实例
-        - all: 更新所有任务实例（包括历史记录）
-        """
-        instance = self.get_object()
-        update_mode = request.query_params.get('update_mode', 'single')
-        
-        # 如果是重复任务，需要处理关联实例
-        if instance.repeat_task:
-            allowed_fields = {
-                'title', 'description', 'category', 'priority',
-                'reminder_time', 'is_important', 'tags'
-            }
-            # 过滤出允许批量更新的字段
-            update_data = {
-                k: v for k, v in request.data.items()
-                if k in allowed_fields
-            }
-            
-            if update_mode in ['future', 'all']:
-                # 更新重复任务主记录
-                repeat_task = instance.repeat_task
-                for field in ['title', 'description', 'category']:
-                    if field in update_data:
-                        setattr(repeat_task, field, update_data[field])
-                repeat_task.save()
-                
-                # 获取需要更新的实例
-                instances = Task.objects.filter(repeat_task=repeat_task)
-                if update_mode == 'future':
-                    instances = instances.filter(
-                        Q(scheduled_date__gt=timezone.now()) |
-                        Q(id=instance.id)  # 包含当前实例
-                    )
-                
-                # 批量更新实例
-                instances.update(**update_data)
-                
-                # 返回更新后的当前实例
-                serializer = self.get_serializer(instance)
-                return Response(serializer.data)
-        
-        # 非重复任务或仅更新单个实例
-        return super().update(request, *args, **kwargs)
-
-    @action(detail=False, methods=['post'])
-    def bulk_update(self, request):
-        """
-        批量更新任务
-        
-        请求数据格式：
-        {
-            "task_ids": [1, 2, 3],
-            "update_data": {
-                "status": "completed",
-                "priority": 2,
-                ...
-            },
-            "update_mode": "single"  # 可选，仅适用于重复任务
-        }
-        """
-        task_ids = request.data.get('task_ids', [])
-        update_data = request.data.get('update_data', {})
-        update_mode = request.data.get('update_mode', 'single')
-        
-        if not task_ids or not update_data:
-            return Response(
-                {"error": "必须提供任务ID列表和更新数据"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
-        # 获取用户的任务
-        tasks = Task.objects.filter(
-            id__in=task_ids,
-            user=request.user
-        )
-        
-        # 按重复任务分组处理
-        repeat_tasks = defaultdict(list)
-        non_repeat_tasks = []
-        
-        for task in tasks:
-            if task.repeat_task:
-                repeat_tasks[task.repeat_task.id].append(task)
-            else:
-                non_repeat_tasks.append(task)
-        
-        # 处理重复任务
-        for repeat_task_id, instances in repeat_tasks.items():
-            if update_mode in ['future', 'all']:
-                repeat_task = RepeatTask.objects.get(id=repeat_task_id)
-                # 更新重复任务主记录
-                for field in ['title', 'description', 'category']:
-                    if field in update_data:
-                        setattr(repeat_task, field, update_data[field])
-                repeat_task.save()
-                
-                # 获取需要更新的实例
-                if update_mode == 'future':
-                    instances = Task.objects.filter(
-                        repeat_task=repeat_task,
-                        scheduled_date__gte=timezone.now()
-                    )
-                else:  # all
-                    instances = Task.objects.filter(repeat_task=repeat_task)
-            
-            # 更新实例
-            instances.update(**update_data)
-        
-        # 处理非重复任务
-        if non_repeat_tasks:
-            Task.objects.filter(id__in=[t.id for t in non_repeat_tasks]).update(**update_data)
-        
-        return Response(status=status.HTTP_200_OK)
+        """创建任务时的额外处理"""
+        serializer.save(user=self.request.user)
 
     @action(detail=True, methods=['post'])
-    def sync_instances(self, request, pk=None):
-        """
-        同步重复任务实例的状态
-        
-        用于手动触发重复任务实例的同步，通常在修改重复规则后调用
-        """
-        instance = self.get_object()
-        if not instance.repeat_task:
+    @extend_schema(
+        summary="激活/停用重复任务",
+        tags=['任务管理'],
+        request=None,
+        responses={
+            200: OpenApiResponse(description="成功更新任务状态")
+        }
+    )
+    def toggle_repeat_active(self, request, pk=None):
+        """激活/停用重复任务"""
+        task = self.get_object()
+        if not task.repeat_task:
             return Response(
-                {"error": "只能同步重复任务"},
+                {'error': 'This is not a repeat task.'}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
+            
+        repeat_task = task.repeat_task
+        repeat_task.is_active = not repeat_task.is_active
+        repeat_task.save()
         
-        # 删除未来的任务实例
-        Task.objects.filter(
-            repeat_task=instance.repeat_task,
-            scheduled_date__gt=timezone.now()
-        ).delete()
-        
-        # 重新创建未来的任务实例
-        create_future_task_instances.delay(instance.repeat_task.id)
-        
-        return Response({"message": "同步任务已启动"})
+        if repeat_task.is_active:
+            # 如果激活，重新生成未来任务
+            repeat_task.refresh_dates()
+        else:
+            # 如果停用，删除未来未完成的任务
+            Task.objects.filter(
+                repeat_task=repeat_task,
+                status='pending',
+                start_time__gt=timezone.now()
+            ).delete()
+            
+        return Response({
+            'status': 'success',
+            'is_active': repeat_task.is_active
+        })
 
-    @action(detail=False, methods=['get'])
-    def expired(self, request):
-        """获取已过期的任务列表"""
-        queryset = self.get_queryset().filter(
-            due_date__lt=timezone.now(),
-            status='pending'
-        )
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
+    @action(detail=True, methods=['get'])
+    @extend_schema(
+        summary="获取重复任务的所有实例",
+        tags=['任务管理'],
+        parameters=[
+            OpenApiParameter(
+                name='status',
+                type=str,
+                description='任务状态过滤 (pending/completed/archived)',
+                required=False
+            ),
+            OpenApiParameter(
+                name='start_date',
+                type=str,
+                description='开始日期 (YYYY-MM-DD)',
+                required=False
+            ),
+            OpenApiParameter(
+                name='end_date',
+                type=str,
+                description='结束日期 (YYYY-MM-DD)',
+                required=False
+            )
+        ],
+        responses={
+            200: OpenApiResponse(
+                description="成功获取任务实例列表",
+                response=TaskSerializer(many=True)
+            )
+        }
+    )
+    def repeat_instances(self, request, pk=None):
+        """获取重复任务的所有实例"""
+        task = self.get_object()
+        if not task.repeat_task:
+            return Response(
+                {'error': 'This is not a repeat task.'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+        queryset = Task.objects.filter(repeat_task=task.repeat_task)
+        
+        # 状态过滤
+        status_param = request.query_params.get('status')
+        if status_param:
+            queryset = queryset.filter(status=status_param)
+            
+        # 日期范围过滤
+        start_date = request.query_params.get('start_date')
+        end_date = request.query_params.get('end_date')
+        
+        if start_date:
+            try:
+                start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+                queryset = queryset.filter(start_time__date__gte=start_date)
+            except ValueError:
+                pass
+                
+        if end_date:
+            try:
+                end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+                queryset = queryset.filter(due_date__date__lte=end_date)
+            except ValueError:
+                pass
+                
         serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @extend_schema(
+        description='获取今天的任务列表',
+        responses={200: TaskSerializer(many=True)}
+    )
+    @action(detail=False, methods=['get'])
+    def today(self, request):
+        """获取今天的任务列表"""
+        today = timezone.now().date()
+        tomorrow = today + timedelta(days=1)
+        
+        # 获取今天的普通任务
+        tasks = Task.objects.filter(
+            user=request.user,
+            scheduled_date=today,
+            status__in=['pending', 'in_progress']
+        )
+
+        # 获取今天的重复任务
+        repeat_tasks = RepeatTask.objects.filter(
+            user=request.user,
+            is_active=True
+        )
+
+        # 创建结果列表
+        result_tasks = list(tasks)
+
+        # 检查每个重复任务是否应该在今天执行
+        for repeat_task in repeat_tasks:
+            config = repeat_task.repeat_config
+            start_date = datetime.strptime(config['start_date'], '%Y-%m-%d').date()
+            end_date = datetime.strptime(config['end_date'], '%Y-%m-%d').date()
+            
+            # 如果今天在有效期内
+            if start_date <= today <= end_date:
+                should_create = False
+                
+                if repeat_task.repeat_type == 'daily':
+                    should_create = True
+                    
+                elif repeat_task.repeat_type == 'weekly':
+                    # 检查今天是否是指定的星期几之一
+                    weekday = today.weekday()
+                    custom_days = config.get('custom_days', [0])  # 默认周一
+                    if weekday in custom_days:
+                        should_create = True
+                        
+                elif repeat_task.repeat_type == 'monthly':
+                    # 检查今天是否是指定的日期
+                    target_day = config.get('day', 1)  # 默认每月1号
+                    if today.day == target_day:
+                        should_create = True
+                        
+                elif repeat_task.repeat_type == 'yearly':
+                    # 检查今天是否是指定的月份和日期
+                    target_month = config.get('month', 1)  # 默认1月
+                    target_day = config.get('day', 1)      # 默认1号
+                    if today.month == target_month and today.day == target_day:
+                        should_create = True
+                
+                if should_create:
+                    # 创建今天的任务实例
+                    start_time = datetime.strptime(config['start_time'], '%H:%M').time()
+                    end_time = datetime.strptime(config['end_time'], '%H:%M').time()
+                    
+                    # 组合日期和时间
+                    task_start = timezone.make_aware(datetime.combine(today, start_time))
+                    task_end = timezone.make_aware(datetime.combine(today, end_time))
+                    
+                    # 检查是否已经存在今天的任务实例
+                    existing_task = Task.objects.filter(
+                        repeat_task=repeat_task,
+                        scheduled_date=today
+                    ).first()
+                    
+                    if not existing_task:
+                        task = Task.objects.create(
+                            user=request.user,
+                            title=repeat_task.title,
+                            description=repeat_task.description,
+                            category=repeat_task.category,
+                            priority=2,  # 默认优先级
+                            start_time=task_start,
+                            due_date=task_end,
+                            scheduled_date=today,
+                            repeat_task=repeat_task,
+                            instance_number=1  # 第一个实例
+                        )
+                        result_tasks.append(task)
+
+        serializer = self.get_serializer(result_tasks, many=True)
+        return Response(serializer.data)
+
+    @extend_schema(
+        description='获取明天的任务列表',
+        responses={200: TaskSerializer(many=True)}
+    )
+    @action(detail=False, methods=['get'])
+    def tomorrow(self, request):
+        """获取明天的任务列表"""
+        today = timezone.now().date()
+        tomorrow = today + timedelta(days=1)
+        
+        # 获取明天的普通任务
+        tasks = Task.objects.filter(
+            user=request.user,
+            scheduled_date=tomorrow,
+            status__in=['pending', 'in_progress']
+        )
+
+        # 获取明天的重复任务
+        repeat_tasks = RepeatTask.objects.filter(
+            user=request.user,
+            is_active=True
+        )
+
+        # 创建结果列表
+        result_tasks = list(tasks)
+
+        # 检查每个重复任务是否应该在明天执行
+        for repeat_task in repeat_tasks:
+            config = repeat_task.repeat_config
+            start_date = datetime.strptime(config['start_date'], '%Y-%m-%d').date()
+            end_date = datetime.strptime(config['end_date'], '%Y-%m-%d').date()
+            
+            # 如果明天在有效期内
+            if start_date <= tomorrow <= end_date:
+                should_create = False
+                
+                if repeat_task.repeat_type == 'daily':
+                    should_create = True
+                    
+                elif repeat_task.repeat_type == 'weekly':
+                    # 检查明天是否是指定的星期几之一
+                    weekday = tomorrow.weekday()
+                    custom_days = config.get('custom_days', [0])  # 默认周一
+                    if weekday in custom_days:
+                        should_create = True
+                        
+                elif repeat_task.repeat_type == 'monthly':
+                    # 检查明天是否是指定的日期
+                    target_day = config.get('day', 1)  # 默认每月1号
+                    if tomorrow.day == target_day:
+                        should_create = True
+                        
+                elif repeat_task.repeat_type == 'yearly':
+                    # 检查明天是否是指定的月份和日期
+                    target_month = config.get('month', 1)  # 默认1月
+                    target_day = config.get('day', 1)      # 默认1号
+                    if tomorrow.month == target_month and tomorrow.day == target_day:
+                        should_create = True
+                
+                if should_create:
+                    # 创建明天的任务实例
+                    start_time = datetime.strptime(config['start_time'], '%H:%M').time()
+                    end_time = datetime.strptime(config['end_time'], '%H:%M').time()
+                    
+                    # 组合日期和时间
+                    task_start = timezone.make_aware(datetime.combine(tomorrow, start_time))
+                    task_end = timezone.make_aware(datetime.combine(tomorrow, end_time))
+                    
+                    # 检查是否已经存在明天的任务实例
+                    existing_task = Task.objects.filter(
+                        repeat_task=repeat_task,
+                        scheduled_date=tomorrow
+                    ).first()
+                    
+                    if not existing_task:
+                        task = Task.objects.create(
+                            user=request.user,
+                            title=repeat_task.title,
+                            description=repeat_task.description,
+                            category=repeat_task.category,
+                            priority=2,  # 默认优先级
+                            start_time=task_start,
+                            due_date=task_end,
+                            scheduled_date=tomorrow,
+                            repeat_task=repeat_task,
+                            instance_number=1  # 第一个实例
+                        )
+                        result_tasks.append(task)
+
+        serializer = self.get_serializer(result_tasks, many=True)
         return Response(serializer.data)
 
 @extend_schema_view(
@@ -887,3 +1052,172 @@ class PriorityStatsView(APIView):
             return Response({'error': 'Invalid month format'}, status=400)
         except Exception as e:
             return Response({'error': str(e)}, status=500)
+
+
+@extend_schema_view(
+    list=extend_schema(
+        summary="获取重复任务列表",
+        tags=['重复任务管理'],
+        responses={
+            200: OpenApiResponse(
+                description="成功获取重复任务列表",
+                response=RepeatTaskSerializer
+            )
+        }
+    ),
+    create=extend_schema(
+        summary="创建重复任务",
+        tags=['重复任务管理'],
+        request=RepeatTaskSerializer,
+        responses={
+            201: OpenApiResponse(
+                description="成功创建重复任务",
+                response=RepeatTaskSerializer
+            )
+        }
+    ),
+    retrieve=extend_schema(
+        summary="获取重复任务详情",
+        tags=['重复任务管理'],
+        responses={
+            200: OpenApiResponse(
+                description="成功获取重复任务详情",
+                response=RepeatTaskSerializer
+            )
+        }
+    ),
+    update=extend_schema(
+        summary="更新重复任务",
+        tags=['重复任务管理'],
+        request=RepeatTaskSerializer,
+        responses={
+            200: OpenApiResponse(
+                description="成功更新重复任务",
+                response=RepeatTaskSerializer
+            )
+        }
+    ),
+    destroy=extend_schema(
+        summary="删除重复任务",
+        tags=['重复任务管理'],
+        responses={
+            204: OpenApiResponse(description="成功删除重复任务")
+        }
+    )
+)
+class RepeatTaskViewSet(viewsets.ModelViewSet):
+    serializer_class = RepeatTaskSerializer
+    permission_classes = [IsAuthenticated]
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    filterset_fields = ['is_active']
+    search_fields = ['title', 'description']
+    
+    def get_queryset(self):
+        """获取重复任务列表"""
+        return RepeatTask.objects.filter(user=self.request.user)
+    
+    def perform_create(self, serializer):
+        """创建重复任务"""
+        serializer.save(user=self.request.user)
+        
+    def perform_update(self, serializer):
+        """更新重复任务"""
+        instance = serializer.save()
+        # 重新生成未来的任务实例
+        instance.refresh_dates()
+        
+    def perform_destroy(self, instance):
+        """删除重复任务"""
+        # 删除所有相关的任务实例
+        Task.objects.filter(repeat_task=instance).delete()
+        instance.delete()
+        
+    @action(detail=True, methods=['post'])
+    @extend_schema(
+        summary="激活/停用重复任务",
+        tags=['重复任务管理'],
+        request=None,
+        responses={
+            200: OpenApiResponse(description="成功更新任务状态")
+        }
+    )
+    def toggle_active(self, request, pk=None):
+        """激活/停用重复任务"""
+        repeat_task = self.get_object()
+        repeat_task.is_active = not repeat_task.is_active
+        repeat_task.save()
+        
+        if repeat_task.is_active:
+            # 如果激活，重新生成未来任务
+            repeat_task.refresh_dates()
+        else:
+            # 如果停用，删除未来未完成的任务
+            Task.objects.filter(
+                repeat_task=repeat_task,
+                status='pending',
+                start_time__gt=timezone.now()
+            ).delete()
+            
+        return Response({'status': 'success', 'is_active': repeat_task.is_active})
+        
+    @action(detail=True, methods=['get'])
+    @extend_schema(
+        summary="获取重复任务的所有实例",
+        tags=['重复任务管理'],
+        parameters=[
+            OpenApiParameter(
+                name='status',
+                type=str,
+                description='任务状态过滤 (pending/completed/archived)',
+                required=False
+            ),
+            OpenApiParameter(
+                name='start_date',
+                type=str,
+                description='开始日期 (YYYY-MM-DD)',
+                required=False
+            ),
+            OpenApiParameter(
+                name='end_date',
+                type=str,
+                description='结束日期 (YYYY-MM-DD)',
+                required=False
+            )
+        ],
+        responses={
+            200: OpenApiResponse(
+                description="成功获取任务实例列表",
+                response=TaskSerializer(many=True)
+            )
+        }
+    )
+    def instances(self, request, pk=None):
+        """获取重复任务的所有实例"""
+        repeat_task = self.get_object()
+        queryset = Task.objects.filter(repeat_task=repeat_task)
+        
+        # 状态过滤
+        status = request.query_params.get('status')
+        if status:
+            queryset = queryset.filter(status=status)
+            
+        # 日期范围过滤
+        start_date = request.query_params.get('start_date')
+        end_date = request.query_params.get('end_date')
+        
+        if start_date:
+            try:
+                start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+                queryset = queryset.filter(start_time__date__gte=start_date)
+            except ValueError:
+                pass
+                
+        if end_date:
+            try:
+                end_date = datetime.strptime(end_date, '%Y-%m-%d').date()
+                queryset = queryset.filter(due_date__date__lte=end_date)
+            except ValueError:
+                pass
+                
+        serializer = TaskSerializer(queryset, many=True)
+        return Response(serializer.data)
